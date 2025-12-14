@@ -13,13 +13,27 @@
   </head>
 
   <body>
+    <header class="site-header">
+      <%= link_to root_path do %>
+        <%= image_tag "handa-logo.png", class: "logo", alt: "handa" %>
+      <% end %>
+
+      <div class="user-actions">
+        <% if user_signed_in? %>
+          <%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "sign-out-btn" %>
+        <% end %>
+      </div>
+    </header>
+
     <% if notice %>
-      <p style="color: green;"><%= notice %></p>
+      <p class="notice"><%= notice %></p>
     <% end %>
     <% if alert %>
-      <p style="color: red;"><%= alert %></p>
+      <p class="alert"><%= alert %></p>
     <% end %>
 
-    <%= yield %>
+    <main class="main-content">
+      <%= yield %>
+    </main>
   </body>
 </html>

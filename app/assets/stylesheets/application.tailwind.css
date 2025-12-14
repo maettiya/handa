@@ -1,1 +1,76 @@
 @import "tailwindcss";
+
+/* Global base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #3a3a3a;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* Header */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+}
+
+.logo {
+  height: 30px;
+  width: auto;
+}
+
+.sign-out-btn {
+  background: transparent;
+  border: 1px solid #666;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.sign-out-btn:hover {
+  border-color: white;
+}
+
+/* Flash messages */
+.notice {
+  color: #4ade80;
+  padding: 10px;
+  text-align: center;
+}
+
+.alert {
+  color: #f87171;
+  padding: 10px;
+  text-align: center;
+}
+
+/* Main content area */
+.main-content {
+  padding: 0 40px 40px 40px;
+}
+
+/* Page titles */
+.page-title {
+  text-align: center;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-decoration: underline;
+  text-underline-offset: 8px;
+}
+
+/* Empty state message */
+.empty-state {
+  text-align: center;
+  color: #888;
+  margin-top: 100px;
+}
