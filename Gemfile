@@ -68,3 +68,8 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+# ------------ CUSTOM GEMS ADDED TO APP ---------------
+
+# Use Devise for authentication
+gem "devise"
