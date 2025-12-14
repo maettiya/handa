@@ -16,6 +16,11 @@
     </div>
 
     <div class="field">
+      <%= f.label :username %>
+      <%= f.text_field :username, autocomplete: "username" %>
+    </div>
+
+    <div class="field">
       <%= f.label :password %>
       <%= f.password_field :password, autocomplete: "new-password" %>
       <small style="color: #888; font-size: 12px;">6 characters minimum</small>
