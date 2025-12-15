@@ -27,4 +27,21 @@ document.addEventListener("turbo:load", function() {
       fileDetails.style.display = "block";
     }
   });
+
+  // Drag and drop
+  dropZone.addEventListener("dragover", function(e) {
+    e.preventDefault();
+    dropZone.style.borderColor = "white";
+  });
+
+  dropZone.addEventListener("dragleave", function() {
+    dropZone.style.borderColor = "#666";
+  });
+
+  dropZone.addEventListener("drop", function(e) {
+    e.preventDefault();
+    dropZone.style.borderColor = "#666";
+    fileInput.files = e.dataTransfer.files;
+    fileInput.dispatchEvent(new Event("change"));
+  });
 });
