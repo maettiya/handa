@@ -2,8 +2,8 @@ document.addEventListener("turbo:load", function() {
   const addBtn = document.getElementById("add-project-btn");
   const dropZone = document.getElementById("drop-zone");
   const fileInput = document.getElementById("file-input");
-  const fileDetails = document.getElementById("file-details");
-  const selectedFileName = document.getElementById("selected-file-title");
+  const uploadForm = document.getElementById("upload-form");
+  const titleInput = document.getElementById("project-title-input");
 
   if (!addBtn) return;
 
@@ -12,11 +12,12 @@ document.addEventListener("turbo:load", function() {
     fileInput.click();
   });
 
-  // Show title input when file selected
+  // Auto-submit when file selected
   fileInput.addEventListener("change", function() {
     if (fileInput.files.length > 0) {
-      selectedFileName.textContent = fileInput.files[0].name;
-      fileDetails.style.display = "block";
+      const fileName = fileInput.files[0].name;
+      titleInput.value = fileName.replace(/\.[^/.]+$/, ""); // Remove file extension
+      uploadForm.requestSubmit();
     }
   });
 
