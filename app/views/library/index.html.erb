@@ -1,3 +1,31 @@
 <h1 class="page-title">LIBRARY</h1>
 
-<p class="empty-state">Welcome, <%= current_user.username %>! <br> Your projects will appear here...</p>
+<div class="add-project-btn" id="add-project-btn">
+  + Add projects
+</div>
+
+<%= form_with model: Project.new, id: "upload-form", style: "display: none;" do |f| %>
+  <div class="drop-zone" id="drop-zone">
+    <p>Drag & drop your project file here</p>
+    <p style="color: #888; font-size: 14px;">or click to browse</p>
+    <%= f.file_field :file, class: "file-input", id: "file-input", accept: ".als,.logicx,.wav,.mp3,.zip" %>
+  </div>
+
+  <div id="file-details" style="display: none;">
+    <p id="selected-file-name" style="text-align: center; margin-bottom: 10px;"></p>
+    <%= f.text_field :name, placeholder: "Project name", class: "project-name-input", id: "project-name-input" %>
+    <%= f.submit "Upload", class: "upload-btn" %>
+  </div>
+<% end %>
+
+<div class="projects-grid">
+  <% if current_user.projects.any? %>
+    <% current_user.projects.each do |project| %>
+      <div class="project-card">
+        <p><%= project.name %></p>
+      </div>
+    <% end %>
+  <% else %>
+    <p class="empty-state">No projects yet. Upload your first one!</p>
+  <% end %>
+</div>
