@@ -9,6 +9,11 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def download
+    @project = current_user.projects.find(params[:id])
+    redirect_to rails_blob_path(@project.file, disposition: "attachment")
+  end
+
   private
 
   def project_params
