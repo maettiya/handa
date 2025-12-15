@@ -208,20 +208,6 @@ body {
   background: #5a5a5a;
 }
 
-.drop-zone {
-  border: 2px dashed #666;
-  border-radius: 8px;
-  padding: 60px;
-  text-align: center;
-  margin: 20px auto;
-  max-width: 500px;
-  cursor: pointer;
-}
-
-.drop-zone:hover {
-  border-color: white;
-}
-
 .file-input {
   display: none;
 }
@@ -248,4 +234,32 @@ body {
   cursor: pointer;
   display: block;
   margin: 0 auto;
+}
+
+.drop-zone {
+  min-height: 500px;
+  border: 2px dashed transparent;
+  border-radius: 8px;
+  margin: 30px auto;
+  padding: 40px;
+  max-width: 1200px;
+}
+
+.drop-zone.drag-over {
+  border-color: #666;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 30px;
+}
+
+.project-card {
+  text-align: center;
+}
+
+.project-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
 }
