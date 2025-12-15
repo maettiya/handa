@@ -18,10 +18,17 @@
   <% if current_user.projects.any? %>
     <div class="projects-grid">
       <% current_user.projects.each do |project| %>
-        <div class="project-card">
-          <div class="project-icon">📁</div>
-          <p><%= project.title %></p>
-        </div>
+        <% if project.file.attached? %>
+          <%= link_to download_project_path(project), class: "project-card" do %>
+            <div class="project-icon">📁</div>
+            <p><%= project.title %></p>
+          <% end %>
+        <% else %>
+          <div class="project-card">
+            <div class="project-icon">📁</div>
+            <p><%= project.title %></p>
+          </div>
+        <% end %>
       <% end %>
     </div>
   <% else %>

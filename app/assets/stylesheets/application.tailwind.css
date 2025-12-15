@@ -257,6 +257,14 @@ body {
 
 .project-card {
   text-align: center;
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+  display: block;
+}
+
+.project-card:hover {
+  opacity: 0.8;
 }
 
 .project-icon {
