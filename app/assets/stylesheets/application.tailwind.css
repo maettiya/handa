@@ -74,6 +74,23 @@ body {
   justify-content: center;
 }
 
+/* =============================================
+   SEARCH ICON
+   ============================================= */
+
+.search-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.search-icon:hover {
+  color: #ffffff;
+}
+
 /* ===================
    BUTTONS
    =================== */
