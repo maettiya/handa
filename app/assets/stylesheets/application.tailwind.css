@@ -33,6 +33,12 @@ body {
   width: auto;
 }
 
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* =============================================
    NOTIFICATION BELL
    ============================================= */
