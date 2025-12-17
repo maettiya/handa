@@ -1,3 +1,6 @@
+# ProjectFile represents an individual file or folder within a Project.
+# Files are organized in a tree structure using parent_id for nesting.
+# Used to store extracted contents from uploaded ZIP files (Ableton Projects, etc).
 class ProjectFile < ApplicationRecord
   belongs_to :project
   belongs_to :parent, class_name: "ProjectFile", optional: true
