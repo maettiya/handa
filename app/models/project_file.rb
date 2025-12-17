@@ -27,6 +27,7 @@ class ProjectFile < ApplicationRecord
   def self.should_hide?(filename, is_directory: false)
     return true if HIDDEN_FOLDERS.include?(filename) && is_directory
     return true if filename.start_with?(".")
+    return true if filename.start_with?("Icon")
 
     extension = File.extname(filename).delete(".").downcase
     HIDDEN_EXTENSIONS.include?(extension)
