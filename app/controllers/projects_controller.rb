@@ -3,6 +3,9 @@ class ProjectsController < ApplicationController
     @project = current_user.projects.build(project_params)
 
     if @project.save
+      # Extract ZIP contents after save
+      ProjectExtractionService.new(@project).extract!
+
       redirect_to root_path, notice: "Project uploaded successfully!"
     else
       redirect_to root_path, alert: "Upload failed: #{@project.errors.full_messages.join(', ')}"
