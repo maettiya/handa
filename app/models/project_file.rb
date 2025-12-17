@@ -15,5 +15,16 @@ class ProjectFile < ApplicationRecord
   # Only show items at the top level (with no parent folder)
   scope :root_level, -> { where(parent_id: nil) }
 
+  # Constants - list of files we know are junk / can be hidden
+  # Freezing to make them immutable
+  HIDDEN_EXTENSIONS = %w[asd ds_store].freeze
+  HIDDEN_FOLDERS = ["Ableton Project Info", "__MACOSX"].freeze
 
+  def self.should_hide?(filename, is_directory: false)
+    return true if HIDDEN_FOLDERS.include?(filename) && is_directory
+    return true if filename.start_with?(".")
+
+    extension = File.extname(filename).delete(".").downcase
+    HIDDEN_EXTENSIONS.include?(extension)
+  end
 end
