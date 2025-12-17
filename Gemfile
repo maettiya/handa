@@ -10,6 +10,8 @@ gem "rails", "~> 7.1.6"
 # Use Devise for authentication
 gem "devise"
 
+gem "rubyzip"
+
 # ------------ CUSTOM GEMS ---------------
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
