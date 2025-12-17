@@ -20,11 +20,30 @@ class ProjectFile < ApplicationRecord
   HIDDEN_EXTENSIONS = %w[asd ds_store].freeze
   HIDDEN_FOLDERS = ["Ableton Project Info", "__MACOSX"].freeze
 
+  # Class method to check if file should be hidden
   def self.should_hide?(filename, is_directory: false)
     return true if HIDDEN_FOLDERS.include?(filename) && is_directory
     return true if filename.start_with?(".")
 
     extension = File.extname(filename).delete(".").downcase
     HIDDEN_EXTENSIONS.include?(extension)
+  end
+
+  # Extract the extension from the filename -- "File Name.als" -> "als"
+  def extension
+    File.extname(original_filename).delete(".").downcase
+  end
+
+  # Return string to select the correct icon to display in view
+  def icon_type
+    return "folder" if is_directory
+
+    case extension
+    when "als" then "ableton"
+    when "logicx" then "logic"
+    when "wav", "mp3", "aif", "aiff", "flac" then "audio"
+    when "mid", "midi" then "midi"
+    else "file"
+    end
   end
 end
