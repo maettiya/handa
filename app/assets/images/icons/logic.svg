@@ -1,0 +1,29 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded square background -->
+  <rect x="4" y="4" width="112" height="112" rx="20" fill="#2A2A2A"/>
+  <rect x="4" y="4" width="112" height="112" rx="20" stroke="#3A3A3A" stroke-width="2"/>
+  
+  <!-- CD outer circle with gradient -->
+  <defs>
+    <radialGradient id="cdGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E8E8E8"/>
+      <stop offset="50%" stop-color="#C0C0C0"/>
+      <stop offset="100%" stop-color="#909090"/>
+    </radialGradient>
+    <radialGradient id="cdShine" cx="30%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- CD disc -->
+  <circle cx="60" cy="60" r="40" fill="url(#cdGradient)"/>
+  <circle cx="60" cy="60" r="40" fill="url(#cdShine)"/>
+  
+  <!-- CD center hole -->
+  <circle cx="60" cy="60" r="10" fill="#2A2A2A"/>
+  
+  <!-- CD rings for detail -->
+  <circle cx="60" cy="60" r="25" fill="none" stroke="#A0A0A0" stroke-width="0.5" opacity="0.5"/>
+  <circle cx="60" cy="60" r="32" fill="none" stroke="#A0A0A0" stroke-width="0.5" opacity="0.5"/>
+</svg>

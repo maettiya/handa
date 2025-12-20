@@ -1,0 +1,17 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded square background -->
+  <rect x="4" y="4" width="112" height="112" rx="20" fill="#2A2A2A"/>
+  <rect x="4" y="4" width="112" height="112" rx="20" stroke="#3A3A3A" stroke-width="2"/>
+  
+  <!-- File shape -->
+  <path d="M40 25H70L85 40V95H40C37.239 95 35 92.761 35 90V30C35 27.239 37.239 25 40 25Z" fill="#4A4A4A"/>
+  
+  <!-- Folded corner -->
+  <path d="M70 25V40H85L70 25Z" fill="#5A5A5A"/>
+  
+  <!-- Lines representing content -->
+  <rect x="45" y="50" width="30" height="3" rx="1.5" fill="#6A6A6A"/>
+  <rect x="45" y="60" width="25" height="3" rx="1.5" fill="#6A6A6A"/>
+  <rect x="45" y="70" width="28" height="3" rx="1.5" fill="#6A6A6A"/>
+  <rect x="45" y="80" width="20" height="3" rx="1.5" fill="#6A6A6A"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded square background -->
+  <rect x="4" y="4" width="112" height="112" rx="20" fill="#2A2A2A"/>
+  <rect x="4" y="4" width="112" height="112" rx="20" stroke="#3A3A3A" stroke-width="2"/>
+  
+  <!-- "Live" text -->
+  <text x="60" y="68" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Live</text>
+</svg>

@@ -1,0 +1,17 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded square background -->
+  <rect x="4" y="4" width="112" height="112" rx="20" fill="#2A2A2A"/>
+  <rect x="4" y="4" width="112" height="112" rx="20" stroke="#3A3A3A" stroke-width="2"/>
+  
+  <!-- Waveform bars - green tint for MP3 -->
+  <rect x="22" y="50" width="4" height="20" rx="2" fill="#7BC47F"/>
+  <rect x="30" y="42" width="4" height="36" rx="2" fill="#7BC47F"/>
+  <rect x="38" y="35" width="4" height="50" rx="2" fill="#7BC47F"/>
+  <rect x="46" y="28" width="4" height="64" rx="2" fill="#7BC47F"/>
+  <rect x="54" y="38" width="4" height="44" rx="2" fill="#7BC47F"/>
+  <rect x="62" y="32" width="4" height="56" rx="2" fill="#7BC47F"/>
+  <rect x="70" y="40" width="4" height="40" rx="2" fill="#7BC47F"/>
+  <rect x="78" y="35" width="4" height="50" rx="2" fill="#7BC47F"/>
+  <rect x="86" y="45" width="4" height="30" rx="2" fill="#7BC47F"/>
+  <rect x="94" y="50" width="4" height="20" rx="2" fill="#7BC47F"/>
+</svg>
