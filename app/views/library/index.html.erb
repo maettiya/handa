@@ -20,12 +20,16 @@
       <% current_user.projects.each do |project| %>
         <% if project.file.attached? %>
           <%= link_to download_project_path(project), class: "project-card" do %>
-            <div class="project-icon">📁</div>
+            <div class="project-icon">
+              <%= image_tag project_icon_for(project), class: "icon-image" %>
+            </div>
             <p><%= project.title %></p>
           <% end %>
         <% else %>
           <div class="project-card">
-            <div class="project-icon">📁</div>
+            <div class="project-icon">
+              <%= image_tag project_icon_for(project), class: "icon-image" %>
+            </div>
             <p><%= project.title %></p>
           </div>
         <% end %>
