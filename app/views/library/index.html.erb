@@ -19,7 +19,7 @@
     <div class="projects-grid">
       <% current_user.projects.each do |project| %>
         <% if project.file.attached? %>
-          <%= link_to download_project_path(project), class: "project-card" do %>
+          <%= link_to project_path(project), class: "project-card" do %>
             <div class="project-icon">
               <%= image_tag project_icon_for(project), class: "icon-image" %>
             </div>
