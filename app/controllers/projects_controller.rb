@@ -1,7 +1,26 @@
 class ProjectsController < ApplicationController
 
   def show
+    # Find the project - scoped to current_user for security
+    # (users can only view their own projects)
+    @project = current_user.projects.find(params[:id])
 
+    if params[:folder_id].present?
+      # Browsing inside a subfolder
+      # Find the folder and get its children
+      @current_folder = @project.project_files.find(params[:folder_id])
+      @files = @project.project_files
+                        .where(parent_id: @current_folder.id)
+                        .visible
+                        .order(:original_filename)
+    else
+      # Root level - show top-level files (no parent)
+      @current_folder = nil
+      @files = @project.project_files
+                        .where(parent_id: nil)
+                        .visible
+                        .order(:original_filename)
+    end
   end
 
   # Handles file upload and triggers ZIP extraction
