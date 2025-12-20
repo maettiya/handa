@@ -350,3 +350,24 @@ body {
   width: 80px;
   height: 80px;
 }
+
+/* ===================
+   BREADCRUMB / BACK NAVIGATION
+   =================== */
+
+.breadcrumb {
+  padding: 20px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back-link {
+  color: #888;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: white;
+}

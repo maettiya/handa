@@ -1,0 +1,55 @@
+<%# app/views/projects/show.html.erb %>
+<%# Displays the contents of a project (extracted files from ZIP) %>
+<%# Uses the same grid layout as library for consistent UX %>
+
+<%# Navigation - Back link to library or parent folder %>
+<div class="breadcrumb">
+  <% if @current_folder %>
+    <%# Inside a subfolder - link back to parent (or root if no parent) %>
+    <% if @current_folder.parent_id %>
+      <%= link_to "← Back", project_path(@project, folder_id: @current_folder.parent_id), class: "back-link" %>
+    <% else %>
+      <%= link_to "← Back", project_path(@project), class: "back-link" %>
+    <% end %>
+  <% else %>
+    <%# At root level - link back to library %>
+    <%= link_to "← Back to Library", root_path, class: "back-link" %>
+  <% end %>
+</div>
+
+<%# Page title - show project name and current folder if applicable %>
+<h1 class="page-title">
+  <%= @project.title %>
+  <% if @current_folder %>
+    / <%= @current_folder.original_filename %>
+  <% end %>
+</h1>
+
+<%# File grid - same styling as library %>
+<div class="drop-zone">
+  <% if @files.any? %>
+    <div class="projects-grid">
+      <% @files.each do |file| %>
+        <% if file.is_directory? %>
+          <%# Folder - clicking navigates into it %>
+          <%= link_to project_path(@project, folder_id: file.id), class: "project-card" do %>
+            <div class="project-icon">
+              <%= image_tag "icons/folder.svg", class: "icon-image" %>
+            </div>
+            <p><%= file.original_filename %></p>
+          <% end %>
+        <% else %>
+          <%# File - just display for now (could add download later) %>
+          <div class="project-card">
+            <div class="project-icon">
+              <%= image_tag file_icon_for(file), class: "icon-image" %>
+            </div>
+            <p><%= file.original_filename %></p>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="empty-state">No files found in this project</p>
+  <% end %>
+</div>
