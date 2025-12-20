@@ -1,4 +1,10 @@
 class ProjectsController < ApplicationController
+
+  def show
+
+  end
+
+  # Handles file upload and triggers ZIP extraction
   def create
     @project = current_user.projects.build(project_params)
 
@@ -12,6 +18,7 @@ class ProjectsController < ApplicationController
     end
   end
 
+  # Downloads the original uploaded file
   def download
     @project = current_user.projects.find(params[:id])
     redirect_to rails_blob_path(@project.file, disposition: "attachment")
@@ -19,6 +26,7 @@ class ProjectsController < ApplicationController
 
   private
 
+  # Strong parameters - only allow these fields from the form
   def project_params
     params.require(:project).permit(:title, :file)
   end
