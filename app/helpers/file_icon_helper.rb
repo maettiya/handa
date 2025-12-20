@@ -1,15 +1,21 @@
-# File Icon Helper provides methods for selecting appropriate icons to be displayed
+# FileIconHelper provides methods for selecting appropriate icons to be displayed
 # Used in views to visually distinguish between file types
 
 module FileIconHelper
 
-  # First check project_type for extracted ZIP projects
+  # Returns icon for a Project (shown on library homepage)
+  # Handles both extracted ZIPs and single file uploads
+
+  # @param project [Project] The project record
+  # @return [String] Path to the SVG icon
+
   def project_icon_for(project)
+    # First check project_type for extracted ZIP projects
     case project.project_type
     when "ableton"
-      "icons/ableton.svg"
+      return "icons/ableton.svg"
     when "logic"
-      "icons/logic.svg"
+      return "icons/logic.svg"
     end
 
     # For single file uploads or unknown types, check the file extension
@@ -45,7 +51,12 @@ module FileIconHelper
     end
   end
 
-  # Method for Project Files
+  # Returns icon for a ProjectFile (shown when viewing inside a project)
+  # Used for extracted files within a ZIP
+
+  # @param project_file [ProjectFile] The extracted file record
+  # @return [String] Path to the SVG icon
+
   def file_icon_for(project_file)
     # Directories always get the folder icon
     if project_file.is_directory?
@@ -55,18 +66,21 @@ module FileIconHelper
       extension = File.extname(project_file.original_filename).downcase.delete(".")
 
       case extension
-        # DAW Project Files
+      # DAW Project Files
       when "als"
         "icons/ableton.svg"
       when "logicx"
         "icons/logic.svg"
-        # Lossless Audio Formats
+
+      # Lossless Audio Formats
       when "wav", "aif", "aiff", "flac"
         "icons/audio.svg"
-        # Compressed Audio Formats
+
+      # Compressed Audio Formats
       when "mp3", "m4a", "aac"
         "icons/mp3.svg"
-        # Fallback for unknown file types
+
+      # Fallback for unknown file types
       else
         "icons/file.svg"
       end
