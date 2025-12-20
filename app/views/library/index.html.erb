@@ -23,7 +23,7 @@
             <div class="project-icon">
               <%= image_tag project_icon_for(project), class: "icon-image" %>
             </div>
-            <p><%= project.title %></p>
+            <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
           <% end %>
         <% else %>
           <div class="project-card">
