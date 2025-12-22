@@ -4,7 +4,7 @@
 
 **Handa** is a Ruby on Rails application designed as a "GitHub for music files" - a seamless storage and collaboration platform for music creators. It consolidates the workflow of sharing music projects into a single platform with automatic file extraction, preview creation, and flexible sharing.
 
-**Current Status**: Early development - Core upload/download/extraction functionality is working. Many planned features not yet built.
+**Current Status**: Early development - Core upload/download/extraction and project browsing functionality is working. Many planned features not yet built.
 
 ## Tech Stack
 
@@ -24,7 +24,9 @@ app/
 ├── controllers/
 │   ├── application_controller.rb    # Devise auth, requires login for all pages
 │   ├── library_controller.rb        # index - main dashboard
-│   └── projects_controller.rb       # create, download
+│   └── projects_controller.rb       # create, show, download
+├── helpers/
+│   └── file_icon_helper.rb          # Icon selection for projects and files
 ├── models/
 │   ├── user.rb                      # Devise user, has_many :projects
 │   ├── project.rb                   # Uploaded music project (ZIP/file)
@@ -35,6 +37,7 @@ app/
 ├── views/
 │   ├── layouts/application.html.erb   # Dark theme layout with header
 │   ├── library/index.html.erb         # Main library grid view
+│   ├── projects/show.html.erb         # Project file browser view
 │   └── devise/                         # Auth forms
 └── javascript/
     └── upload.js                       # Drag-drop, file picker logic
@@ -44,13 +47,15 @@ app/
 
 ```
 User
-├── has_many :projects
+├── has_many :projects, dependent: :destroy
+├── validates: username (required, unique)
 
 Project
 ├── belongs_to :user
-├── has_many :project_files
+├── has_many :project_files, dependent: :destroy
 ├── has_one_attached :file (original ZIP)
 ├── fields: title, project_type (ableton/logic/folder), extracted
+├── validates: title presence, file presence
 
 ProjectFile (tree structure for extracted files)
 ├── belongs_to :project
@@ -58,6 +63,8 @@ ProjectFile (tree structure for extracted files)
 ├── has_many :children
 ├── has_one_attached :file
 ├── fields: original_filename, path, file_size, is_directory, hidden, file_type
+├── scopes: visible, directories, files, root_level
+├── methods: extension, icon_type, should_hide?
 
 ShareLink (NOT YET IMPLEMENTED)
 ├── belongs_to :project
@@ -67,11 +74,16 @@ ShareLink (NOT YET IMPLEMENTED)
 ## Routes
 
 ```ruby
-root "library#index"                    # Main library page
-resources :projects, only: [:create, :destroy] do
-  member { get :download }
-end
 devise_for :users                       # Auth routes
+
+resources :projects, only: [:create, :show, :destroy] do
+  member do
+    get :download
+  end
+end
+
+get 'library/index'
+root "library#index"                    # Main library page
 ```
 
 ## Common Development Tasks
@@ -100,8 +112,10 @@ yarn build:css             # Build Tailwind CSS
 |---------|------|
 | ZIP extraction logic | `app/services/project_extraction_service.rb` |
 | File hiding rules | `app/models/project_file.rb` (HIDDEN_EXTENSIONS, HIDDEN_FOLDERS) |
+| File icon selection | `app/helpers/file_icon_helper.rb` |
 | Upload UI/UX | `app/javascript/upload.js` |
-| Main view | `app/views/library/index.html.erb` |
+| Library view | `app/views/library/index.html.erb` |
+| Project browser | `app/views/projects/show.html.erb` |
 | Styling | `app/assets/stylesheets/application.tailwind.css` |
 | Routes | `config/routes.rb` |
 | Database schema | `db/schema.rb` |
@@ -115,20 +129,35 @@ Files are auto-hidden during extraction:
 
 See `ProjectFile.should_hide?(filename, is_directory:)` for implementation.
 
+## FileIconHelper
+
+Provides icon selection for visual file type display:
+- `project_icon_for(project)` - Icon for library view (checks project_type first, then file extension)
+- `file_icon_for(project_file)` - Icon for extracted files within project browser
+
+Supported file types:
+- **DAW Projects**: Ableton (.als), Logic (.logicx)
+- **Lossless Audio**: WAV, AIF, AIFF, FLAC
+- **Compressed Audio**: MP3, M4A, AAC
+- **Folders**: Directory icon
+- **Fallback**: Generic file icon
+
 ## What's Implemented
 
 - User authentication (sign up, login, logout, password reset)
 - Project upload with drag-drop and file picker
 - ZIP file extraction with tree structure preservation
 - Project type auto-detection (Ableton/Logic/Folder)
-- Project download
+- Project download (original ZIP)
 - Library grid view
+- **Project file browser** - View extracted files and navigate subfolders
+- File type icons throughout UI
 - Dark theme UI
 
 ## What's NOT Implemented Yet
 
 - **ShareLink functionality** (model exists, no controller/UI)
-- **Project file browser** (extracted files not displayed)
+- **Individual file downloads** (can only download original ZIP)
 - **Search** (icon in UI, no logic)
 - **Notifications** (icon with hardcoded badge, no backend)
 - **Project deletion** (route exists, no controller action)
@@ -144,6 +173,18 @@ See `ProjectFile.should_hide?(filename, is_directory:)` for implementation.
 2. **Service Objects**: Business logic in `app/services/` (e.g., ProjectExtractionService)
 3. **Self-referential association**: ProjectFile uses `parent_id` for folder tree structure
 4. **Synchronous extraction**: ZIP extraction happens in controller - should move to background job for large files
+5. **Helper modules**: FileIconHelper for icon selection logic, included in views
+
+## Controller Actions
+
+### ProjectsController
+- `show` - View project contents, supports subfolder navigation via `folder_id` param
+- `create` - Upload new project, triggers ZIP extraction
+- `download` - Download original uploaded file
+- `destroy` - Route exists but **not implemented**
+
+### LibraryController
+- `index` - Main dashboard (empty action, view renders user's projects)
 
 ## Testing
 
@@ -155,6 +196,7 @@ Test framework is Minitest but **no tests have been written yet**. Test files ex
 2. No error handling in extraction service
 3. Hardcoded "3" notification badge
 4. ShareLink model unused
-5. ProjectFile records created but never displayed
-6. Devise mailer not configured for password resets
-7. Zero test coverage
+5. Project destroy action not implemented
+6. Individual file download not available
+7. Devise mailer not configured for password resets
+8. Zero test coverage

@@ -2,7 +2,6 @@
 # - Viewing project contents (browse extracted files)
 # - Uploading new projects (with automatic ZIP extraction)
 # - Downloading original project files
-
 class ProjectsController < ApplicationController
 
   def show
