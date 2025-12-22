@@ -1,0 +1,44 @@
+<%# app/views/projects/_breadcrumbs.html.erb %>
+<%# File-path style breadcrumb navigation: LIBRARY / Project / Folder / Subfolder %>
+<%# Each segment is clickable to navigate back up the tree %>
+
+<%#
+  # Build the ancestry chain from current folder up to root
+  # Returns array of folders from root -> current (reversed ancestor order)
+  # ancestors = []
+  # if @current_folder
+  #  folder = @current_folder
+  #  while folder
+  #    ancestors.unshift(folder)  # Add to front to maintain root->current order
+  #    folder = folder.parent
+  #  end
+  # end
+%>
+
+<nav class="breadcrumbs" aria-label="Breadcrumb navigation">
+  <%# LIBRARY - always links back to main library %>
+  <%= link_to "LIBRARY", root_path, class: "breadcrumb-link" %>
+
+  <span class="breadcrumb-separator">/</span>
+
+  <%# Project name - links to project root (no folder_id) %>
+  <% if @current_folder %>
+    <%= link_to @project.title, project_path(@project), class: "breadcrumb-link" %>
+  <% else %>
+    <%# At project root - show as current (not linked) %>
+    <span class="breadcrumb-current"><%= @project.title %></span>
+  <% end %>
+
+  <%# Folder chain - each ancestor folder %>
+  <% ancestors.each_with_index do |folder, index| %>
+    <span class="breadcrumb-separator">/</span>
+
+    <% if index == ancestors.length - 1 %>
+      <%# Last item (current folder) - not linked %>
+      <span class="breadcrumb-current"><%= folder.original_filename %></span>
+    <% else %>
+      <%# Ancestor folder - clickable %>
+      <%= link_to folder.original_filename, project_path(@project, folder_id: folder.id), class: "breadcrumb-link" %>
+    <% end %>
+  <% end %>
+</nav>
