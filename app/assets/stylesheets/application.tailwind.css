@@ -352,22 +352,38 @@ body {
 }
 
 /* ===================
-   BREADCRUMB / BACK NAVIGATION
+   BREADCRUMB NAVIGATION (File-path style)
    =================== */
 
-.breadcrumb {
+.breadcrumbs {
   padding: 20px 0;
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  font-size: 14px;
 }
 
-.back-link {
+.breadcrumb-link {
   color: #888;
   text-decoration: none;
-  font-size: 14px;
   transition: color 0.2s ease;
+  padding: 4px 0;
 }
 
-.back-link:hover {
+.breadcrumb-link:hover {
   color: white;
+}
+
+.breadcrumb-separator {
+  color: #555;
+  margin: 0 10px;
+  user-select: none;
+}
+
+.breadcrumb-current {
+  color: white;
+  padding: 4px 0;
 }
