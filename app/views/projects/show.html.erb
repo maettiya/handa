@@ -2,28 +2,8 @@
 <%# Displays the contents of a project (extracted files from ZIP) %>
 <%# Uses the same grid layout as library for consistent UX %>
 
-<%# Navigation - Back link to library or parent folder %>
-<div class="breadcrumb">
-  <% if @current_folder %>
-    <%# Inside a subfolder - link back to parent (or root if no parent) %>
-    <% if @current_folder.parent_id %>
-      <%= link_to "← Back", project_path(@project, folder_id: @current_folder.parent_id), class: "back-link" %>
-    <% else %>
-      <%= link_to "← Back", project_path(@project), class: "back-link" %>
-    <% end %>
-  <% else %>
-    <%# At root level - link back to library %>
-    <%= link_to "← Back to Library", root_path, class: "back-link" %>
-  <% end %>
-</div>
-
-<%# Page title - show project name and current folder if applicable %>
-<h1 class="page-title">
-  <%= @project.title %>
-  <% if @current_folder %>
-    / <%= @current_folder.original_filename %>
-  <% end %>
-</h1>
+<%# Breadcrumb navigation - file path style %>
+<%= render "projects/breadcrumbs" %>
 
 <%# File grid - same styling as library %>
 <div class="drop-zone">
