@@ -41,12 +41,31 @@ class ProjectsController < ApplicationController
     end
   end
 
-  # Deletes an entire project and all it's files
+  # Deletes an entire project and all it's children
   def destroy
     @project = current_user.projects.find(params[:id])
     @project.destroy
 
     redirect_to root_path, notice: "Project deleted successfully"
+  end
+
+  # Deletes a single file or folder (and all children if it's a folder)
+  def destroy_file
+    @project = current_user.projects.find(params[:id])
+    @file = @project.project_files.find(params[:file_id])
+
+    # Store parent folder to redirect back to current location
+    parent_folder_id = @file.parent_id
+
+    # If it's a folder, this will also destroy all the children
+    @file.destroy
+
+    # Redirect back to where they were
+    if parent_folder_id
+      redirect_to project_path(@project, folder_id: parent_folder_id), notice: "Deleted successfully"
+    else
+      redirect_to project_path(@project), notice: "Deleted successfully"
+    end
   end
 
   # Downloads the original uploaded file
