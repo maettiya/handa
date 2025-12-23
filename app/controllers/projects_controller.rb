@@ -64,7 +64,8 @@ class ProjectsController < ApplicationController
 
   # Downloads a folder from a project
   def download_folder
-
+    @project = current_user.projects.find(params[:id])
+    @file = @project.project_files.find(params[:folder_id])
   end
 
   private
