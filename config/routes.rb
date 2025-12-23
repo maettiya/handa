@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   # Show: View extracted contents of a project (Look inside)
   # Destroy: Delete a project (and it's contents)
   # Download: Download the original uploaded file
+
   resources :projects, only: [:create, :show, :destroy] do
     member do
       # Downloads the original ZIP file
@@ -14,6 +15,8 @@ Rails.application.routes.draw do
       get 'download_file/:file_id', to: 'projects#download_file', as: :download_file
       # Downloads an individual folder
       get 'download_folder/:folder_id', to: 'projects#download_folder', as: :download_folder
+      # Deletes an individual file or folder
+      delete 'delete_file/:file_id', to: 'projects#destroy_file', as: :destroy_file
     end
   end
 
