@@ -18,21 +18,39 @@
   <% if current_user.projects.any? %>
     <div class="projects-grid">
       <% current_user.projects.each do |project| %>
-        <% if project.file.attached? %>
-          <%= link_to project_path(project), class: "project-card" do %>
-            <div class="project-icon">
-              <%= image_tag project_icon_for(project), class: "icon-image" %>
+        <div class="project-card-wrapper">
+          <% if project.file.attached? %>
+            <%= link_to project_path(project), class: "project-card" do %>
+              <div class="project-icon">
+                <%= image_tag project_icon_for(project), class: "icon-image" %>
+              </div>
+              <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
+            <% end %>
+          <% else %>
+            <div class="project-card">
+              <div class="project-icon">
+                <%= image_tag project_icon_for(project), class: "icon-image" %>
+              </div>
+              <p><%= project.title %></p>
             </div>
-            <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
           <% end %>
-        <% else %>
-          <div class="project-card">
-            <div class="project-icon">
-              <%= image_tag project_icon_for(project), class: "icon-image" %>
+
+          <%# Three-dot menu for actions %>
+          <% if project.file.attached? %>
+            <div class="card-menu" data-controller="dropdown">
+              <button class="menu-trigger" data-action="click->dropdown#toggle">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="1.5"/>
+                  <circle cx="8" cy="8" r="1.5"/>
+                  <circle cx="13" cy="8" r="1.5"/>
+                </svg>
+              </button>
+              <div class="menu-dropdown" data-dropdown-target="menu">
+                <%= link_to "Download", download_project_path(project), class: "menu-item" %>
+              </div>
             </div>
-            <p><%= project.title %></p>
-          </div>
-        <% end %>
+          <% end %>
+        </div>
       <% end %>
     </div>
   <% else %>
