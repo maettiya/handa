@@ -92,12 +92,19 @@ class ProjectsController < ApplicationController
 
   # Collects all files in a folder and creates a ZIP
   def create_folder_zip
+    # Load RubyZip library
     require 'zip'
 
+    # Create StringIO (memory buffer). Gives us 'zio' (zip input/outputstream) to add files to
     stringio = Zip::OutputStream.write.buffer do |zio|
       add_folder_to_zip(zio, folder, "")
     end
+
+    stringio.rewind
+    stringio.read
   end
+
+  # Adds files and sub-folders to the ZIP
 
 
 end
