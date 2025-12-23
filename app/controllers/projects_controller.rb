@@ -104,7 +104,20 @@ class ProjectsController < ApplicationController
     stringio.read
   end
 
-  # Adds files and sub-folders to the ZIP
+  # Adds files and sub-folders to the ZIP (folders-within-folders handling)
+  def add_folder_to_zip(zio, folder, path_prefix)
+    folder.children.visible.each do |child|
+      child_path = path_prefix.empty? ? child.original_filename : "#{path_prefix}/#{child.original_filename}"
 
+      if child.is_directory?
+        # Recurse into sub-folder
+        add_folder_to_zip(zio, child, child_path)
+      elsif child.file.attached?
+        # Add file to ZIP
+        zio.put_next_entry(child_path)
+        zio.write(child.file.download)
+      end
+    end
+  end
 
 end
