@@ -14,5 +14,5 @@ cloudflare:
   bucket: <%= ENV['AWS_BUCKET'] %>
   endpoint: <%= ENV['AWS_ENDPOINT'] %>
   force_path_style: true
-  upload:
-    checksum: false
+  request_checksum_calculation: when_required
+  response_checksum_validation: when_required

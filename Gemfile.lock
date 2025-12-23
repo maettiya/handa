@@ -319,7 +319,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  aws-sdk-s3 (~> 1.170)
+  aws-sdk-s3
   bootsnap
   capybara
   cssbundling-rails

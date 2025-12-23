@@ -14,7 +14,7 @@ gem "devise"
 gem "rubyzip"
 
 # Use Cloudfare R2 for storage
-gem "aws-sdk-s3", "~> 1.170", require: false
+gem "aws-sdk-s3", require: false
 
 # ------------ CUSTOM GEMS ---------------
 
