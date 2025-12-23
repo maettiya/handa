@@ -10,7 +10,11 @@ gem "rails", "~> 7.1.6"
 # Use Devise for authentication
 gem "devise"
 
+# RubyZIP for zipping/unzipping files
 gem "rubyzip"
+
+# Use Cloudfare R2 for storage
+gem "aws-sdk-s3", require: false
 
 # ------------ CUSTOM GEMS ---------------
 
