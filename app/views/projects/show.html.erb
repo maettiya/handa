@@ -10,23 +10,43 @@
   <% if @files.any? %>
     <div class="projects-grid">
       <% @files.each do |file| %>
-        <% if file.is_directory? %>
-          <%# Folder - clicking navigates into it %>
-          <%= link_to project_path(@project, folder_id: file.id), class: "project-card" do %>
-            <div class="project-icon">
-              <%= image_tag "icons/folder.svg", class: "icon-image" %>
+        <div class="project-card-wrapper">
+          <% if file.is_directory? %>
+            <%# Folder - clicking navigates into it %>
+            <%= link_to project_path(@project, folder_id: file.id), class: "project-card" do %>
+              <div class="project-icon">
+                <%= image_tag "icons/folder.svg", class: "icon-image" %>
+              </div>
+              <p><%= file.original_filename %></p>
+            <% end %>
+          <% else %>
+            <%# File - display with icon %>
+            <div class="project-card">
+              <div class="project-icon">
+                <%= image_tag file_icon_for(file), class: "icon-image" %>
+              </div>
+              <p><%= file.original_filename %></p>
             </div>
-            <p><%= file.original_filename %></p>
           <% end %>
-        <% else %>
-          <%# File - just display for now (could add download later) %>
-          <div class="project-card">
-            <div class="project-icon">
-              <%= image_tag file_icon_for(file), class: "icon-image" %>
+
+          <%# Three-dot menu for actions %>
+          <div class="card-menu" data-controller="dropdown">
+            <button class="menu-trigger" data-action="click->dropdown#toggle">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <circle cx="8" cy="3" r="1.5"/>
+                <circle cx="8" cy="8" r="1.5"/>
+                <circle cx="8" cy="13" r="1.5"/>
+              </svg>
+            </button>
+            <div class="menu-dropdown" data-dropdown-target="menu">
+              <% if file.is_directory? %>
+                <%= link_to "Download as ZIP", download_folder_project_path(@project, folder_id: file.id), class: "menu-item" %>
+              <% else %>
+                <%= link_to "Download", download_file_project_path(@project, file_id: file.id), class: "menu-item" %>
+              <% end %>
             </div>
-            <p><%= file.original_filename %></p>
           </div>
-        <% end %>
+        </div>
       <% end %>
     </div>
   <% else %>
