@@ -47,6 +47,11 @@ class ProjectsController < ApplicationController
     redirect_to rails_blob_path(@project.file, disposition: "attachment")
   end
 
+  # Downloads a single file
+  def download_file
+
+  end
+
   private
 
   # Strong parameters - only allow these fields from the form
@@ -56,6 +61,10 @@ class ProjectsController < ApplicationController
 
   # Collects all files in a folder and creates a ZIP
   def create_folder_zip
+    require 'zip'
 
+    stringio = Zip::OutputStream.write.buffer do |zio|
+      add_folder_to_zip(zio, folder, "")
+    end
   end
 end
