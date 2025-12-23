@@ -50,7 +50,7 @@ class ProjectsController < ApplicationController
   # Downloads a single file from a project
   def download_file
     @project = current_user.projects.find(params[:id])
-    @file = @project.project_files.find(params[:id])
+    @file = @project.project_files.find(params[:file_id])
 
     # Ensure it's actually a file, not a directory
     if @file.is_directory? || !@file.file.attached?
@@ -65,7 +65,7 @@ class ProjectsController < ApplicationController
   # Downloads a folder from a project
   def download_folder
     @project = current_user.projects.find(params[:id])
-    @file = @project.project_files.find(params[:folder_id])
+    @folder = @project.project_files.find(params[:folder_id])
 
     # Ensure it's a directory
     unless @folder.is_directory?
@@ -91,12 +91,12 @@ class ProjectsController < ApplicationController
   end
 
   # Collects all files in a folder and creates a ZIP
-  def create_folder_zip
+  def create_folder_zip(folder)
     # Load RubyZip library
     require 'zip'
 
     # Create StringIO (memory buffer). Gives us 'zio' (zip input/outputstream) to add files to
-    stringio = Zip::OutputStream.write.buffer do |zio|
+    stringio = Zip::OutputStream.write_buffer do |zio|
       add_folder_to_zip(zio, folder, "")
     end
 
