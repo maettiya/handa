@@ -387,3 +387,71 @@ body {
   color: white;
   padding: 4px 0;
 }
+
+/* ==========================================
+   CARD MENU (Three-dot dropdown)
+   ========================================== */
+
+.project-card-wrapper {
+  position: relative;
+}
+
+.card-menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.project-card-wrapper:hover .card-menu {
+  opacity: 1;
+}
+
+.menu-trigger {
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 4px;
+  padding: 6px;
+  cursor: pointer;
+  color: #888;
+  transition: all 0.2s ease;
+}
+
+.menu-trigger:hover {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+}
+
+.menu-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.menu-dropdown.open {
+  display: block;
+}
+
+.menu-item {
+  display: block;
+  padding: 10px 14px;
+  color: #ccc;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.15s ease;
+}
+
+.menu-item:hover {
+  background: #3a3a3a;
+  color: white;
+}
