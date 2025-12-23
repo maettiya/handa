@@ -69,8 +69,10 @@ class ProjectExtractionService
 
     # Attach the actual file content (skip for directories)
     unless is_directory
+      # Read into StringIO so the stream can be rewound for checksum calculation
+      content = StringIO.new(zip.get_input_stream(entry).read)
       project_file.file.attach(
-        io: zip.get_input_stream(entry),
+        io: content,
         filename: filename,
         content_type: detect_content_type(filename)
       )
