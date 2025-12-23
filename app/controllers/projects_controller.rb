@@ -41,6 +41,14 @@ class ProjectsController < ApplicationController
     end
   end
 
+  # Deletes an entire project and all it's files
+  def destroy
+    @project = current_user.projects.find(params[:id])
+    @project.destroy
+
+    redirect_to root_path, notice: "Project deleted successfully"
+  end
+
   # Downloads the original uploaded file
   def download
     @project = current_user.projects.find(params[:id])
