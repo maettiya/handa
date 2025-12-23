@@ -32,10 +32,10 @@ class ProjectsController < ApplicationController
     @project = current_user.projects.build(project_params)
 
     if @project.save
-      # Extract ZIP contents after save
-      ProjectExtractionService.new(@project).extract!
+      # Extract ZIP contents in background job (avoids Heroku 30s timeout)
+      ProjectExtractionJob.perform_later(@project.id)
 
-      redirect_to root_path, notice: "Project uploaded successfully!"
+      redirect_to root_path, notice: "Project uploaded! Extraction in progress..."
     else
       redirect_to root_path, alert: "Upload failed: #{@project.errors.full_messages.join(', ')}"
     end
