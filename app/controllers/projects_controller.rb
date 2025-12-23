@@ -47,10 +47,24 @@ class ProjectsController < ApplicationController
     redirect_to rails_blob_path(@project.file, disposition: "attachment")
   end
 
-  # Downloads a single file
+  # Downloads a single file from a project
   def download_file
     @project = current_user.projects.find(params[:id])
     @file = @project.project_files.find(params[:id])
+
+    # Ensure it's actually a file, not a directory
+    if @file.is_directory? || !@file.file.attached?
+      redirect_to project_path(@project), alert: "File not available for download"
+      return
+    end
+
+    # The actual file download. Just download, ensures original file name (not Active Storage ID)
+    redirect_to rails_blob_path(@file.file, disposition: "attachment", filename: @file.original_filename)
+  end
+
+  # Downloads a folder from a project
+  def download_folder
+
   end
 
   private
@@ -68,4 +82,6 @@ class ProjectsController < ApplicationController
       add_folder_to_zip(zio, folder, "")
     end
   end
+
+
 end
