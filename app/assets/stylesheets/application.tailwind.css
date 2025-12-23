@@ -470,3 +470,62 @@ body {
   background: #4a2a2a;
   color: #f66;
 }
+
+/* ===================
+   UPLOAD PROGRESS
+   =================== */
+
+.upload-progress-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: none;
+}
+
+.upload-progress-container.active {
+  display: block;
+}
+
+.upload-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+#upload-filename {
+  font-size: 13px;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+#upload-percent {
+  font-size: 13px;
+  color: #888;
+  margin-left: 12px;
+}
+
+.upload-progress-bar {
+  height: 4px;
+  background: #4a4a4a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.upload-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #60a5fa, #3b82f6);
+  border-radius: 2px;
+  transition: width 0.15s ease;
+}

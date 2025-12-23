@@ -50,5 +50,16 @@
     <main class="main-content">
       <%= yield %>
     </main>
+
+    <!-- Upload Progress Indicator -->
+    <div id="upload-progress" class="upload-progress-container">
+      <div class="upload-progress-info">
+        <span id="upload-filename">Uploading...</span>
+        <span id="upload-percent">0%</span>
+      </div>
+      <div class="upload-progress-bar">
+        <div id="upload-progress-fill" class="upload-progress-fill"></div>
+      </div>
+    </div>
   </body>
 </html>
