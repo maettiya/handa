@@ -47,6 +47,11 @@
               </button>
               <div class="menu-dropdown" data-dropdown-target="menu">
                 <%= link_to "Download", download_project_path(project), class: "menu-item" %>
+                <div class="menu-divider"></div>
+                <%= link_to "Delete", project_path(project),
+                    method: :delete,
+                    data: { turbo_method: :delete, turbo_confirm: "Delete '#{project.title}'? This cannot be undone." },
+                    class: "menu-item menu-item-danger" %>
               </div>
             </div>
           <% end %>
