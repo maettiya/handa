@@ -53,4 +53,9 @@ class ProjectsController < ApplicationController
   def project_params
     params.require(:project).permit(:title, :file)
   end
+
+  # Collects all files in a folder and creates a ZIP
+  def create_folder_zip
+
+  end
 end
