@@ -67,10 +67,20 @@ class ProjectsController < ApplicationController
     @project = current_user.projects.find(params[:id])
     @file = @project.project_files.find(params[:folder_id])
 
+    # Ensure it's a directory
     unless @folder.is_directory?
       redirect_to project_path(@project), alert: "Not a folder"
       return
     end
+
+    # Create ZIP in memory (call private method below)
+    zip_data = create_folder_zip(@folder)
+
+    # Send the ZIP file
+    send_data zip_data,
+      type: 'application/zip',
+      disposition: 'attachment',
+      filename: "#{@folder.original_filename}.zip"
   end
 
   private
