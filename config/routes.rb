@@ -8,7 +8,12 @@ Rails.application.routes.draw do
   # Download: Download the original uploaded file
   resources :projects, only: [:create, :show, :destroy] do
     member do
+      # Downloads the original ZIP file
       get :download
+      # Downloads an individual file
+      get 'download_file/:file_id', to: 'projects#download_file', as: :download_file
+      # Downloads an individual folder
+      get 'download_folder/:folder_id', to: 'projects#download_folder', as: :download_folder
     end
   end
 
