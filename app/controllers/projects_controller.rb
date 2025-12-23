@@ -49,6 +49,7 @@ class ProjectsController < ApplicationController
 
   # Downloads a single file
   def download_file
+    @project = current_user.projects.find([:id])
 
   end
 
