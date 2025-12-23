@@ -66,6 +66,11 @@ class ProjectsController < ApplicationController
   def download_folder
     @project = current_user.projects.find(params[:id])
     @file = @project.project_files.find(params[:folder_id])
+
+    unless @folder.is_directory?
+      redirect_to project_path(@project), alert: "Not a folder"
+      return
+    end
   end
 
   private
