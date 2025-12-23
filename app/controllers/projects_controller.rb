@@ -76,7 +76,7 @@ class ProjectsController < ApplicationController
     # Create ZIP in memory (call private method below)
     zip_data = create_folder_zip(@folder)
 
-    # Send the ZIP file
+    # Send the ZIP file (send_data -> Rails method to send raw bytes to the browser)
     send_data zip_data,
       type: 'application/zip',
       disposition: 'attachment',
