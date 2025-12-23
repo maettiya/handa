@@ -19,14 +19,24 @@
     <div class="projects-grid">
       <% current_user.projects.each do |project| %>
         <div class="project-card-wrapper">
-          <% if project.file.attached? %>
+          <% if project.file.attached? && project.project_files.any? %>
+            <%# Project has extracted contents - clickable to browse inside %>
             <%= link_to project_path(project), class: "project-card" do %>
               <div class="project-icon">
                 <%= image_tag project_icon_for(project), class: "icon-image" %>
               </div>
               <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
             <% end %>
+          <% elsif project.file.attached? %>
+            <%# Single file (wav, mp3, etc) - not clickable, nothing to browse %>
+            <div class="project-card">
+              <div class="project-icon">
+                <%= image_tag project_icon_for(project), class: "icon-image" %>
+              </div>
+              <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
+            </div>
           <% else %>
+            <%# No file attached - just display %>
             <div class="project-card">
               <div class="project-icon">
                 <%= image_tag project_icon_for(project), class: "icon-image" %>
@@ -49,7 +59,6 @@
                 <%= link_to "Download", download_project_path(project), class: "menu-item" %>
                 <div class="menu-divider"></div>
                 <%= link_to "Delete", project_path(project),
-                    method: :delete,
                     data: { turbo_method: :delete, turbo_confirm: "Delete '#{project.title}'? This cannot be undone." },
                     class: "menu-item menu-item-danger" %>
               </div>

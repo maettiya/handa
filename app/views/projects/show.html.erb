@@ -44,6 +44,10 @@
               <% else %>
                 <%= link_to "Download", download_file_project_path(@project, file_id: file.id), class: "menu-item" %>
               <% end %>
+              <div class="menu-divider"></div>
+              <%= link_to "Delete", destroy_file_project_path(@project, file_id: file.id),
+                  data: { turbo_method: :delete, turbo_confirm: "Delete '#{file.original_filename}'?#{file.is_directory? ? ' This will delete all contents inside.' : ''}" },
+                  class: "menu-item menu-item-danger" %>
             </div>
           </div>
         </div>
