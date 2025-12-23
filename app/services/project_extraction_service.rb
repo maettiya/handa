@@ -15,14 +15,8 @@ class ProjectExtractionService
     # Track folders we create so we can set parent relationships
     folder_map = {}
 
-    Zip::File.open(zip_path) do |zip|
-      zip.each do |entry|
-        # Skip the root folder that macOS creates when zipping
-        next if entry.name.end_with?('/')
-
-        process_entry(entry, folder_map, zip)
-      end
-    end
+    # Download the ZIP to a temp file (required for cloud storage like S3/R2)
+    download_and_extract(folder_map)
 
     detect_project_type!
     @project.update!(extracted: true)
@@ -35,8 +29,18 @@ class ProjectExtractionService
       @project.file.content_type == 'application/zip'
   end
 
-  def zip_path
-    ActiveStorage::Blob.service.path_for(@project.file.key)
+  def download_and_extract(folder_map)
+    # Download blob to a temp file, then extract
+    @project.file.open do |tempfile|
+      Zip::File.open(tempfile.path) do |zip|
+        zip.each do |entry|
+          # Skip the root folder that macOS creates when zipping
+          next if entry.name.end_with?('/')
+
+          process_entry(entry, folder_map, zip)
+        end
+      end
+    end
   end
 
   def process_entry(entry, folder_map, zip)
