@@ -41,13 +41,26 @@
               <p><%= project.title %></p>
             <% end %>
           <% elsif project.file.attached? %>
-            <%# Single file (wav, mp3, etc) - not clickable, nothing to browse %>
-            <div class="project-card">
-              <div class="project-icon">
-                <%= image_tag project_icon_for(project), class: "icon-image" %>
+            <% ext = File.extname(project.file.filename.to_s).downcase.delete(".") %>
+            <% if %w[wav mp3 aif aiff flac].include?(ext) %>
+              <%# Audio file - clickable to play %>
+              <div class="project-card"
+                   data-audio-url="<%= url_for(project.file) %>"
+                   data-audio-title="<%= project.title %>">
+                <div class="project-icon">
+                  <%= image_tag project_icon_for(project), class: "icon-image" %>
+                </div>
+                <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
               </div>
-              <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
-            </div>
+            <% else %>
+              <%# Other single file - not clickable %>
+              <div class="project-card">
+                <div class="project-icon">
+                  <%= image_tag project_icon_for(project), class: "icon-image" %>
+                </div>
+                <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
+              </div>
+            <% end %>
           <% else %>
             <%# No file attached - just display %>
             <div class="project-card">

@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import WaveSurfer from "wavesurfer.js"
 
 export default class extends Controller {
-  static targets = ["waveform", "title", "currentTime", "duration", "playBtn", "volume", "player"]
+  static targets = ["waveform", "title", "currentTime", "duration", "playBtn", "volume", "volumePopup", "volumeBtn"]
 
   connect() {
     // Don't reinitialize if wavesurfer already exists (Turbo navigation)
@@ -56,7 +56,10 @@ export default class extends Controller {
     })
 
     // Listen for audio file clicks anywhere on the page
-    document.addEventListener("click", this.handleAudioClick.bind(this))
+    this.boundHandleAudioClick = this.handleAudioClick.bind(this)
+    this.boundHandleOutsideClick = this.handleOutsideClick.bind(this)
+    document.addEventListener("click", this.boundHandleAudioClick)
+    document.addEventListener("click", this.boundHandleOutsideClick)
 
     // Preserve state during Turbo navigation
     document.addEventListener("turbo:before-cache", () => {
@@ -66,8 +69,18 @@ export default class extends Controller {
 
   disconnect() {
     // Don't destroy on disconnect - we want persistence
-    // Only clean up event listener
-    document.removeEventListener("click", this.handleAudioClick.bind(this))
+    // Only clean up event listeners
+    document.removeEventListener("click", this.boundHandleAudioClick)
+    document.removeEventListener("click", this.boundHandleOutsideClick)
+  }
+
+  handleOutsideClick(event) {
+    // Close volume popup if clicking outside of it
+    if (this.hasVolumePopupTarget &&
+        this.volumePopupTarget.classList.contains("visible") &&
+        !event.target.closest(".audio-player-volume-wrapper")) {
+      this.volumePopupTarget.classList.remove("visible")
+    }
   }
 
   handleAudioClick(event) {
@@ -87,8 +100,21 @@ export default class extends Controller {
     // Show the player
     this.element.classList.add("visible")
 
-    // Update title
+    // Update title and reset scroll animation
+    this.titleTarget.classList.remove("scrolling")
     this.titleTarget.textContent = title
+
+    // Clear any existing scroll timeout
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout)
+    }
+
+    // Start scrolling after 2 seconds if title is longer than container
+    this.scrollTimeout = setTimeout(() => {
+      if (this.titleTarget.scrollWidth > this.titleTarget.parentElement.clientWidth) {
+        this.titleTarget.classList.add("scrolling")
+      }
+    }, 2000)
 
     // If same track, just toggle play/pause
     if (this.currentUrl === url) {
@@ -118,7 +144,21 @@ export default class extends Controller {
     this.wavesurfer.setVolume(volume)
   }
 
+  toggleVolume(event) {
+    event.stopPropagation()
+    this.volumePopupTarget.classList.toggle("visible")
+  }
+
   close() {
+    // Hide volume popup if open
+    this.volumePopupTarget.classList.remove("visible")
+
+    // Clear scroll timeout
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout)
+    }
+    this.titleTarget.classList.remove("scrolling")
+
     // Stop playback
     if (this.wavesurfer) {
       this.wavesurfer.stop()

@@ -9,3 +9,6 @@ application.register("hello", HelloController)
 
 import DropdownController from "./dropdown_controller"
 application.register("dropdown", DropdownController)
+
+import AudioPlayerController from "./audio_player_controller"
+application.register("audio-player", AudioPlayerController)
