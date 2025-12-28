@@ -1,13 +1,13 @@
 <%# app/views/projects/show.html.erb %>
 <%# Displays the contents of a project (extracted files from ZIP) %>
 <%# Uses the same grid layout as library for consistent UX %>
-<% content_for :page_title, "LIBRARY" %>
+<% content_for :page_title, @project.title.upcase %>
 
 <%# Breadcrumb navigation - file path style %>
 <%= render "projects/breadcrumbs" %>
 
 <%# File grid - same styling as library %>
-<div class="drop-zone">
+<div class="drop-zone" id="drop-zone">
   <% if @files.any? %>
     <div class="projects-grid">
       <% @files.each do |file| %>
@@ -55,6 +55,35 @@
       <% end %>
     </div>
   <% else %>
-    <p class="empty-state">No files found in this project</p>
+    <p class="empty-state">This folder is empty. Right-click to create a new folder.</p>
   <% end %>
+</div>
+
+<!-- Right-click Context Menu -->
+<div id="context-menu" class="context-menu">
+  <button class="context-menu-item" id="context-new-folder">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+      <line x1="12" y1="11" x2="12" y2="17"></line>
+      <line x1="9" y1="14" x2="15" y2="14"></line>
+    </svg>
+    New Folder
+  </button>
+</div>
+
+<!-- New Folder Modal -->
+<div id="folder-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3>Create New Folder</h3>
+    <%= form_with url: create_subfolder_project_path(@project), method: :post, class: "folder-form" do %>
+      <% if @current_folder %>
+        <input type="hidden" name="parent_id" value="<%= @current_folder.id %>">
+      <% end %>
+      <input type="text" name="folder_name" placeholder="Folder name" class="folder-name-input" id="folder-name-input" required>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" id="cancel-folder">Cancel</button>
+        <button type="submit" class="save-btn">Create</button>
+      </div>
+    <% end %>
+  </div>
 </div>

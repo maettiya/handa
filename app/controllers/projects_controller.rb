@@ -164,7 +164,43 @@ class ProjectsController < ApplicationController
     end
   end
 
+  # Creates a folder inside a project (as a ProjectFile)
+  def create_subfolder
+    @project = current_user.projects.find(params[:id])
+
+    # Determine parent folder (nil = root level of project)
+    parent_id = params[:parent_id].presence
+
+    @folder = @project.project_files.build(
+      original_filename: params[:folder_name],
+      is_directory: true,
+      parent_id: parent_id,
+      path: build_folder_path(parent_id, params[:folder_name])
+    )
+
+    if @folder.save
+      # Redirect back to where they were
+      if parent_id
+        redirect_to project_path(@project, folder_id: parent_id)
+      else
+        redirect_to project_path(@project)
+      end
+    else
+      redirect_back fallback_location: project_path(@project), alert: "Could not create folder"
+    end
+  end
+
   private
+
+  # Builds the full path for a new folder
+  def build_folder_path(parent_id, folder_name)
+    if parent_id.present?
+      parent = @project.project_files.find(parent_id)
+      "#{parent.path}/#{folder_name}"
+    else
+      folder_name
+    end
+  end
 
   # Strong parameters - only allow these fields from the form
   def project_params

@@ -25,6 +25,8 @@ Rails.application.routes.draw do
       post :duplicate
       # Rename a project
       patch :rename
+      # Create a folder inside a project
+      post :create_subfolder
     end
   end
 
