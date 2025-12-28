@@ -24,6 +24,8 @@ Rails.application.routes.draw do
   get 'library/index'
   root "library#index"
 
+  # Profile - user profile dashboard
+  get 'profile', to: 'profile#show'
   # Health Status
   get "up" => "rails/health#show", as: :rails_health_check
 

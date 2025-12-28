@@ -13,9 +13,9 @@
 - **Database**: PostgreSQL
 - **Authentication**: Devise
 - **Frontend**: Hotwire (Turbo + Stimulus), Tailwind CSS v4
-- **File Storage**: Active Storage (local, production should use S3/GCP)
+- **File Storage**: Active Storage (local dev, Cloudflare R2 in production)
 - **JavaScript Bundler**: esbuild
-- **Key Gems**: `devise`, `rubyzip`, `pg`, `turbo-rails`, `stimulus-rails`
+- **Key Gems**: `devise`, `rubyzip`, `aws-sdk-s3`, `pg`, `turbo-rails`, `stimulus-rails`
 
 ## Project Structure
 
@@ -24,9 +24,11 @@ app/
 ├── controllers/
 │   ├── application_controller.rb    # Devise auth, requires login for all pages
 │   ├── library_controller.rb        # index - main dashboard
-│   └── projects_controller.rb       # create, show, download
+│   └── projects_controller.rb       # create, show, download, destroy, download_file, download_folder, destroy_file
 ├── helpers/
 │   └── file_icon_helper.rb          # Icon selection for projects and files
+├── jobs/
+│   └── project_extraction_job.rb    # Background ZIP extraction
 ├── models/
 │   ├── user.rb                      # Devise user, has_many :projects
 │   ├── project.rb                   # Uploaded music project (ZIP/file)
@@ -37,10 +39,15 @@ app/
 ├── views/
 │   ├── layouts/application.html.erb   # Dark theme layout with header
 │   ├── library/index.html.erb         # Main library grid view
-│   ├── projects/show.html.erb         # Project file browser view
+│   ├── projects/
+│   │   ├── show.html.erb              # Project file browser view
+│   │   └── _breadcrumbs.html.erb      # File path navigation partial
 │   └── devise/                         # Auth forms
 └── javascript/
-    └── upload.js                       # Drag-drop, file picker logic
+    ├── application.js                  # Entry point
+    ├── upload.js                       # Drag-drop, file picker, progress bar
+    └── controllers/
+        └── dropdown_controller.js      # Three-dot menu toggle
 ```
 
 ## Key Models & Relationships
@@ -78,7 +85,10 @@ devise_for :users                       # Auth routes
 
 resources :projects, only: [:create, :show, :destroy] do
   member do
-    get :download
+    get :download                                      # Download original file
+    get 'download_file/:file_id', to: :download_file   # Download single file
+    get 'download_folder/:folder_id', to: :download_folder  # Download folder as ZIP
+    delete 'delete_file/:file_id', to: :destroy_file   # Delete file or folder
   end
 end
 
@@ -111,13 +121,17 @@ yarn build:css             # Build Tailwind CSS
 | Purpose | File |
 |---------|------|
 | ZIP extraction logic | `app/services/project_extraction_service.rb` |
+| Background extraction | `app/jobs/project_extraction_job.rb` |
 | File hiding rules | `app/models/project_file.rb` (HIDDEN_EXTENSIONS, HIDDEN_FOLDERS) |
 | File icon selection | `app/helpers/file_icon_helper.rb` |
-| Upload UI/UX | `app/javascript/upload.js` |
+| Upload UI/UX + progress | `app/javascript/upload.js` |
+| Dropdown menus | `app/javascript/controllers/dropdown_controller.js` |
 | Library view | `app/views/library/index.html.erb` |
 | Project browser | `app/views/projects/show.html.erb` |
+| Breadcrumb navigation | `app/views/projects/_breadcrumbs.html.erb` |
 | Styling | `app/assets/stylesheets/application.tailwind.css` |
 | Routes | `config/routes.rb` |
+| Storage config | `config/storage.yml` |
 | Database schema | `db/schema.rb` |
 
 ## ProjectFile Hidden File Logic
@@ -146,45 +160,77 @@ Supported file types:
 
 - User authentication (sign up, login, logout, password reset)
 - Project upload with drag-drop and file picker
+- Upload progress bar with percentage display
 - ZIP file extraction with tree structure preservation
+- Background job extraction (avoids Heroku 30s timeout)
 - Project type auto-detection (Ableton/Logic/Folder)
-- Project download (original ZIP)
-- Library grid view
-- **Project file browser** - View extracted files and navigate subfolders
+- Original project download
+- Individual file download
+- Folder download as ZIP (in-memory ZIP creation)
+- Project deletion
+- Individual file/folder deletion (with cascade for folders)
+- Library grid view with three-dot menus
+- Project file browser with subfolder navigation
+- Breadcrumb navigation in project browser
 - File type icons throughout UI
 - Dark theme UI
+- Cloud storage (Cloudflare R2 in production)
 
 ## What's NOT Implemented Yet
 
 - **ShareLink functionality** (model exists, no controller/UI)
-- **Individual file downloads** (can only download original ZIP)
 - **Search** (icon in UI, no logic)
 - **Notifications** (icon with hardcoded badge, no backend)
-- **Project deletion** (route exists, no controller action)
-- **Background job extraction** (currently synchronous)
 - **Audio previews/waveforms**
 - **Collaboration features**
 - **Payment integration**
-- **Cloud storage** (using local Active Storage)
 
 ## Architecture Notes
 
 1. **Active Storage**: Used for both original project files AND individual extracted files
 2. **Service Objects**: Business logic in `app/services/` (e.g., ProjectExtractionService)
-3. **Self-referential association**: ProjectFile uses `parent_id` for folder tree structure
-4. **Synchronous extraction**: ZIP extraction happens in controller - should move to background job for large files
+3. **Background Jobs**: ProjectExtractionJob handles ZIP extraction asynchronously
+4. **Self-referential association**: ProjectFile uses `parent_id` for folder tree structure
 5. **Helper modules**: FileIconHelper for icon selection logic, included in views
+6. **Stimulus Controllers**: DropdownController for three-dot menu interactions
+7. **Cloud Storage**: Cloudflare R2 (S3-compatible) configured with special checksum settings
 
 ## Controller Actions
 
 ### ProjectsController
 - `show` - View project contents, supports subfolder navigation via `folder_id` param
-- `create` - Upload new project, triggers ZIP extraction
+- `create` - Upload new project, triggers background extraction job
 - `download` - Download original uploaded file
-- `destroy` - Route exists but **not implemented**
+- `download_file` - Download individual extracted file with original filename
+- `download_folder` - Download folder as in-memory ZIP file
+- `destroy` - Delete entire project and all extracted files
+- `destroy_file` - Delete individual file or folder (cascades to children)
 
 ### LibraryController
 - `index` - Main dashboard (empty action, view renders user's projects)
+
+## Storage Configuration
+
+```yaml
+# config/storage.yml
+local:
+  service: Disk
+  root: storage/
+
+cloudflare:
+  service: S3
+  endpoint: https://<account>.r2.cloudflarestorage.com
+  access_key_id: <%= ENV['CLOUDFLARE_ACCESS_KEY_ID'] %>
+  secret_access_key: <%= ENV['CLOUDFLARE_SECRET_ACCESS_KEY'] %>
+  bucket: <%= ENV['CLOUDFLARE_BUCKET'] %>
+  region: auto
+  force_path_style: true
+  request_checksum_calculation: when_required
+  response_checksum_validation: when_required
+```
+
+- **Development**: Uses local disk storage
+- **Production**: Uses Cloudflare R2 (S3-compatible)
 
 ## Testing
 
@@ -192,11 +238,8 @@ Test framework is Minitest but **no tests have been written yet**. Test files ex
 
 ## Known Issues / Technical Debt
 
-1. Large ZIP files block request (need background job)
-2. No error handling in extraction service
-3. Hardcoded "3" notification badge
-4. ShareLink model unused
-5. Project destroy action not implemented
-6. Individual file download not available
-7. Devise mailer not configured for password resets
-8. Zero test coverage
+1. Hardcoded "3" notification badge
+2. ShareLink model unused
+3. Devise mailer not configured for password resets
+4. Zero test coverage
+5. No error handling UI for failed extractions
