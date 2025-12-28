@@ -33,7 +33,7 @@
               <div class="project-icon">
                 <%= image_tag project_icon_for(project), class: "icon-image" %>
               </div>
-              <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
+              <p><%= project.title %></p>
             <% end %>
           <% elsif project.file.attached? %>
             <%# Single file (wav, mp3, etc) - not clickable, nothing to browse %>

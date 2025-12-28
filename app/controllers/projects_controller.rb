@@ -9,6 +9,19 @@ class ProjectsController < ApplicationController
     # (users can only view their own projects)
     @project = current_user.projects.find(params[:id])
 
+    # Check if we should auto-skip a single root folder
+    # (e.g., "SERENADE Project.zip" containing only "SERENADE Project/" folder)
+    root_files = @project.project_files
+                          .where(parent_id: nil)
+                          .visible
+                          .order(:original_filename)
+
+    if root_files.count == 1 && root_files.first.is_directory?
+      @skipped_root_folder = root_files.first
+    else
+      @skipped_root_folder = nil
+    end
+
     if params[:folder_id].present?
       # Browsing inside a subfolder
       # Find the folder and get its children
@@ -19,11 +32,17 @@ class ProjectsController < ApplicationController
                         .order(:original_filename)
     else
       # Root level - show top-level files (no parent)
-      @current_folder = nil
-      @files = @project.project_files
-                        .where(parent_id: nil)
-                        .visible
-                        .order(:original_filename)
+      if @skipped_root_folder
+        # Skip into the single root folder automatically
+        @current_folder = nil
+        @files = @project.project_files
+                          .where(parent_id: @skipped_root_folder.id)
+                          .visible
+                          .order(:original_filename)
+      else
+        @current_folder = nil
+        @files = root_files
+      end
     end
   end
 
@@ -168,8 +187,14 @@ class ProjectsController < ApplicationController
   def create_subfolder
     @project = current_user.projects.find(params[:id])
 
-    # Determine parent folder (nil = root level of project)
+    # Determine parent folder
+    # If no parent_id provided but project has a skipped root folder,
+    # use the skipped folder as parent
     parent_id = params[:parent_id].presence
+    if parent_id.nil?
+      skipped = detect_skipped_root_folder
+      parent_id = skipped&.id
+    end
 
     @folder = @project.project_files.build(
       original_filename: params[:folder_name],
@@ -180,8 +205,8 @@ class ProjectsController < ApplicationController
 
     if @folder.save
       # Redirect back to where they were
-      if parent_id
-        redirect_to project_path(@project, folder_id: parent_id)
+      if params[:parent_id].present?
+        redirect_to project_path(@project, folder_id: params[:parent_id])
       else
         redirect_to project_path(@project)
       end
@@ -191,6 +216,20 @@ class ProjectsController < ApplicationController
   end
 
   private
+
+  # Detects if project has a single root folder that should be auto-skipped
+  def detect_skipped_root_folder
+    root_files = @project.project_files
+                          .where(parent_id: nil)
+                          .visible
+                          .order(:original_filename)
+
+    if root_files.count == 1 && root_files.first.is_directory?
+      root_files.first
+    else
+      nil
+    end
+  end
 
   # Builds the full path for a new folder
   def build_folder_path(parent_id, folder_name)

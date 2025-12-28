@@ -17,7 +17,10 @@
       ancestors = []
       folder = @current_folder
       while folder
-        ancestors.unshift(folder)
+        # Skip the auto-skipped root folder from breadcrumbs
+        unless @skipped_root_folder && folder.id == @skipped_root_folder.id
+          ancestors.unshift(folder)
+        end
         folder = folder.parent
       end
 
