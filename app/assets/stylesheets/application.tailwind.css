@@ -91,6 +91,26 @@ body {
   color: #ffffff;
 }
 
+/* =============================================
+   PROFILE ICON
+   ============================================= */
+
+.profile-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #9ca3af;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.profile-icon:hover {
+  color: #ffffff;
+}
+
+
 /* ===================
    BUTTONS
    =================== */
