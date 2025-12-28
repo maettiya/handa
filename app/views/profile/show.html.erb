@@ -56,11 +56,22 @@
 
   <!-- Profile Fields -->
   <div class="profile-fields">
+
     <!-- Username -->
     <div class="profile-field">
       <label>Username</label>
       <div class="field-value"><%= @user.username %></div>
       <%= link_to "Edit", edit_profile_path(field: :username), class: "field-action" %>
+    </div>
+
+    <!-- Membership -->
+    <div class="profile-field">
+      <label>Membership</label>
+      <div class="field-value">
+        <span class="membership-badge free">Free</span>
+        <span class="membership-storage">10 GB</span>
+      </div>
+      <%= link_to "Upgrade", "#", class: "field-action" %>
     </div>
 
     <!-- Email -->
