@@ -18,6 +18,42 @@
     <% end %>
   </div>
 
+  <!-- Stats Row -->
+  <div class="profile-stats">
+    <div class="stat-item">
+      <div class="stat-value"><%= @user.projects.count %></div>
+      <div class="stat-label">Projects</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Collaborators</div>
+    </div>
+  </div>
+
+  <!-- File Types Breakdown -->
+  <div class="profile-breakdown">
+    <div class="breakdown-bar">
+      <div class="breakdown-segment ableton" style="width: 64%"></div>
+      <div class="breakdown-segment wav" style="width: 23%"></div>
+      <div class="breakdown-segment mp3" style="width: 13%"></div>
+    </div>
+    <div class="breakdown-legend">
+      <div class="legend-item">
+        <span class="legend-dot ableton"></span>
+        <span>Ableton</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot wav"></span>
+        <span>WAV</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot mp3"></span>
+        <span>MP3</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Profile Fields -->
   <div class="profile-fields">
     <!-- Username -->

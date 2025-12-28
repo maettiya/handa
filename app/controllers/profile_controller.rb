@@ -13,9 +13,9 @@ class ProfileController < ApplicationController
 
     if avatar_update?
       @user.avatar.attach(params[:user][:avatar])
-      redirect_to profile_path, notice: "Photo updated"
+      redirect_to profile_path
     elsif @user.update(profile_params)
-      redirect_to profile_path, notice: "Profile updated"
+      redirect_to profile_path
     else
       @field = params[:user].keys.first&.to_sym
       render :edit, status: :unprocessable_entity
