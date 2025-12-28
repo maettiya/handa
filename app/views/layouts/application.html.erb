@@ -35,7 +35,11 @@
             </svg>
           </button>
 
-          <%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "sign-out-btn" %>
+          <%= link_to profile_path, class: "profile-icon" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          <% end %>
         <% end %>
       </div>
     </header>
