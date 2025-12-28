@@ -26,6 +26,10 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
+  position: sticky;
+  top: 0;
+  background-color: #3a3a3a;
+  z-index: 100;
 }
 
 .logo {
