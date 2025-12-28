@@ -1,5 +1,6 @@
+<% content_for :page_title, "PROFILE" %>
+
 <div class="profile-container">
-  <h1 class="page-title">EDIT PROFILE</h1>
 
   <%= form_with model: @user, url: profile_path, method: :patch, class: "profile-edit-form" do |f| %>
     <% case @field %>

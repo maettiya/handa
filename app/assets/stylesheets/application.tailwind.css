@@ -32,6 +32,20 @@ body {
   z-index: 100;
 }
 
+.nav-title {
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-decoration: underline;
+  text-underline-offset: 8px;
+}
+
 .logo {
   height: 30px;
   width: auto;
@@ -156,19 +170,6 @@ body {
 
 .main-content {
   padding: 0 40px 40px 40px;
-}
-
-/* ===================
-   PAGE TITLES
-   =================== */
-
-.page-title {
-  text-align: center;
-  font-weight: 400;
-  font-size: 16px;
-  letter-spacing: 1px;
-  text-decoration: underline;
-  text-underline-offset: 8px;
 }
 
 /* ===================

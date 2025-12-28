@@ -18,6 +18,10 @@
         <%= image_tag "handa-logo.png", class: "logo", alt: "handa" %>
       <% end %>
 
+      <% if user_signed_in? %>
+        <h1 class="nav-title"><%= yield :page_title %></h1>
+      <% end %>
+
       <div class="user-actions">
         <% if user_signed_in? %>
           <!-- Notification Bell -->
@@ -43,6 +47,7 @@
         <% end %>
       </div>
     </header>
+
 
     <main class="main-content">
       <%= yield %>
