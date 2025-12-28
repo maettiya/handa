@@ -27,7 +27,4 @@ Rails.application.routes.draw do
   # Profile - user profile dashboard
   resource :profile, only: [:show, :edit, :update], controller:
 
-  # Health Status
-  get "up" => "rails/health#show", as: :rails_health_check
-
 end
