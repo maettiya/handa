@@ -1,4 +1,49 @@
 <div class="profile-container">
-  <h1>Profile</h1>
-  <p>Welcome, <%= @user.username %></p>
+  <h1 class="page-title">PROFILE</h1>
+
+  <!-- Profile Photo -->
+  <div class="profile-photo-section">
+    <div class="profile-photo">
+      <% if @user.avatar.attached? %>
+        <%= image_tag @user.avatar, class: "avatar-image" %>
+      <% else %>
+        <div class="avatar-placeholder">
+          <%= @user.username.first.upcase %>
+        </div>
+      <% end %>
+    </div>
+    <%= form_with model: @user, url: profile_path, method: :patch, class: "avatar-form" do |f| %>
+      <%= f.file_field :avatar, class: "file-input", id: "avatar-input", accept: "image/*" %>
+      <label for="avatar-input" class="change-photo-btn">Change photo</label>
+    <% end %>
+  </div>
+
+  <!-- Profile Fields -->
+  <div class="profile-fields">
+    <!-- Username -->
+    <div class="profile-field">
+      <label>Username</label>
+      <div class="field-value"><%= @user.username %></div>
+      <%= link_to "Edit", edit_profile_path(field: :username), class: "field-action" %>
+    </div>
+
+    <!-- Email -->
+    <div class="profile-field">
+      <label>Email</label>
+      <div class="field-value"><%= @user.email %></div>
+      <%= link_to "Edit", edit_profile_path(field: :email), class: "field-action" %>
+    </div>
+
+    <!-- Password -->
+    <div class="profile-field">
+      <label>Password</label>
+      <div class="field-value">••••••••</div>
+      <%= link_to "Change", edit_profile_path(field: :password), class: "field-action" %>
+    </div>
+  </div>
+
+  <!-- Sign Out -->
+  <div class="profile-sign-out">
+    <%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "sign-out-link" %>
+  </div>
 </div>
