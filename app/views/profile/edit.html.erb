@@ -1,0 +1,34 @@
+<div class="profile-container">
+  <h1 class="page-title">EDIT PROFILE</h1>
+
+  <%= form_with model: @user, url: profile_path, method: :patch, class: "profile-edit-form" do |f| %>
+    <% case @field %>
+    <% when :username %>
+      <div class="field">
+        <%= f.label :username %>
+        <%= f.text_field :username, autofocus: true %>
+      </div>
+
+    <% when :email %>
+      <div class="field">
+        <%= f.label :email %>
+        <%= f.email_field :email, autofocus: true %>
+      </div>
+
+    <% when :password %>
+      <div class="field">
+        <%= f.label :password, "New password" %>
+        <%= f.password_field :password, autofocus: true %>
+      </div>
+      <div class="field">
+        <%= f.label :password_confirmation, "Confirm password" %>
+        <%= f.password_field :password_confirmation %>
+      </div>
+    <% end %>
+
+    <div class="profile-edit-actions">
+      <%= f.submit "Save", class: "save-btn" %>
+      <%= link_to "Cancel", profile_path, class: "cancel-btn" %>
+    </div>
+  <% end %>
+</div>
