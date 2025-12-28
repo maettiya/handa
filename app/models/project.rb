@@ -4,5 +4,9 @@ class Project < ApplicationRecord
   has_one_attached :file
 
   validates :title, presence: true
-  validates :file, presence: true
+  validates :file, presence: true, unless: :folder?
+
+  def folder?
+    project_type == "folder"
+  end
 end

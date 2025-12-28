@@ -19,7 +19,15 @@
     <div class="projects-grid">
       <% current_user.projects.each do |project| %>
         <div class="project-card-wrapper">
-          <% if project.file.attached? && project.project_files.any? %>
+          <% if project.folder? %>
+            <%# Empty folder - clickable to browse inside %>
+            <%= link_to project_path(project), class: "project-card" do %>
+              <div class="project-icon">
+                <%= image_tag "icons/folder.svg", class: "icon-image" %>
+              </div>
+              <p><%= project.title %></p>
+            <% end %>
+          <% elsif project.file.attached? && project.project_files.any? %>
             <%# Project has extracted contents - clickable to browse inside %>
             <%= link_to project_path(project), class: "project-card" do %>
               <div class="project-icon">
@@ -45,29 +53,55 @@
             </div>
           <% end %>
 
-          <%# Three-dot menu for actions %>
-          <% if project.file.attached? %>
-            <div class="card-menu" data-controller="dropdown">
-              <button class="menu-trigger" data-action="click->dropdown#toggle">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                  <circle cx="3" cy="8" r="1.5"/>
-                  <circle cx="8" cy="8" r="1.5"/>
-                  <circle cx="13" cy="8" r="1.5"/>
-                </svg>
-              </button>
-              <div class="menu-dropdown" data-dropdown-target="menu">
+          <%# Three-dot menu for actions - now on ALL items %>
+          <div class="card-menu" data-controller="dropdown">
+            <button class="menu-trigger" data-action="click->dropdown#toggle">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <circle cx="3" cy="8" r="1.5"/>
+                <circle cx="8" cy="8" r="1.5"/>
+                <circle cx="13" cy="8" r="1.5"/>
+              </svg>
+            </button>
+            <div class="menu-dropdown" data-dropdown-target="menu">
+              <% if project.file.attached? %>
                 <%= link_to "Download", download_project_path(project), class: "menu-item" %>
                 <div class="menu-divider"></div>
-                <%= link_to "Delete", project_path(project),
-                    data: { turbo_method: :delete, turbo_confirm: "Delete '#{project.title}'? This cannot be undone." },
-                    class: "menu-item menu-item-danger" %>
-              </div>
+              <% end %>
+              <%= link_to "Delete", project_path(project),
+                  data: { turbo_method: :delete, turbo_confirm: "Delete '#{project.title}'? This cannot be undone." },
+                  class: "menu-item menu-item-danger" %>
             </div>
-          <% end %>
+          </div>
         </div>
       <% end %>
     </div>
   <% else %>
     <p class="empty-state">Drag & drop files here or use the button above</p>
   <% end %>
+</div>
+
+<!-- Right-click Context Menu -->
+<div id="context-menu" class="context-menu">
+  <button class="context-menu-item" id="context-new-folder">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+      <line x1="12" y1="11" x2="12" y2="17"></line>
+      <line x1="9" y1="14" x2="15" y2="14"></line>
+    </svg>
+    New Folder
+  </button>
+</div>
+
+<!-- New Folder Modal -->
+<div id="folder-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3>Create New Folder</h3>
+    <%= form_with url: create_folder_projects_path, method: :post, class: "folder-form" do %>
+      <input type="text" name="folder_name" placeholder="Folder name" class="folder-name-input" id="folder-name-input" required>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" id="cancel-folder">Cancel</button>
+        <button type="submit" class="save-btn">Create</button>
+      </div>
+    <% end %>
+  </div>
 </div>

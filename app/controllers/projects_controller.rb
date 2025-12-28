@@ -110,6 +110,20 @@ class ProjectsController < ApplicationController
       filename: "#{@folder.original_filename}.zip"
   end
 
+  def create_folder
+  @project = current_user.projects.build(
+    title: params[:folder_name],
+    project_type: "folder"
+  )
+
+    if @project.save
+      redirect_to root_path
+    else
+      redirect_to root_path, alert: "Could not create folder"
+    end
+  end
+
+
   private
 
   # Strong parameters - only allow these fields from the form

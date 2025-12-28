@@ -276,21 +276,26 @@ body {
    =================== */
 
 .add-project-btn {
-  background: #4a4a4a;
-  border: none;
-  border-radius: 25px;
-  color: white;
-  padding: 16px 40px;
+  background: transparent;
+  border: 1px dashed #666;
+  border-radius: 8px;
+  color: #888;
+  padding: 10px 20px;
   cursor: pointer;
-  margin: 30px auto;
+  margin: 20px auto;
   display: block;
+  width: fit-content;
   text-align: center;
-  max-width: 400px;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
+
 .add-project-btn:hover {
-  background: #5a5a5a;
+  border-color: #999;
+  color: white;
 }
+
 
 .file-input {
   display: none;
@@ -828,4 +833,112 @@ body {
 
 .legend-dot.mp3 {
   background: #f59e0b;
+}
+
+/* ===================
+   CONTEXT MENU
+   =================== */
+
+.context-menu {
+  position: absolute;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 4px;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: none;
+}
+
+.context-menu.visible {
+  display: block;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.context-menu-item:hover {
+  background: #3a3a3a;
+  color: white;
+}
+
+.context-menu-item svg {
+  flex-shrink: 0;
+}
+
+/* ===================
+   MODAL
+   =================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-overlay.visible {
+  display: flex;
+}
+
+.modal-content {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.modal-content h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.folder-name-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid #666;
+  border-radius: 4px;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.folder-name-input:focus {
+  outline: none;
+  border-color: white;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-actions .cancel-btn,
+.modal-actions .save-btn {
+  flex: 1;
 }
