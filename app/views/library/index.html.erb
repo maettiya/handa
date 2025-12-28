@@ -63,10 +63,37 @@
               </svg>
             </button>
             <div class="menu-dropdown" data-dropdown-target="menu">
+              <!-- Share with submenu -->
+              <div class="menu-item-with-submenu">
+                <button class="menu-item menu-item-parent">
+                  <span>Share</span>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                  </svg>
+                </button>
+                <div class="submenu">
+                  <button class="menu-item" data-action="click->share#createLink" data-project-id="<%= project.id %>">
+                    Create a link
+                  </button>
+                </div>
+              </div>
+
               <% if project.file.attached? %>
                 <%= link_to "Download", download_project_path(project), class: "menu-item" %>
-                <div class="menu-divider"></div>
               <% end %>
+
+              <%= button_to "Duplicate", duplicate_project_path(project), method: :post, class: "menu-item", form: { data: { turbo: false } } %>
+
+              <button class="menu-item" data-action="click->rename#open" data-project-id="<%= project.id %>" data-project-title="<%= project.title %>">
+                Rename
+              </button>
+
+              <button class="menu-item" data-action="click->access#open" data-project-id="<%= project.id %>">
+                Who has access
+              </button>
+
+              <div class="menu-divider"></div>
+
               <%= link_to "Delete", project_path(project),
                   data: { turbo_method: :delete, turbo_confirm: "Delete '#{project.title}'? This cannot be undone." },
                   class: "menu-item menu-item-danger" %>
@@ -103,5 +130,42 @@
         <button type="submit" class="save-btn">Create</button>
       </div>
     <% end %>
+  </div>
+</div>
+
+<!-- Rename Modal -->
+<div id="rename-modal" class="modal-overlay" data-controller="rename">
+  <div class="modal-content">
+    <h3>Rename</h3>
+    <form id="rename-form" data-action="submit->rename#submit">
+      <input type="hidden" id="rename-project-id" data-rename-target="projectId">
+      <input type="text" name="title" placeholder="New name" class="folder-name-input" id="rename-input" data-rename-target="input" required>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" data-action="click->rename#close">Cancel</button>
+        <button type="submit" class="save-btn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Who Has Access Modal -->
+<div id="access-modal" class="modal-overlay" data-controller="access">
+  <div class="modal-content">
+    <h3>Who has access</h3>
+    <div class="access-list" data-access-target="list">
+      <div class="access-item">
+        <div class="access-avatar">
+          <span><%= current_user.username.first.upcase %></span>
+        </div>
+        <div class="access-info">
+          <span class="access-name"><%= current_user.username %> (you)</span>
+          <span class="access-role">Owner</span>
+        </div>
+      </div>
+      <p class="access-empty">Only you have access to this file.</p>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="cancel-btn" data-action="click->access#close" style="flex: none; width: 100%;">Done</button>
+    </div>
   </div>
 </div>

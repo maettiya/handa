@@ -111,10 +111,10 @@ class ProjectsController < ApplicationController
   end
 
   def create_folder
-  @project = current_user.projects.build(
-    title: params[:folder_name],
-    project_type: "folder"
-  )
+    @project = current_user.projects.build(
+      title: params[:folder_name],
+      project_type: "folder"
+    )
 
     if @project.save
       redirect_to root_path
@@ -123,6 +123,46 @@ class ProjectsController < ApplicationController
     end
   end
 
+  # Duplicates a project (creates a copy with " (copy)" suffix)
+  def duplicate
+    @project = current_user.projects.find(params[:id])
+
+    # Create new project with copied attributes
+    new_project = current_user.projects.build(
+      title: "#{@project.title} (copy)",
+      project_type: @project.project_type
+    )
+
+    # Copy the attached file if present
+    if @project.file.attached?
+      new_project.file.attach(
+        io: StringIO.new(@project.file.download),
+        filename: @project.file.filename.to_s,
+        content_type: @project.file.content_type
+      )
+    end
+
+    if new_project.save
+      # If original had extracted files, trigger extraction for the copy too
+      if @project.project_files.any?
+        ProjectExtractionJob.perform_later(new_project.id)
+      end
+      redirect_to root_path
+    else
+      redirect_to root_path, alert: "Could not duplicate project"
+    end
+  end
+
+  # Renames a project
+  def rename
+    @project = current_user.projects.find(params[:id])
+
+    if @project.update(title: params[:title])
+      redirect_to root_path
+    else
+      redirect_to root_path, alert: "Could not rename project"
+    end
+  end
 
   private
 

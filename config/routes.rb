@@ -21,6 +21,10 @@ Rails.application.routes.draw do
       get 'download_folder/:folder_id', to: 'projects#download_folder', as: :download_folder
       # Deletes an individual file or folder
       delete 'delete_file/:file_id', to: 'projects#destroy_file', as: :destroy_file
+      # Duplicate a project
+      post :duplicate
+      # Rename a project
+      patch :rename
     end
   end
 
