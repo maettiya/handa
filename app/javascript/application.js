@@ -24,8 +24,13 @@ document.addEventListener("turbo:load", () => {
 
   if (!dropZone || !contextMenu) return;
 
-  // Show context menu on right-click
+  // Show context menu on right-click (only on empty space, not on cards)
   dropZone.addEventListener("contextmenu", (e) => {
+    // Don't show context menu if right-clicking on a project card
+    if (e.target.closest(".project-card-wrapper")) {
+      return; // Let the default behavior happen (nothing)
+    }
+
     e.preventDefault();
     contextMenu.style.left = e.pageX + "px";
     contextMenu.style.top = e.pageY + "px";
@@ -41,6 +46,15 @@ document.addEventListener("turbo:load", () => {
   if (contextNewFolder) {
     contextNewFolder.addEventListener("click", () => {
       contextMenu.classList.remove("visible");
+      folderModal.classList.add("visible");
+      setTimeout(() => folderNameInput.focus(), 50);
+    });
+  }
+
+  // Open folder modal from "+ New folder" button
+  const addFolderBtn = document.getElementById("add-folder-btn");
+  if (addFolderBtn) {
+    addFolderBtn.addEventListener("click", () => {
       folderModal.classList.add("visible");
       setTimeout(() => folderNameInput.focus(), 50);
     });

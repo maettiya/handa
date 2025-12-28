@@ -1,7 +1,12 @@
 <% content_for :page_title, "LIBRARY" %>
 
-<div class="add-project-btn" id="add-project-btn">
-  + Add projects
+<div class="library-actions">
+  <div class="add-project-btn" id="add-project-btn">
+    + Add projects
+  </div>
+  <button class="add-folder-btn" id="add-folder-btn">
+    + New folder
+  </button>
 </div>
 
 <%= form_with model: Project.new, id: "upload-form" do |f| %>
@@ -15,9 +20,9 @@
 <% end %>
 
 <div class="drop-zone" id="drop-zone">
-  <% if current_user.projects.any? %>
+  <% if @projects.any? %>
     <div class="projects-grid">
-      <% current_user.projects.each do |project| %>
+      <% @projects.each do |project| %>
         <div class="project-card-wrapper">
           <% if project.folder? %>
             <%# Empty folder - clickable to browse inside %>

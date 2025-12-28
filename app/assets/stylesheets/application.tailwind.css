@@ -276,23 +276,28 @@ body {
    UPLOAD
    =================== */
 
-.add-project-btn {
+.library-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px auto;
+}
+
+.add-project-btn,
+.add-folder-btn {
   background: transparent;
   border: 1px dashed #666;
   border-radius: 8px;
   color: #888;
   padding: 10px 20px;
   cursor: pointer;
-  margin: 20px auto;
-  display: block;
-  width: fit-content;
   text-align: center;
   font-size: 14px;
   transition: all 0.2s ease;
 }
 
-
-.add-project-btn:hover {
+.add-project-btn:hover,
+.add-folder-btn:hover {
   border-color: #999;
   color: white;
 }
