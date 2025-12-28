@@ -1,7 +1,10 @@
 // Entry point for the build script in your package.json
 import "@hotwired/turbo-rails"
+import * as ActiveStorage from "@rails/activestorage"
 import "./controllers"
 import "./upload"
+
+ActiveStorage.start()
 
 // Auto-submit avatar form when file is selected
 document.addEventListener("turbo:load", () => {

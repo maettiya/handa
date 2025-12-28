@@ -10,7 +10,7 @@
 </div>
 
 <%= form_with model: Project.new, id: "upload-form" do |f| %>
-  <%= f.file_field :file, class: "file-input", id: "file-input", accept: ".als,.logicx,.wav,.mp3,.zip" %>
+  <%= f.file_field :file, class: "file-input", id: "file-input", accept: ".als,.logicx,.wav,.mp3,.zip", direct_upload: true %>
 
   <div id="file-details" style="display: none;">
     <p id="selected-file-title" style="text-align: center; margin-bottom: 10px;"></p>
