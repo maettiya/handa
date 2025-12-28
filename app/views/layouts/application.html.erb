@@ -53,17 +53,15 @@
       <%= yield %>
     </main>
 
-    <!-- Audio Player Bar (hidden by default) -->
-    <div id="audio-player" class="audio-player" data-controller="audio-player">
-      <div class="audio-player-info">
+    <!-- Audio Player Bar (hidden by default, persists across Turbo navigation) -->
+    <div id="audio-player" class="audio-player" data-controller="audio-player" data-turbo-permanent>
+      <div class="audio-player-title-row">
         <span class="audio-player-title" data-audio-player-target="title">Track Name</span>
       </div>
       <div class="audio-player-controls">
         <span class="audio-player-time" data-audio-player-target="currentTime">0:00</span>
         <div class="audio-player-waveform" data-audio-player-target="waveform"></div>
         <span class="audio-player-time" data-audio-player-target="duration">0:00</span>
-      </div>
-      <div class="audio-player-actions">
         <button class="audio-player-btn" data-action="click->audio-player#togglePlay" data-audio-player-target="playBtn">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
             <path d="M8 5v14l11-7z"/>
@@ -82,8 +80,8 @@
                    data-action="input->audio-player#setVolume" data-audio-player-target="volume">
           </div>
         </div>
+        <button class="audio-player-close" data-action="click->audio-player#close">&times;</button>
       </div>
-      <button class="audio-player-close" data-action="click->audio-player#close">&times;</button>
     </div>
 
     <!-- Upload Progress Indicator -->

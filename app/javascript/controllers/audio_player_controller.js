@@ -21,7 +21,7 @@ export default class extends Controller {
       barWidth: 2,
       barGap: 1,
       barRadius: 2,
-      height: 48,
+      height: 32,
       responsive: true,
       normalize: true
     })
@@ -111,7 +111,8 @@ export default class extends Controller {
 
     // Start scrolling after 2 seconds if title is longer than container
     this.scrollTimeout = setTimeout(() => {
-      if (this.titleTarget.scrollWidth > this.titleTarget.parentElement.clientWidth) {
+      const titleRow = this.titleTarget.parentElement
+      if (this.titleTarget.scrollWidth > titleRow.clientWidth) {
         this.titleTarget.classList.add("scrolling")
       }
     }, 2000)
