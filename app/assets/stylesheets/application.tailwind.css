@@ -886,16 +886,24 @@ body {
   height: 100%;
 }
 
-.breakdown-segment.ableton {
-  background: #6366f1;
+.breakdown-segment.daw,
+.legend-dot.daw {
+  background-color: #f97316; /* orange */
 }
 
-.breakdown-segment.wav {
-  background: #22c55e;
+.breakdown-segment.lossless,
+.legend-dot.lossless {
+  background-color: #3b82f6; /* blue */
 }
 
-.breakdown-segment.mp3 {
-  background: #f59e0b;
+.breakdown-segment.compressed,
+.legend-dot.compressed {
+  background-color: #22c55e; /* green */
+}
+
+.breakdown-segment.other,
+.legend-dot.other {
+  background-color: #6b7280; /* gray */
 }
 
 .breakdown-legend {
