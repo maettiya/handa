@@ -9,17 +9,7 @@ class User < ApplicationRecord
 
   validates :username, presence: true, uniqueness: true
 
-    # Calculate total storage used (in bytes)
-  def total_storage_used
-    project_files.sum(:file_size) || 0
-  end
-
-  # Get all project files for this user
-  def project_files
-    ProjectFile.joins(:project).where(projects: { user_id: id })
-  end
-
-  # Calculate storage breakdown by file category
+  # Calculate storage breakdown by project type
   def storage_breakdown
     total = total_storage_used
     return {} if total.zero?
@@ -31,7 +21,59 @@ class User < ApplicationRecord
       other: 0
     }
 
-    project_files.files.find_each do |pf|
+    projects.includes(:project_files, file_attachment: :blob).find_each do |project|
+      # Calculate total size of all extracted files in this project
+      project_size = project.project_files.files.sum(:file_size) || 0
+
+      # If no extracted files, use the original file size
+      if project_size.zero? && project.file.attached?
+        project_size = project.file.byte_size || 0
+      end
+
+      case project.project_type
+      when 'ableton', 'logic', 'fl_studio', 'pro_tools'
+        breakdown[:daw] += project_size
+      when 'folder'
+        # For folders, categorize by what's inside
+        categorize_folder_contents(project, breakdown)
+      when nil
+        # Standalone file uploads - categorize by file extension
+        categorize_standalone_file(project, project_size, breakdown)
+      else
+        breakdown[:other] += project_size
+      end
+    end
+
+    # Convert to percentages
+    breakdown.transform_values { |v| (v.to_f / total * 100).round(1) }
+  end
+
+  # Calculate total storage used (in bytes)
+  def total_storage_used
+    # Sum extracted files
+    extracted = project_files.sum(:file_size) || 0
+
+    # Sum original attached files for projects with no extracted files
+    original = 0
+    projects.includes(:project_files, file_attachment: :blob).find_each do |project|
+      if project.project_files.empty? && project.file.attached?
+        original += project.file.byte_size || 0
+      end
+    end
+
+    extracted + original
+  end
+
+  # Get all project files for this user
+  def project_files
+    ProjectFile.joins(:project).where(projects: { user_id: id })
+  end
+
+  private
+
+  # For standalone folders, categorize by file type
+  def categorize_folder_contents(project, breakdown)
+    project.project_files.files.visible.find_each do |pf|
       ext = pf.extension
       size = pf.file_size || 0
 
@@ -46,8 +88,23 @@ class User < ApplicationRecord
         breakdown[:other] += size
       end
     end
+  end
 
-    # Convert to percentages
-    breakdown.transform_values { |v| (v.to_f / total * 100).round(1) }
+  # For standalone file uploads, categorize by file extension
+  def categorize_standalone_file(project, size, breakdown)
+    return if size.zero? || !project.file.attached?
+
+    ext = File.extname(project.file.filename.to_s).delete('.').downcase
+
+    case ext
+    when 'als', 'logicx', 'flp', 'ptx'
+      breakdown[:daw] += size
+    when 'wav', 'aif', 'aiff', 'flac'
+      breakdown[:lossless] += size
+    when 'mp3', 'm4a', 'aac', 'ogg'
+      breakdown[:compressed] += size
+    else
+      breakdown[:other] += size
+    end
   end
 end
