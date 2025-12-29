@@ -871,7 +871,9 @@ body {
 
 /* File Types Breakdown */
 .profile-breakdown {
-  margin: 30px 0 40px 0;
+  margin: 30px -40px 40px -40px;
+  padding: 0 40px;
+  width: calc(100% + 80px);
 }
 
 .breakdown-bar {

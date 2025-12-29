@@ -53,29 +53,28 @@
         <% if @storage_breakdown[:daw] > 0 %>
           <div class="legend-item">
             <span class="legend-dot daw"></span>
-            <span>DAW Projects</span>
+            <span>DAW Projects <%= @storage_breakdown[:daw] %>%</span>
           </div>
         <% end %>
         <% if @storage_breakdown[:lossless] > 0 %>
           <div class="legend-item">
             <span class="legend-dot lossless"></span>
-            <span>Lossless</span>
+            <span>Lossless <%= @storage_breakdown[:lossless] %>%</span>
           </div>
         <% end %>
         <% if @storage_breakdown[:compressed] > 0 %>
           <div class="legend-item">
             <span class="legend-dot compressed"></span>
-            <span>Compressed</span>
+            <span>Compressed <%= @storage_breakdown[:compressed] %>%</span>
           </div>
         <% end %>
         <% if @storage_breakdown[:other] > 0 %>
           <div class="legend-item">
             <span class="legend-dot other"></span>
-            <span>Other</span>
+            <span>Other <%= @storage_breakdown[:other] %>%</span>
           </div>
         <% end %>
       </div>
-    </div>
   <% end %>
 
 
