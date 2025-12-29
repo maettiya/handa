@@ -910,17 +910,19 @@ body {
 
 .breakdown-legend {
   display: flex;
-  justify-content: center;
-  gap: 24px;
+  justify-content: flex-start;
+  gap: 32px;
   margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: #888;
+  white-space: nowrap;
 }
 
 .legend-dot {
