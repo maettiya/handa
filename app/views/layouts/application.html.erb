@@ -62,11 +62,13 @@
         <span class="audio-player-time" data-audio-player-target="currentTime">0:00</span>
         <div class="audio-player-waveform" data-audio-player-target="waveform"></div>
         <span class="audio-player-time" data-audio-player-target="duration">0:00</span>
-        <button class="audio-player-btn" data-action="click->audio-player#togglePlay" data-audio-player-target="playBtn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5v14l11-7z"/>
+        <button class="audio-player-btn" data-action="click->audio-player#restart" title="Restart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
           </svg>
         </button>
+        <button class="audio-player-btn" data-action="click->audio-player#togglePlay" data-audio-player-target="playBtn">
+
         <div class="audio-player-volume-wrapper">
           <button class="audio-player-volume-btn" data-action="click->audio-player#toggleVolume" data-audio-player-target="volumeBtn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
