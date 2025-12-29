@@ -1297,3 +1297,266 @@ body {
   cursor: pointer;
   border: none;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===================
+   MOBILE RESPONSIVE
+   =================== */
+
+@media (max-width: 768px) {
+
+  /* ----- HEADER ----- */
+  .site-header {
+    padding: 16px 16px;
+    gap: 8px;
+  }
+
+  .logo {
+    height: 24px;
+  }
+
+  .nav-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .user-actions {
+    gap: 4px;
+  }
+
+  .notification-bell,
+  .search-icon,
+  .profile-icon {
+    padding: 6px;
+  }
+
+  /* ----- MAIN CONTENT ----- */
+  .main-content {
+    padding: 0 16px 120px 16px;
+  }
+
+  /* ----- LIBRARY ACTIONS ----- */
+  .library-actions {
+    gap: 8px;
+  }
+
+  .add-project-btn,
+  .add-folder-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  /* ----- PROJECTS GRID (2 columns) ----- */
+  .drop-zone {
+    padding: 20px 0;
+    margin: 20px auto;
+    min-height: auto;
+  }
+
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .project-card p {
+    font-size: 11px;
+    max-width: 100px;
+  }
+
+  .icon-image {
+    width: 64px;
+    height: 64px;
+  }
+
+  /* ----- AUDIO PLAYER (centered like desktop, just smaller) ----- */
+  .audio-player {
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 500px;
+    bottom: 16px;
+    border-radius: 8px;
+    padding: 8px 16px 12px 16px;
+    gap: 8px;
+  }
+
+  .audio-player-title-row {
+    max-width: 100%;
+    padding-right: 30px;
+  }
+
+  .audio-player-close {
+    top: 8px;
+    right: 12px;
+  }
+
+  .audio-player-controls {
+    gap: 8px;
+  }
+
+  .audio-player-waveform {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .audio-player-btn {
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .audio-player-volume-wrapper {
+    display: none; /* Hide volume on mobile - use device volume */
+  }
+
+  /* ----- UPLOAD PROGRESS ----- */
+  .upload-progress-container {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    min-width: auto;
+  }
+
+  /* ----- PROFILE PAGE ----- */
+  .profile-container {
+    padding: 0 16px;
+    margin: 20px auto;
+  }
+
+  .profile-photo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .avatar-placeholder {
+    font-size: 40px;
+  }
+
+  .profile-stats {
+    gap: 24px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  /* Profile breakdown - full width on mobile */
+  .profile-breakdown {
+    margin: 20px -16px 30px -16px;
+    width: calc(100% + 32px);
+    padding: 0 16px;
+  }
+
+  .breakdown-legend {
+    gap: 16px;
+    justify-content: center;
+  }
+
+  .legend-item {
+    font-size: 12px;
+  }
+
+  .profile-field {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .profile-field label {
+    width: 100%;
+  }
+
+  .profile-field .field-value {
+    flex: 1;
+  }
+
+  /* ----- BREADCRUMBS ----- */
+  .breadcrumbs {
+    padding: 16px 0;
+    font-size: 13px;
+  }
+
+  .breadcrumb-separator {
+    margin: 0 6px;
+  }
+
+  /* ----- MODALS ----- */
+  .modal-content {
+    margin: 16px;
+    max-width: calc(100% - 32px);
+  }
+
+  /* ----- AUTH FORMS ----- */
+  .auth-container {
+    padding: 20px;
+    margin: 40px auto 0 auto;
+  }
+
+  /* ----- DROPDOWN MENUS ----- */
+  .menu-dropdown {
+    min-width: 140px;
+  }
+
+  /* Touch-friendly tap targets */
+  .menu-item,
+  .menu-item-parent {
+    padding: 12px 14px;
+    min-height: 44px;
+  }
+}
+
+/* Extra small screens (under 375px) */
+@media (max-width: 374px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .audio-player-time {
+    display: none;
+  }
+
+  .nav-title {
+    display: none;
+  }
+}
