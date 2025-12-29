@@ -140,6 +140,7 @@ export default class extends Controller {
     this.wavesurfer.playPause()
   }
 
+  // Restart the audio playback. Seek moves play-head to 0:00
   restart() {
   if (!this.wavesurfer) return
 
