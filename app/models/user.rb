@@ -33,16 +33,20 @@ class User < ApplicationRecord
       case project.project_type
       when 'ableton', 'logic', 'fl_studio', 'pro_tools'
         breakdown[:daw] += project_size
+      when 'lossless_audio'
+        breakdown[:lossless] += project_size
+      when 'compressed_audio'
+        breakdown[:compressed] += project_size
       when 'folder'
         # For folders, categorize by what's inside
         categorize_folder_contents(project, breakdown)
       when nil
-        # Standalone file uploads - categorize by file extension
+        # Standalone file uploads (legacy) - categorize by file extension
         categorize_standalone_file(project, project_size, breakdown)
       else
         breakdown[:other] += project_size
       end
-    end
+      end
 
     # Convert to percentages
     breakdown.transform_values { |v| (v.to_f / total * 100).round(1) }
