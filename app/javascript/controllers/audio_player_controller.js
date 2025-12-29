@@ -5,67 +5,70 @@ export default class extends Controller {
   static targets = ["waveform", "title", "currentTime", "duration", "playBtn", "volume", "volumePopup", "volumeBtn"]
 
   connect() {
-    // Don't reinitialize if wavesurfer already exists (Turbo navigation)
-    if (this.wavesurfer) return
-
     this.isPlaying = false
-    this.currentUrl = null
 
-    // Initialize WaveSurfer
-    this.wavesurfer = WaveSurfer.create({
-      container: this.waveformTarget,
-      waveColor: "#888888",
-      progressColor: "#f97316",
-      cursorColor: "#f97316",
-      cursorWidth: 2,
-      barWidth: 2,
-      barGap: 1,
-      barRadius: 2,
-      height: 32,
-      responsive: true,
-      normalize: true
-    })
+    // Check if wavesurfer already exists on the element (survives Turbo navigation)
+    if (this.element.wavesurfer) {
+      this.wavesurfer = this.element.wavesurfer
+      this.currentUrl = this.element.currentAudioUrl
+    } else {
+      this.currentUrl = null
 
-    // Event listeners for WaveSurfer
-    this.wavesurfer.on("ready", () => {
-      this.durationTarget.textContent = this.formatTime(this.wavesurfer.getDuration())
-      this.updatePlayButton()
-    })
+      // Initialize WaveSurfer
+      this.wavesurfer = WaveSurfer.create({
+        container: this.waveformTarget,
+        waveColor: "#888888",
+        progressColor: "#f97316",
+        cursorColor: "#f97316",
+        cursorWidth: 2,
+        barWidth: 2,
+        barGap: 1,
+        barRadius: 2,
+        height: 32,
+        responsive: true,
+        normalize: true
+      })
 
-    this.wavesurfer.on("audioprocess", () => {
-      this.currentTimeTarget.textContent = this.formatTime(this.wavesurfer.getCurrentTime())
-    })
+      // Store on element for persistence
+      this.element.wavesurfer = this.wavesurfer
 
-    this.wavesurfer.on("seeking", () => {
-      this.currentTimeTarget.textContent = this.formatTime(this.wavesurfer.getCurrentTime())
-    })
+      // Event listeners for WaveSurfer
+      this.wavesurfer.on("ready", () => {
+        this.durationTarget.textContent = this.formatTime(this.wavesurfer.getDuration())
+        this.updatePlayButton()
+      })
 
-    this.wavesurfer.on("finish", () => {
-      this.isPlaying = false
-      this.updatePlayButton()
-    })
+      this.wavesurfer.on("audioprocess", () => {
+        this.currentTimeTarget.textContent = this.formatTime(this.wavesurfer.getCurrentTime())
+      })
 
-    this.wavesurfer.on("play", () => {
-      this.isPlaying = true
-      this.updatePlayButton()
-    })
+      this.wavesurfer.on("seeking", () => {
+        this.currentTimeTarget.textContent = this.formatTime(this.wavesurfer.getCurrentTime())
+      })
 
-    this.wavesurfer.on("pause", () => {
-      this.isPlaying = false
-      this.updatePlayButton()
-    })
+      this.wavesurfer.on("finish", () => {
+        this.isPlaying = false
+        this.updatePlayButton()
+      })
 
-    // Listen for audio file clicks anywhere on the page
+      this.wavesurfer.on("play", () => {
+        this.isPlaying = true
+        this.updatePlayButton()
+      })
+
+      this.wavesurfer.on("pause", () => {
+        this.isPlaying = false
+        this.updatePlayButton()
+      })
+    }
+
+    // Always re-add document event listeners (they get removed on disconnect)
     this.boundHandleAudioClick = this.handleAudioClick.bind(this)
     this.boundHandleOutsideClick = this.handleOutsideClick.bind(this)
     document.addEventListener("click", this.boundHandleAudioClick)
     document.addEventListener("click", this.boundHandleOutsideClick)
-
-    // Preserve state during Turbo navigation
-    document.addEventListener("turbo:before-cache", () => {
-      // Keep playing during navigation - don't destroy
-    })
   }
+
 
   disconnect() {
     // Don't destroy on disconnect - we want persistence
@@ -125,6 +128,7 @@ export default class extends Controller {
 
     // Load new track
     this.currentUrl = url
+    this.element.currentAudioUrl = url
     this.currentTimeTarget.textContent = "0:00"
     this.durationTarget.textContent = "0:00"
 
@@ -142,10 +146,10 @@ export default class extends Controller {
 
   // Restart the audio playback. Seek moves play-head to 0:00
   restart() {
-  if (!this.wavesurfer) return
+    if (!this.wavesurfer) return
 
-  this.wavesurfer.seekTo(0)
-  this.wavesurfer.play()
+    this.wavesurfer.seekTo(0)
+    this.wavesurfer.play()
   }
 
   setVolume(event) {
