@@ -1,6 +1,8 @@
 class ProfileController < ApplicationController
   def show
     @user = current_user
+    @storage_breakdown = @user.storage_breakdown
+    @total_storage = @user.total_storage_used
   end
 
   def edit
