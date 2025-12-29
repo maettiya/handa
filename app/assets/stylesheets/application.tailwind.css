@@ -1166,6 +1166,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: nowrap;
 }
 
 .audio-player-time {
