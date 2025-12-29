@@ -140,6 +140,13 @@ export default class extends Controller {
     this.wavesurfer.playPause()
   }
 
+  restart() {
+  if (!this.wavesurfer) return
+
+  this.wavesurfer.seekTo(0)
+  this.wavesurfer.play()
+  }
+
   setVolume(event) {
     const volume = parseFloat(event.target.value)
     this.wavesurfer.setVolume(volume)
