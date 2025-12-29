@@ -1127,9 +1127,8 @@ body {
 
 .audio-player-close {
   position: absolute;
+  top: 8px;
   right: 8px;
-  top: 50%;
-  transform: translateY(-150%);
   background: none;
   border: none;
   color: #666;
