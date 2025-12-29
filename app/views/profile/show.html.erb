@@ -33,27 +33,51 @@
   </div>
 
   <!-- File Types Breakdown -->
-  <div class="profile-breakdown">
-    <div class="breakdown-bar">
-      <div class="breakdown-segment ableton" style="width: 64%"></div>
-      <div class="breakdown-segment wav" style="width: 23%"></div>
-      <div class="breakdown-segment mp3" style="width: 13%"></div>
+  <% if @total_storage > 0 %>
+    <div class="profile-breakdown">
+      <div class="breakdown-bar">
+        <% if @storage_breakdown[:daw] > 0 %>
+          <div class="breakdown-segment daw" style="width: <%= @storage_breakdown[:daw] %>%"></div>
+        <% end %>
+        <% if @storage_breakdown[:lossless] > 0 %>
+          <div class="breakdown-segment lossless" style="width: <%= @storage_breakdown[:lossless] %>%"></div>
+        <% end %>
+        <% if @storage_breakdown[:compressed] > 0 %>
+          <div class="breakdown-segment compressed" style="width: <%= @storage_breakdown[:compressed] %>%"></div>
+        <% end %>
+        <% if @storage_breakdown[:other] > 0 %>
+          <div class="breakdown-segment other" style="width: <%= @storage_breakdown[:other] %>%"></div>
+        <% end %>
+      </div>
+      <div class="breakdown-legend">
+        <% if @storage_breakdown[:daw] > 0 %>
+          <div class="legend-item">
+            <span class="legend-dot daw"></span>
+            <span>DAW Projects</span>
+          </div>
+        <% end %>
+        <% if @storage_breakdown[:lossless] > 0 %>
+          <div class="legend-item">
+            <span class="legend-dot lossless"></span>
+            <span>Lossless</span>
+          </div>
+        <% end %>
+        <% if @storage_breakdown[:compressed] > 0 %>
+          <div class="legend-item">
+            <span class="legend-dot compressed"></span>
+            <span>Compressed</span>
+          </div>
+        <% end %>
+        <% if @storage_breakdown[:other] > 0 %>
+          <div class="legend-item">
+            <span class="legend-dot other"></span>
+            <span>Other</span>
+          </div>
+        <% end %>
+      </div>
     </div>
-    <div class="breakdown-legend">
-      <div class="legend-item">
-        <span class="legend-dot ableton"></span>
-        <span>Ableton</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot wav"></span>
-        <span>WAV</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot mp3"></span>
-        <span>MP3</span>
-      </div>
-    </div>
-  </div>
+  <% end %>
+
 
   <!-- Profile Fields -->
   <div class="profile-fields">
