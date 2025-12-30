@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_30_035226) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_30_053833) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -50,6 +50,21 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_30_035226) do
     t.index ["collaborator_id"], name: "index_collaborations_on_collaborator_id"
     t.index ["user_id", "collaborator_id"], name: "index_collaborations_on_user_id_and_collaborator_id", unique: true
     t.index ["user_id"], name: "index_collaborations_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "actor_id", null: false
+    t.string "notification_type", null: false
+    t.string "notifiable_type"
+    t.bigint "notifiable_id"
+    t.boolean "read", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_notifications_on_actor_id"
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
+    t.index ["user_id", "read"], name: "index_notifications_on_user_id_and_read"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "project_files", force: :cascade do |t|
@@ -105,6 +120,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_30_035226) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "collaborations", "users"
   add_foreign_key "collaborations", "users", column: "collaborator_id"
+  add_foreign_key "notifications", "users"
+  add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "project_files", "project_files", column: "parent_id"
   add_foreign_key "project_files", "projects"
   add_foreign_key "projects", "users"

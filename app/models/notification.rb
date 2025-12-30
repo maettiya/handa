@@ -6,5 +6,5 @@ class Notification < ApplicationRecord
   scope :unread, -> { where(read: false) }
   scope :recent, -> { order(created_at: :desc) }
 
-  validates "notification_type, presence: true"
+  validates :notification_type, presence: true
 end
