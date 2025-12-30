@@ -2,6 +2,8 @@ class User < ApplicationRecord
   has_one_attached :avatar
 
   has_many :projects, dependent: :destroy
+  has_many :collaborations, dependent: :destroy
+  has_many :inverse_collaborations, class_name: 'Collaboration', foreign_key: 'collaborator_id', dependent: :destroy
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
