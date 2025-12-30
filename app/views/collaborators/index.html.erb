@@ -1,0 +1,48 @@
+<div class="collaborators-container">
+  <h1 class="collaborators-title">Collaborators</h1>
+
+  <!-- Add Collaborator Form -->
+  <div class="add-collaborator-section">
+    <%= form_with url: collaborators_path, method: :post, class: "add-collaborator-form" do |f| %>
+      <%= f.text_field :username,
+          placeholder: "Enter username...",
+          class: "collaborator-input",
+          autocomplete: "off" %>
+      <%= f.submit "+ Add", class: "add-collaborator-btn" %>
+    <% end %>
+  </div>
+
+  <!-- Collaborators List -->
+  <div class="collaborators-list">
+    <% if @collaborators.any? %>
+      <% @collaborators.each do |collaborator| %>
+        <div class="collaborator-item">
+          <div class="collaborator-avatar">
+            <% if collaborator.avatar.attached? %>
+              <%= image_tag collaborator.avatar, class: "avatar-image" %>
+            <% else %>
+              <span class="avatar-placeholder"><%= collaborator.username[0].upcase %></span>
+            <% end %>
+          </div>
+          <div class="collaborator-info">
+            <span class="collaborator-username"><%= collaborator.username %></span>
+          </div>
+          <%= button_to collaborator_path(collaborator),
+              method: :delete,
+              class: "remove-collaborator-btn",
+              data: { turbo_confirm: "Remove #{collaborator.username} from collaborators?" } do %>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="empty-collaborators">
+        <p>No collaborators yet</p>
+        <p class="empty-hint">Add collaborators by their username above</p>
+      </div>
+    <% end %>
+  </div>
+</div>
