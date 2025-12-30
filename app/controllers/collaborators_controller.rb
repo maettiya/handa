@@ -19,9 +19,15 @@ class CollaboratorsController < ApplicationController
     users = User.where("LOWER(username) LIKE ?", "#{query}%")
                 .where.not(id: existing_ids)
                 .limit(5)
-                .select(:id, :username)
+                .with_attached_avatar
 
-    render json: users.map { |u| { id: u.id, username: u.username } }
+    render json: users.map { |u|
+      {
+        id: u.id,
+        username: u.username,
+        avatar_url: u.avatar.attached? ? url_for(u.avatar) : nil
+      }
+    }
   end
 
   def create

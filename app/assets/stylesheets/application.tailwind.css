@@ -1506,6 +1506,12 @@ body {
   color: #888;
 }
 
+.search-result-avatar .avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .search-result-username {
   flex: 1;
   font-size: 15px;

@@ -38,7 +38,10 @@ export default class extends Controller {
         this.resultsTarget.innerHTML = users.map(user => `
           <div class="search-result-item">
             <div class="search-result-avatar">
-              <span class="avatar-placeholder">${user.username[0].toUpperCase()}</span>
+              ${user.avatar_url
+                ? `<img src="${user.avatar_url}" class="avatar-image" alt="${user.username}">`
+                : `<span class="avatar-placeholder">${user.username[0].toUpperCase()}</span>`
+              }
             </div>
             <span class="search-result-username">${user.username}</span>
             <form action="/collaborators" method="post" class="search-result-form">
