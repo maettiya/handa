@@ -5,6 +5,25 @@ class CollaboratorsController < ApplicationController
     @collaborators = current_user.collaborators.order(:username)
   end
 
+  def search
+    query = params[:q]&.strip&.downcase
+
+    if query.blank? || query.length < 2
+      render json: []
+      return
+    end
+
+    # Find users matching the query, exclude current user and existing collaborators
+    existing_ids = current_user.collaborators.pluck(:id) + [current_user.id]
+
+    users = User.where("LOWER(username) LIKE ?", "#{query}%")
+                .where.not(id: existing_ids)
+                .limit(5)
+                .select(:id, :username)
+
+    render json: users.map { |u| { id: u.id, username: u.username } }
+  end
+
   def create
     username = params[:username]&.strip&.downcase
 
