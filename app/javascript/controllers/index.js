@@ -12,3 +12,6 @@ application.register("dropdown", DropdownController)
 
 import AudioPlayerController from "./audio_player_controller"
 application.register("audio-player", AudioPlayerController)
+
+import CollaboratorSearchController from "./collaborator_search_controller"
+application.register("collaborator-search", CollaboratorSearchController)
