@@ -48,6 +48,14 @@ class CollaboratorsController < ApplicationController
       flash[:alert] = "#{collaborator.username} is already a collaborator"
     else
       Collaboration.create!(user: current_user, collaborator: collaborator)
+
+      # Notify the collaborator that they were added
+      Notification.create!(
+        user: collaborator,
+        actor: current_user,
+        notification_type: 'collaborator_added'
+      )
+
       flash[:notice] = "#{collaborator.username} added as a collaborator"
     end
 
