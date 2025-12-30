@@ -1777,6 +1777,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
+  justify-content: space-between;
   gap: 16px;
   padding: 16px 20px;
   background: #2a2a2a;
@@ -1787,6 +1788,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1;
+  min-width: 100px;
+}
+
+.filter-group-bpm {
+  flex: 2;
+  min-width: 200px;
 }
 
 .filter-label {
@@ -1880,6 +1888,32 @@ body {
 
 .filter-clear-btn:hover {
   color: white;
+}
+
+/* BPM controls */
+.bpm-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bpm-mode-select {
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.bpm-exact-input {
+  display: flex;
+}
+
+.bpm-exact-input.hidden,
+.bpm-range-inputs.hidden {
+  display: none;
+}
+
+/* Hidden utility */
+.hidden {
+  display: none !important;
 }
 
 /* Results */
@@ -1976,7 +2010,7 @@ body {
 
 /* Empty states */
 .search-empty-state,
-.search-results-section .search-no-results {
+.search-no-results-box {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1986,20 +2020,20 @@ body {
 }
 
 .search-empty-state svg,
-.search-results-section .search-no-results svg {
+.search-no-results-box svg {
   margin-bottom: 16px;
   opacity: 0.5;
 }
 
 .search-empty-state p,
-.search-results-section .search-no-results p {
+.search-no-results-box p {
   font-size: 18px;
   color: #888;
   margin: 0;
 }
 
 .search-empty-state span,
-.search-results-section .search-no-results span {
+.search-no-results-box span {
   font-size: 14px;
   color: #666;
   margin-top: 8px;

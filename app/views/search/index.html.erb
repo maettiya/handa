@@ -3,8 +3,8 @@
 <div class="search-container">
   <!-- Search Input Section -->
   <div class="search-input-section">
-    <%= form_with url: search_path, method: :get, class: "search-form", data: { controller: "search-autocomplete", search_autocomplete_url_value: search_suggestions_path } do %>
-      <div class="search-input-wrapper" data-search-autocomplete-target="wrapper">
+    <%= form_with url: search_path, method: :get, class: "search-form", id: "search-form", data: { controller: "search-filters" } do %>
+      <div class="search-input-wrapper">
         <svg class="search-input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
@@ -14,8 +14,9 @@
                placeholder="Search projects, files, samples..."
                class="search-input"
                autocomplete="off"
-               data-search-autocomplete-target="input"
-               data-action="input->search-autocomplete#search keydown->search-autocomplete#keydown">
+               data-search-filters-target="searchInput"
+               data-action="input->search-filters#searchWithDebounce keydown->search-filters#submitOnEnter"
+               <%= 'autofocus' if @query.present? %>>
         <% if @query.present? %>
           <%= link_to search_path, class: "search-clear-btn" do %>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -23,9 +24,6 @@
             </svg>
           <% end %>
         <% end %>
-
-        <!-- Autocomplete dropdown -->
-        <div class="search-autocomplete" data-search-autocomplete-target="results"></div>
       </div>
 
       <!-- Filters Row -->
@@ -33,7 +31,8 @@
         <!-- Sort By -->
         <div class="filter-group">
           <label class="filter-label">Sort by</label>
-          <select name="sort" class="filter-select" onchange="this.form.submit()">
+          <select name="sort" class="filter-select" data-action="change->search-filters#submit">
+            <option value="" <%= 'selected' if @sort.blank? %>>------</option>
             <option value="recent" <%= 'selected' if @sort == 'recent' %>>Recent</option>
             <option value="oldest" <%= 'selected' if @sort == 'oldest' %>>Oldest</option>
             <option value="a-z" <%= 'selected' if @sort == 'a-z' %>>A-Z</option>
@@ -43,28 +42,42 @@
 
         <!-- Date Range -->
         <div class="filter-group">
-          <label class="filter-label">Date range</label>
-          <div class="date-range-inputs">
-            <input type="date" name="date_from" value="<%= @date_from %>" class="filter-date" placeholder="From">
-            <span class="date-separator">-</span>
-            <input type="date" name="date_to" value="<%= @date_to %>" class="filter-date" placeholder="To">
-          </div>
+          <label class="filter-label">From</label>
+          <input type="date" name="date_from" value="<%= @date_from %>" class="filter-date" data-action="change->search-filters#submit">
         </div>
 
-        <!-- BPM Range -->
         <div class="filter-group">
+          <label class="filter-label">To</label>
+          <input type="date" name="date_to" value="<%= @date_to %>" class="filter-date" data-action="change->search-filters#submit">
+        </div>
+
+        <!-- BPM with Exact/Range toggle -->
+        <div class="filter-group filter-group-bpm">
           <label class="filter-label">BPM</label>
-          <div class="bpm-range-inputs">
-            <input type="number" name="bpm_min" value="<%= @bpm_min %>" class="filter-number" placeholder="Min" min="40" max="300">
-            <span class="bpm-separator">-</span>
-            <input type="number" name="bpm_max" value="<%= @bpm_max %>" class="filter-number" placeholder="Max" min="40" max="300">
+          <div class="bpm-controls">
+            <select name="bpm_mode" class="filter-select bpm-mode-select" data-action="change->search-filters#toggleBpmMode change->search-filters#submit" data-search-filters-target="bpmMode">
+              <option value="range" <%= 'selected' if @bpm_mode == 'range' %>>Range</option>
+              <option value="exact" <%= 'selected' if @bpm_mode == 'exact' %>>Exact</option>
+            </select>
+
+            <!-- Exact BPM input -->
+            <div class="bpm-exact-input <%= 'hidden' unless @bpm_mode == 'exact' %>" data-search-filters-target="bpmExact">
+              <input type="number" name="bpm_exact" value="<%= @bpm_exact %>" class="filter-number" placeholder="80" min="40" max="300" data-action="change->search-filters#submit keydown->search-filters#submitOnEnter" data-search-filters-target="bpmExactInput">
+            </div>
+
+            <!-- Range BPM inputs -->
+            <div class="bpm-range-inputs <%= 'hidden' if @bpm_mode == 'exact' %>" data-search-filters-target="bpmRange">
+              <input type="number" name="bpm_min" value="<%= @bpm_min %>" class="filter-number" placeholder="70" min="40" max="300" data-action="change->search-filters#submit keydown->search-filters#submitOnEnter" data-search-filters-target="bpmMinInput">
+              <span class="bpm-separator">-</span>
+              <input type="number" name="bpm_max" value="<%= @bpm_max %>" class="filter-number" placeholder="140" min="40" max="300" data-action="change->search-filters#submit keydown->search-filters#submitOnEnter" data-search-filters-target="bpmMaxInput">
+            </div>
           </div>
         </div>
 
         <!-- Musical Key -->
         <div class="filter-group">
           <label class="filter-label">Key</label>
-          <select name="key" class="filter-select">
+          <select name="key" class="filter-select" data-action="change->search-filters#submit">
             <option value="">Any key</option>
             <optgroup label="Major">
               <option value="C" <%= 'selected' if @key == 'C' %>>C Major</option>
@@ -97,12 +110,7 @@
           </select>
         </div>
 
-        <!-- Apply Button -->
-        <button type="submit" class="filter-apply-btn">Apply Filters</button>
-
-        <% if @query.present? || @date_from.present? || @date_to.present? || @bpm_min.present? || @bpm_max.present? || @key.present? %>
-          <%= link_to "Clear all", search_path, class: "filter-clear-btn" %>
-        <% end %>
+        <%= link_to "Clear all", search_path, class: "filter-clear-btn" %>
       </div>
     <% end %>
   </div>
@@ -111,7 +119,7 @@
   <div class="search-results-section">
     <% total_results = @projects.count + @files.count %>
 
-    <% if @query.present? || @date_from.present? || @date_to.present? || @bpm_min.present? || @bpm_max.present? || @key.present? %>
+    <% if @has_filters %>
       <div class="search-results-header">
         <span class="results-count"><%= total_results %> result<%= total_results == 1 ? '' : 's' %></span>
         <% if @query.present? %>
@@ -120,32 +128,52 @@
       </div>
 
       <% if total_results > 0 %>
-        <!-- Projects Results -->
+        <!-- Projects Results (Library-style grid) -->
         <% if @projects.any? %>
           <div class="results-group">
             <h3 class="results-group-title">Projects (<%= @projects.count %>)</h3>
-            <div class="results-grid">
+            <div class="projects-grid">
               <% @projects.each do |project| %>
-                <div class="result-card-wrapper">
-                  <% if project.folder? || project.project_files.any? %>
-                    <%= link_to project_path(project), class: "result-card" do %>
-                      <div class="result-icon">
+                <div class="project-card-wrapper">
+                  <% if project.folder? %>
+                    <%= link_to project_path(project), class: "project-card" do %>
+                      <div class="project-icon">
+                        <%= image_tag "icons/folder.svg", class: "icon-image" %>
+                      </div>
+                      <p><%= project.title %></p>
+                    <% end %>
+                  <% elsif project.file.attached? && project.project_files.any? %>
+                    <%= link_to project_path(project), class: "project-card" do %>
+                      <div class="project-icon">
                         <%= image_tag project_icon_for(project), class: "icon-image" %>
                       </div>
-                      <div class="result-info">
-                        <span class="result-title"><%= project.title %></span>
-                        <span class="result-meta"><%= time_ago_in_words(project.created_at) %> ago</span>
+                      <p><%= project.title %></p>
+                    <% end %>
+                  <% elsif project.file.attached? %>
+                    <% ext = File.extname(project.file.filename.to_s).downcase.delete(".") %>
+                    <% if %w[wav mp3 aif aiff flac m4a].include?(ext) %>
+                      <div class="project-card"
+                           data-audio-url="<%= url_for(project.file) %>"
+                           data-audio-title="<%= project.title %>">
+                        <div class="project-icon">
+                          <%= image_tag project_icon_for(project), class: "icon-image" %>
+                        </div>
+                        <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
+                      </div>
+                    <% else %>
+                      <div class="project-card">
+                        <div class="project-icon">
+                          <%= image_tag project_icon_for(project), class: "icon-image" %>
+                        </div>
+                        <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
                       </div>
                     <% end %>
                   <% else %>
-                    <div class="result-card">
-                      <div class="result-icon">
+                    <div class="project-card">
+                      <div class="project-icon">
                         <%= image_tag project_icon_for(project), class: "icon-image" %>
                       </div>
-                      <div class="result-info">
-                        <span class="result-title"><%= project.title %></span>
-                        <span class="result-meta"><%= time_ago_in_words(project.created_at) %> ago</span>
-                      </div>
+                      <p><%= project.title %></p>
                     </div>
                   <% end %>
                 </div>
@@ -154,44 +182,35 @@
           </div>
         <% end %>
 
-        <!-- Files Results -->
+        <!-- Files Results (Library-style grid) -->
         <% if @files.any? %>
           <div class="results-group">
             <h3 class="results-group-title">Files (<%= @files.count %>)</h3>
-            <div class="results-grid">
+            <div class="projects-grid">
               <% @files.each do |file| %>
-                <div class="result-card-wrapper">
+                <div class="project-card-wrapper">
                   <% if file.is_directory %>
-                    <%= link_to project_path(file.project, folder_id: file.id), class: "result-card" do %>
-                      <div class="result-icon">
+                    <%= link_to project_path(file.project, folder_id: file.id), class: "project-card" do %>
+                      <div class="project-icon">
                         <%= image_tag file_icon_for(file), class: "icon-image" %>
                       </div>
-                      <div class="result-info">
-                        <span class="result-title"><%= file.original_filename %></span>
-                        <span class="result-meta">in <%= file.project.title %></span>
-                      </div>
+                      <p><%= file.original_filename %></p>
                     <% end %>
                   <% elsif %w[wav mp3 aif aiff flac m4a].include?(file.extension) && file.file.attached? %>
-                    <div class="result-card"
+                    <div class="project-card"
                          data-audio-url="<%= url_for(file.file) %>"
                          data-audio-title="<%= file.original_filename %>">
-                      <div class="result-icon">
+                      <div class="project-icon">
                         <%= image_tag file_icon_for(file), class: "icon-image" %>
                       </div>
-                      <div class="result-info">
-                        <span class="result-title"><%= file.original_filename %></span>
-                        <span class="result-meta">in <%= file.project.title %></span>
-                      </div>
+                      <p><%= file.original_filename %></p>
                     </div>
                   <% else %>
-                    <%= link_to project_path(file.project), class: "result-card" do %>
-                      <div class="result-icon">
+                    <%= link_to project_path(file.project), class: "project-card" do %>
+                      <div class="project-icon">
                         <%= image_tag file_icon_for(file), class: "icon-image" %>
                       </div>
-                      <div class="result-info">
-                        <span class="result-title"><%= file.original_filename %></span>
-                        <span class="result-meta">in <%= file.project.title %></span>
-                      </div>
+                      <p><%= file.original_filename %></p>
                     <% end %>
                   <% end %>
                 </div>
@@ -200,7 +219,7 @@
           </div>
         <% end %>
       <% else %>
-        <div class="search-no-results">
+        <div class="search-no-results-box">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
