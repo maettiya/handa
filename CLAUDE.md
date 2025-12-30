@@ -22,32 +22,41 @@
 ```
 app/
 ├── controllers/
-│   ├── application_controller.rb    # Devise auth, requires login for all pages
-│   ├── library_controller.rb        # index - main dashboard
-│   └── projects_controller.rb       # create, show, download, destroy, download_file, download_folder, destroy_file
+│   ├── application_controller.rb      # Devise auth, requires login for all pages
+│   ├── library_controller.rb          # index - main dashboard
+│   ├── projects_controller.rb         # create, show, download, destroy, download_file, download_folder, destroy_file
+│   ├── profile_controller.rb          # show, edit, update - user profile page
+│   ├── collaborators_controller.rb    # index, create, destroy, search - manage collaborators
+│   └── notifications_controller.rb    # mark_read - notification management
 ├── helpers/
-│   └── file_icon_helper.rb          # Icon selection for projects and files
+│   └── file_icon_helper.rb            # Icon selection for projects and files
 ├── jobs/
-│   └── project_extraction_job.rb    # Background ZIP extraction
+│   └── project_extraction_job.rb      # Background ZIP extraction
 ├── models/
-│   ├── user.rb                      # Devise user, has_many :projects
-│   ├── project.rb                   # Uploaded music project (ZIP/file)
-│   ├── project_file.rb              # Extracted files with tree structure
-│   └── share_link.rb                # Sharing (model exists, not implemented)
+│   ├── user.rb                        # Devise user, has_many :projects, :collaborations, :notifications
+│   ├── project.rb                     # Uploaded music project (ZIP/file)
+│   ├── project_file.rb                # Extracted files with tree structure
+│   ├── collaboration.rb               # User-to-user collaboration relationship
+│   ├── notification.rb                # User notifications (collaborator_added, etc.)
+│   └── share_link.rb                  # Sharing (model exists, not implemented)
 ├── services/
 │   └── project_extraction_service.rb  # ZIP extraction logic
 ├── views/
-│   ├── layouts/application.html.erb   # Dark theme layout with header
+│   ├── layouts/application.html.erb   # Dark theme layout with header + notification dropdown
 │   ├── library/index.html.erb         # Main library grid view
 │   ├── projects/
 │   │   ├── show.html.erb              # Project file browser view
 │   │   └── _breadcrumbs.html.erb      # File path navigation partial
-│   └── devise/                         # Auth forms
+│   ├── profile/                       # User profile views
+│   ├── collaborators/                 # Collaborator management views
+│   └── devise/                        # Auth forms
 └── javascript/
     ├── application.js                  # Entry point
     ├── upload.js                       # Drag-drop, file picker, progress bar
     └── controllers/
-        └── dropdown_controller.js      # Three-dot menu toggle
+        ├── dropdown_controller.js              # Three-dot menu toggle
+        ├── notification_dropdown_controller.js # Notification bell dropdown + mark as read
+        └── collaborator_search_controller.js   # Autocomplete search for adding collaborators
 ```
 
 ## Key Models & Relationships
@@ -55,7 +64,12 @@ app/
 ```
 User
 ├── has_many :projects, dependent: :destroy
+├── has_many :collaborations, dependent: :destroy
+├── has_many :inverse_collaborations (as collaborator)
+├── has_many :notifications
+├── has_one_attached :avatar
 ├── validates: username (required, unique)
+├── methods: collaborators, collaborators_count, daw_projects_count, total_storage_used, storage_breakdown
 
 Project
 ├── belongs_to :user
@@ -73,6 +87,19 @@ ProjectFile (tree structure for extracted files)
 ├── scopes: visible, directories, files, root_level
 ├── methods: extension, icon_type, should_hide?
 
+Collaboration
+├── belongs_to :user (the person who added the collaborator)
+├── belongs_to :collaborator (User)
+├── Represents a mutual collaboration relationship between users
+
+Notification
+├── belongs_to :user (recipient)
+├── belongs_to :actor (User who triggered notification)
+├── belongs_to :notifiable (polymorphic, optional - for linking to projects)
+├── fields: notification_type, read (boolean)
+├── scopes: unread, recent
+├── Types: 'collaborator_added'
+
 ShareLink (NOT YET IMPLEMENTED)
 ├── belongs_to :project
 ├── fields: token, expires_at, download_count, password_digest
@@ -84,11 +111,31 @@ ShareLink (NOT YET IMPLEMENTED)
 devise_for :users                       # Auth routes
 
 resources :projects, only: [:create, :show, :destroy] do
+  collection do
+    post :create_folder
+  end
   member do
     get :download                                      # Download original file
     get 'download_file/:file_id', to: :download_file   # Download single file
     get 'download_folder/:folder_id', to: :download_folder  # Download folder as ZIP
     delete 'delete_file/:file_id', to: :destroy_file   # Delete file or folder
+    post :duplicate                                    # Duplicate a project
+    patch :rename                                      # Rename a project
+    post :create_subfolder                             # Create folder inside project
+  end
+end
+
+resource :profile, only: [:show, :edit, :update]       # User profile
+
+resources :collaborators, only: [:index, :create, :destroy] do
+  collection do
+    get :search                                        # Autocomplete search for users
+  end
+end
+
+resources :notifications, only: [] do
+  collection do
+    post :mark_read                                    # Mark all notifications as read
   end
 end
 
@@ -126,6 +173,8 @@ yarn build:css             # Build Tailwind CSS
 | File icon selection | `app/helpers/file_icon_helper.rb` |
 | Upload UI/UX + progress | `app/javascript/upload.js` |
 | Dropdown menus | `app/javascript/controllers/dropdown_controller.js` |
+| Notification dropdown | `app/javascript/controllers/notification_dropdown_controller.js` |
+| Collaborator search | `app/javascript/controllers/collaborator_search_controller.js` |
 | Library view | `app/views/library/index.html.erb` |
 | Project browser | `app/views/projects/show.html.erb` |
 | Breadcrumb navigation | `app/views/projects/_breadcrumbs.html.erb` |
@@ -169,20 +218,26 @@ Supported file types:
 - Folder download as ZIP (in-memory ZIP creation)
 - Project deletion
 - Individual file/folder deletion (with cascade for folders)
+- Project duplication
+- Project renaming
+- Folder creation (top-level and inside projects)
 - Library grid view with three-dot menus
 - Project file browser with subfolder navigation
 - Breadcrumb navigation in project browser
 - File type icons throughout UI
 - Dark theme UI
 - Cloud storage (Cloudflare R2 in production)
+- **User Profile**: Avatar upload, username/email/password editing, storage usage display
+- **Collaborators**: Add/remove collaborators with autocomplete search, mutual relationship
+- **Notifications**: Bell icon with unread count badge, dropdown showing recent activity, auto mark-as-read on open
+  - Currently supports: `collaborator_added` notification type
+  - Polymorphic `notifiable` ready for future notification types (e.g., file shared, project downloaded)
 
 ## What's NOT Implemented Yet
 
 - **ShareLink functionality** (model exists, no controller/UI)
 - **Search** (icon in UI, no logic)
-- **Notifications** (icon with hardcoded badge, no backend)
 - **Audio previews/waveforms**
-- **Collaboration features**
 - **Payment integration**
 
 ## Architecture Notes
@@ -192,8 +247,12 @@ Supported file types:
 3. **Background Jobs**: ProjectExtractionJob handles ZIP extraction asynchronously
 4. **Self-referential association**: ProjectFile uses `parent_id` for folder tree structure
 5. **Helper modules**: FileIconHelper for icon selection logic, included in views
-6. **Stimulus Controllers**: DropdownController for three-dot menu interactions
+6. **Stimulus Controllers**:
+   - `DropdownController` - Three-dot menu toggle
+   - `NotificationDropdownController` - Bell icon dropdown with AJAX mark-as-read
+   - `CollaboratorSearchController` - Autocomplete search with avatar display
 7. **Cloud Storage**: Cloudflare R2 (S3-compatible) configured with special checksum settings
+8. **Polymorphic associations**: Notification `notifiable` allows linking to any model (future: projects, files)
 
 ## Controller Actions
 
@@ -208,6 +267,20 @@ Supported file types:
 
 ### LibraryController
 - `index` - Main dashboard (empty action, view renders user's projects)
+
+### ProfileController
+- `show` - User profile page with stats, avatar, storage breakdown
+- `edit` - Edit individual fields (username, email, password)
+- `update` - Save profile changes, handle avatar upload
+
+### CollaboratorsController
+- `index` - List all collaborators
+- `create` - Add a collaborator (creates notification for them)
+- `destroy` - Remove a collaborator
+- `search` - JSON endpoint for autocomplete (returns id, username, avatar_url)
+
+### NotificationsController
+- `mark_read` - Mark all user's notifications as read (AJAX)
 
 ## Storage Configuration
 
@@ -238,8 +311,7 @@ Test framework is Minitest but **no tests have been written yet**. Test files ex
 
 ## Known Issues / Technical Debt
 
-1. Hardcoded "3" notification badge
-2. ShareLink model unused
-3. Devise mailer not configured for password resets
-4. Zero test coverage
-5. No error handling UI for failed extractions
+1. ShareLink model unused
+2. Devise mailer not configured for password resets
+3. Zero test coverage
+4. No error handling UI for failed extractions
