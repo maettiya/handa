@@ -21,15 +21,15 @@
 
   <!-- Stats Row -->
   <div class="profile-stats">
-    <div class="stat-item">
+    <%= link_to root_path, class: "stat-item stat-link" do %>
       <div class="stat-value"><%= @user.projects.count %></div>
       <div class="stat-label">Projects</div>
-    </div>
+    <% end %>
     <div class="stat-divider"></div>
-    <div class="stat-item">
-      <div class="stat-value">0</div>
+    <%= link_to collaborators_path, class: "stat-item stat-link" do %>
+      <div class="stat-value"><%= @user.collaborators_count %></div>
       <div class="stat-label">Collaborators</div>
-    </div>
+    <% end %>
   </div>
 
   <!-- File Types Breakdown -->
