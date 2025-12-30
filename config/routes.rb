@@ -45,7 +45,11 @@ Rails.application.routes.draw do
   end
 
   # Notifications
-  resources :notifications, only: [:index]
+  resources :notifications, only: [] do
+    collection do
+      post :mark_read
+    end
+  end
 
   # Health Status
   get 'up' => 'rails/health#show', as: :rails_health_check
