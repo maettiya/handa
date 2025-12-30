@@ -28,4 +28,8 @@ class CollaboratorsController < ApplicationController
 
     redirect_to collaborators_path
   end
+
+  def destroy
+
+  end
 end
