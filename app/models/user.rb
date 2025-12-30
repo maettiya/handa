@@ -21,24 +21,28 @@ class User < ApplicationRecord
     collaborators.count
   end
 
-  # Count all DAW projects (Ableton, Logic, FL Studio, Pro Tools)
-  # Includes top-level projects AND files inside folders/ZIPs
-  DAW_PROJECT_TYPES = %w[ableton logic fl_studio pro_tools].freeze
-  DAW_EXTENSIONS = %w[als logicx flp ptx].freeze
-
+  # Count all DAW project files (.als, .logicx, .flp, .ptx)
+  # Excludes files inside "Backup" folders (Ableton auto-saves)
   def daw_projects_count
-    # Count top-level DAW projects (not folders)
-    top_level_count = projects.where(project_type: DAW_PROJECT_TYPES).count
+    # Get IDs of all "Backup" folders
+    backup_folder_ids = project_files.directories
+      .where("LOWER(original_filename) = 'backup'")
+      .pluck(:id)
 
-    # Count DAW files inside folders/ZIPs
-    nested_count = project_files.files.visible.where(
+    # Count DAW files, excluding those inside Backup folders
+    query = project_files.files.where(
       "LOWER(original_filename) LIKE '%.als' OR " \
       "LOWER(original_filename) LIKE '%.logicx' OR " \
       "LOWER(original_filename) LIKE '%.flp' OR " \
       "LOWER(original_filename) LIKE '%.ptx'"
-    ).count
+    )
 
-    top_level_count + nested_count
+    # Exclude files whose parent is a Backup folder
+    if backup_folder_ids.any?
+      query = query.where.not(parent_id: backup_folder_ids)
+    end
+
+    query.count
   end
 
   # Calculate storage breakdown by project type
