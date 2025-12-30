@@ -11,6 +11,16 @@ class User < ApplicationRecord
 
   validates :username, presence: true, uniqueness: true
 
+  # Get all collaborators (mutual - both directions)
+  def collaborators
+    User.where(id: collaborations.select(:collaborator_id))
+      .or(User.where(id: inverse_collaborations.select(:user_id)))
+  end
+
+  def collaborators_count
+    collaborators.count
+  end
+
   # Calculate storage breakdown by project type
   def storage_breakdown
     total = total_storage_used
