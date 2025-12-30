@@ -8,8 +8,13 @@ class Collaboration < ApplicationRecord
   private
 
   def not_self_collaboration
-    errors.add(:collaborator, "can't be yourself") if user_id == collaborator_id
+    errors.add(:collaborator, "Can't be yourself") if user_id == collaborator_id
   end
 
-
+  def mutual_uniqueness
+    # Check if reverse relationship already exists
+    if Collaboration.exists?(user_id: collaborator_id, collaborator_id: user_id)
+      errors.add(:base, "Collaboration already exists")
+    end
+  end
 end
