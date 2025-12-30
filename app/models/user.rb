@@ -21,6 +21,26 @@ class User < ApplicationRecord
     collaborators.count
   end
 
+  # Count all DAW projects (Ableton, Logic, FL Studio, Pro Tools)
+  # Includes top-level projects AND files inside folders/ZIPs
+  DAW_PROJECT_TYPES = %w[ableton logic fl_studio pro_tools].freeze
+  DAW_EXTENSIONS = %w[als logicx flp ptx].freeze
+
+  def daw_projects_count
+    # Count top-level DAW projects (not folders)
+    top_level_count = projects.where(project_type: DAW_PROJECT_TYPES).count
+
+    # Count DAW files inside folders/ZIPs
+    nested_count = project_files.files.visible.where(
+      "LOWER(original_filename) LIKE '%.als' OR " \
+      "LOWER(original_filename) LIKE '%.logicx' OR " \
+      "LOWER(original_filename) LIKE '%.flp' OR " \
+      "LOWER(original_filename) LIKE '%.ptx'"
+    ).count
+
+    top_level_count + nested_count
+  end
+
   # Calculate storage breakdown by project type
   def storage_breakdown
     total = total_storage_used
