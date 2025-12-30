@@ -37,6 +37,9 @@ Rails.application.routes.draw do
   # Profile - user profile dashboard
   resource :profile, only: [:show, :edit, :update], controller: 'profile'
 
+  # Collaborators
+  resources :collaborators, only: [:index, :create, :destroy]
+
   # Health Status
   get 'up' => 'rails/health#show', as: :rails_health_check
 
