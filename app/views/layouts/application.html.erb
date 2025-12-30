@@ -25,12 +25,50 @@
       <div class="user-actions">
         <% if user_signed_in? %>
           <!-- Notification Bell -->
-          <button class="notification-bell">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            <span class="notification-badge">3</span>
-          </button>
+          <div class="notification-wrapper" data-controller="notification-dropdown" data-notification-dropdown-mark-read-url-value="<%= mark_read_notifications_path %>">
+            <button class="notification-bell" data-action="click->notification-dropdown#toggle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <% unread_count = current_user.notifications.unread.count %>
+              <% if unread_count > 0 %>
+                <span class="notification-badge" data-notification-dropdown-target="badge"><%= unread_count %></span>
+              <% end %>
+            </button>
+
+            <div class="notification-dropdown" data-notification-dropdown-target="menu">
+              <div class="notification-dropdown-header">Activity</div>
+              <div class="notification-dropdown-list">
+                <% notifications = current_user.notifications.recent.includes(:actor).limit(20) %>
+                <% if notifications.any? %>
+                  <% notifications.each do |notification| %>
+                    <div class="notification-dropdown-item">
+                      <div class="notification-avatar">
+                        <% if notification.actor.avatar.attached? %>
+                          <%= image_tag notification.actor.avatar, class: "avatar-image" %>
+                        <% else %>
+                          <span class="avatar-placeholder"><%= notification.actor.username[0].upcase %></span>
+                        <% end %>
+                      </div>
+                      <div class="notification-content">
+                        <span class="notification-text">
+                          <strong><%= notification.actor.username %></strong>
+                          <% case notification.notification_type %>
+                          <% when 'collaborator_added' %>
+                            added you as a collaborator
+                          <% end %>
+                        </span>
+                        <span class="notification-time"><%= time_ago_in_words(notification.created_at) %> ago</span>
+                      </div>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <div class="notification-dropdown-empty">No activity yet</div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
 
           <!-- Search Icon -->
           <button class="search-icon">
