@@ -30,6 +30,14 @@ class CollaboratorsController < ApplicationController
   end
 
   def destroy
+    collaborator = User.find(params[:id])
 
+    # Remove collaboration in either direction
+    Collaboration.where(user: current_user, collaborator: collaborator)
+      .or(Collaboration.where(user: collaborator, collaborator: current_user))
+      .destroy_all
+
+    flash[:notice] = "#{collaborator.username} removed from collaborators"
+    redirect_to collaborators_path
   end
 end
