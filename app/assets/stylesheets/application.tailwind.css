@@ -1298,6 +1298,145 @@ body {
   border: none;
 }
 
+/* ===================
+   COLLABORATORS PAGE
+   =================== */
+
+.collaborators-container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.collaborators-title {
+  font-size: 24px;
+  font-weight: 400;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.add-collaborator-section {
+  margin-bottom: 30px;
+}
+
+.add-collaborator-form {
+  display: flex;
+  gap: 12px;
+}
+
+.collaborator-input {
+  flex: 1;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid #666;
+  border-radius: 4px;
+  color: white;
+  font-size: 16px;
+}
+
+.collaborator-input:focus {
+  outline: none;
+  border-color: white;
+}
+
+.collaborator-input::placeholder {
+  color: #888;
+}
+
+.add-collaborator-btn {
+  padding: 12px 20px;
+  background: white;
+  border: none;
+  border-radius: 4px;
+  color: #3a3a3a;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.add-collaborator-btn:hover {
+  background: #eee;
+}
+
+.collaborators-list {
+  border-top: 1px solid #4a4a4a;
+}
+
+.collaborator-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid #4a4a4a;
+}
+
+.collaborator-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.collaborator-avatar .avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.collaborator-avatar .avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #4a4a4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 400;
+  color: #888;
+}
+
+.collaborator-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.collaborator-username {
+  font-size: 16px;
+  color: white;
+}
+
+.remove-collaborator-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  transition: color 0.2s ease;
+}
+
+.remove-collaborator-btn:hover {
+  color: #e55;
+}
+
+.empty-collaborators {
+  text-align: center;
+  padding: 40px 0;
+  color: #888;
+}
+
+.empty-collaborators p {
+  margin: 0;
+}
+
+.empty-hint {
+  font-size: 14px;
+  margin-top: 8px !important;
+  color: #666;
+}
+
+
 
 
 
