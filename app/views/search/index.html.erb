@@ -117,7 +117,9 @@
 
   <!-- Results Section -->
   <div class="search-results-section">
-    <% total_results = @projects.count + @files.count %>
+    <% daw_count = @daw_files.count %>
+    <% audio_count = @other_projects.count + @audio_files.count %>
+    <% total_results = daw_count + audio_count %>
 
     <% if @has_filters %>
       <div class="search-results-header">
@@ -128,24 +130,37 @@
       </div>
 
       <% if total_results > 0 %>
-        <!-- Projects Results (Library-style grid) -->
-        <% if @projects.any? %>
+        <!-- DAW Results (.als, .logicx, .flp, .ptx files - excluding Backup folders) -->
+        <% if daw_count > 0 %>
           <div class="results-group">
-            <h3 class="results-group-title">Projects (<%= @projects.count %>)</h3>
+            <h3 class="results-group-title">DAW (<%= daw_count %>)</h3>
             <div class="projects-grid">
-              <% @projects.each do |project| %>
+              <% @daw_files.each do |file| %>
+                <div class="project-card-wrapper">
+                  <%= link_to project_path(file.project), class: "project-card" do %>
+                    <div class="project-icon">
+                      <%= image_tag file_icon_for(file), class: "icon-image" %>
+                    </div>
+                    <p><%= file.original_filename %></p>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Audio & Files Results (folders, audio, and other files) -->
+        <% if audio_count > 0 %>
+          <div class="results-group">
+            <h3 class="results-group-title">Audio & Files (<%= audio_count %>)</h3>
+            <div class="projects-grid">
+              <%# Non-DAW Projects (folders, standalone audio uploads) %>
+              <% @other_projects.each do |project| %>
                 <div class="project-card-wrapper">
                   <% if project.folder? %>
                     <%= link_to project_path(project), class: "project-card" do %>
                       <div class="project-icon">
                         <%= image_tag "icons/folder.svg", class: "icon-image" %>
-                      </div>
-                      <p><%= project.title %></p>
-                    <% end %>
-                  <% elsif project.file.attached? && project.project_files.any? %>
-                    <%= link_to project_path(project), class: "project-card" do %>
-                      <div class="project-icon">
-                        <%= image_tag project_icon_for(project), class: "icon-image" %>
                       </div>
                       <p><%= project.title %></p>
                     <% end %>
@@ -161,33 +176,25 @@
                         <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
                       </div>
                     <% else %>
-                      <div class="project-card">
+                      <%= link_to project_path(project), class: "project-card" do %>
                         <div class="project-icon">
                           <%= image_tag project_icon_for(project), class: "icon-image" %>
                         </div>
-                        <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
-                      </div>
+                        <p><%= project.title %></p>
+                      <% end %>
                     <% end %>
                   <% else %>
-                    <div class="project-card">
+                    <%= link_to project_path(project), class: "project-card" do %>
                       <div class="project-icon">
                         <%= image_tag project_icon_for(project), class: "icon-image" %>
                       </div>
                       <p><%= project.title %></p>
-                    </div>
+                    <% end %>
                   <% end %>
                 </div>
               <% end %>
-            </div>
-          </div>
-        <% end %>
-
-        <!-- Files Results (Library-style grid) -->
-        <% if @files.any? %>
-          <div class="results-group">
-            <h3 class="results-group-title">Files (<%= @files.count %>)</h3>
-            <div class="projects-grid">
-              <% @files.each do |file| %>
+              <%# Audio files and other ProjectFiles %>
+              <% @audio_files.each do |file| %>
                 <div class="project-card-wrapper">
                   <% if file.is_directory %>
                     <%= link_to project_path(file.project, folder_id: file.id), class: "project-card" do %>
