@@ -44,6 +44,9 @@ Rails.application.routes.draw do
     end
   end
 
+  # Notifications
+  resources :notifications, only: [:index]
+
   # Health Status
   get 'up' => 'rails/health#show', as: :rails_health_check
 
