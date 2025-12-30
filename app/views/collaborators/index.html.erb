@@ -1,15 +1,17 @@
 <div class="collaborators-container">
   <h1 class="collaborators-title">Collaborators</h1>
 
-  <!-- Add Collaborator Form -->
-  <div class="add-collaborator-section">
-    <%= form_with url: collaborators_path, method: :post, class: "add-collaborator-form" do |f| %>
-      <%= f.text_field :username,
-          placeholder: "Enter username...",
-          class: "collaborator-input",
-          autocomplete: "off" %>
-      <%= f.submit "+ Add", class: "add-collaborator-btn" %>
-    <% end %>
+  <!-- Search Collaborator -->
+  <div class="add-collaborator-section" data-controller="collaborator-search" data-collaborator-search-url-value="<%= search_collaborators_path %>">
+    <div class="collaborator-search-wrapper">
+      <input type="text"
+             placeholder="Search by username..."
+             class="collaborator-input"
+             autocomplete="off"
+             data-collaborator-search-target="input"
+             data-action="input->collaborator-search#search focus->collaborator-search#showResults blur->collaborator-search#hideResults">
+      <div class="search-results" data-collaborator-search-target="results"></div>
+    </div>
   </div>
 
   <!-- Collaborators List -->
@@ -41,7 +43,7 @@
     <% else %>
       <div class="empty-collaborators">
         <p>No collaborators yet</p>
-        <p class="empty-hint">Add collaborators by their username above</p>
+        <p class="empty-hint">Search for users by their username above</p>
       </div>
     <% end %>
   </div>
