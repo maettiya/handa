@@ -38,7 +38,11 @@ Rails.application.routes.draw do
   resource :profile, only: [:show, :edit, :update], controller: 'profile'
 
   # Collaborators
-  resources :collaborators, only: [:index, :create, :destroy]
+  resources :collaborators, only: [:index, :create, :destroy] do
+    collection do
+      get :search
+    end
+  end
 
   # Health Status
   get 'up' => 'rails/health#show', as: :rails_health_check
