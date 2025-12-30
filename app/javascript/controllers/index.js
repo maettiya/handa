@@ -18,3 +18,6 @@ application.register("collaborator-search", CollaboratorSearchController)
 
 import NotificationDropdownController from "./notification_dropdown_controller"
 application.register("notification-dropdown", NotificationDropdownController)
+
+import SearchAutocompleteController from "./search_autocomplete_controller"
+application.register("search-autocomplete", SearchAutocompleteController)

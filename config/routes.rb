@@ -51,6 +51,10 @@ Rails.application.routes.draw do
     end
   end
 
+  # Search
+  get 'search', to: 'search#index', as: :search
+  get 'search/suggestions', to: 'search#suggestions', as: :search_suggestions
+
   # Health Status
   get 'up' => 'rails/health#show', as: :rails_health_check
 
