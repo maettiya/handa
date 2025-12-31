@@ -19,7 +19,14 @@
       <% end %>
 
       <% if user_signed_in? %>
-        <h1 class="nav-title"><%= yield :page_title %></h1>
+        <% if content_for?(:show_tabs) %>
+          <div class="nav-tabs">
+            <%= link_to "LIBRARY", root_path, class: "nav-tab #{'active' if controller_name == 'library'}" %>
+            <%= link_to "SHARE", quick_shares_path, class: "nav-tab #{'active' if controller_name == 'quick_shares'}" %>
+          </div>
+        <% else %>
+          <h1 class="nav-title"><%= yield :page_title %></h1>
+        <% end %>
       <% end %>
 
       <div class="user-actions">

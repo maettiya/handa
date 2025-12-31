@@ -46,6 +46,36 @@ body {
   text-underline-offset: 8px;
 }
 
+/* Tab Navigation (LIBRARY | SHARE) */
+.nav-tabs {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 24px;
+}
+
+.nav-tab {
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #888;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding-bottom: 4px;
+  transition: color 0.2s ease;
+}
+
+.nav-tab:hover {
+  color: #ccc;
+}
+
+.nav-tab.active {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 8px;
+}
+
 .logo {
   height: 30px;
   width: auto;
@@ -2270,6 +2300,15 @@ body {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .nav-tabs {
+    gap: 16px;
+  }
+
+  .nav-tab {
     font-size: 12px;
     letter-spacing: 1px;
   }

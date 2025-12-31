@@ -1,10 +1,5 @@
 <% content_for :page_title, "SHARE" %>
-
-<!-- Tab Navigation -->
-<div class="nav-tabs">
-  <%= link_to "LIBRARY", root_path, class: "nav-tab" %>
-  <%= link_to "SHARE", quick_shares_path, class: "nav-tab active" %>
-</div>
+<% content_for :show_tabs, true %>
 
 <div data-controller="quick-share" data-quick-share-create-url-value="<%= quick_shares_path %>" data-quick-share-direct-upload-url-value="<%= rails_direct_uploads_url %>">
 
