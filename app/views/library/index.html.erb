@@ -92,7 +92,7 @@
                   </svg>
                 </button>
                 <div class="submenu">
-                  <button class="menu-item" data-action="click->share#createLink" data-project-id="<%= project.id %>">
+                  <button class="menu-item" data-action="click->share#open" data-project-id="<%= project.id %>">
                     Create a link
                   </button>
                 </div>
@@ -214,3 +214,47 @@
     </div>
   </div>
 </div>
+
+<!-- Share Link Modal -->
+<div id="share-modal" class="modal-overlay" data-share-target="modal" data-action="click->share#clickOutside">
+  <div class="modal-content">
+    <h3>Share Link</h3>
+
+    <!-- Create Form -->
+    <div data-share-target="createForm">
+      <div class="share-form-field">
+        <label>Password (optional)</label>
+        <input type="password" placeholder="Leave blank for no password" class="folder-name-input" data-share-target="passwordField">
+      </div>
+
+      <div class="share-form-field">
+        <label>Expires (optional)</label>
+        <select class="folder-name-input" data-share-target="expiresField">
+          <option value="">Never</option>
+          <option value="1_hour">1 hour</option>
+          <option value="24_hours">24 hours</option>
+          <option value="7_days">7 days</option>
+          <option value="30_days">30 days</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" data-action="click->share#close">Cancel</button>
+        <button type="button" class="save-btn" data-action="click->share#createLink">Create Link</button>
+      </div>
+    </div>
+
+    <!-- Link Display (shown after creation) -->
+    <div data-share-target="linkDisplay" class="hidden">
+      <div class="share-link-display">
+        <input type="text" readonly class="share-link-input" data-share-target="url">
+        <button type="button" class="copy-btn" data-action="click->share#copyLink" data-share-target="copyBtn">Copy</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="save-btn" data-action="click->share#close" style="width: 100%;">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div> <!-- Close share controller wrapper -->
