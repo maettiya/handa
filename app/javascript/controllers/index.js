@@ -24,3 +24,6 @@ application.register("search-filters", SearchFiltersController)
 
 import ShareController from "./share_controller"
 application.register("share", ShareController)
+
+import ProjectUploadController from "./project_upload_controller"
+application.register("project-upload", ProjectUploadController)

@@ -201,6 +201,87 @@ class ProjectsController < ApplicationController
     end
   end
 
+  # Uploads files to an existing project
+  def upload_files
+    @project = current_user.projects.find(params[:id])
+
+    # Determine parent folder
+    parent_id = params[:parent_id].presence
+    if parent_id.nil?
+      skipped = detect_skipped_root_folder
+      parent_id = skipped&.id
+    end
+
+    uploaded_files = []
+    errors = []
+
+    # Handle multiple files
+    files = params[:files] || []
+    files = [files] unless files.is_a?(Array)
+
+    files.each do |file|
+      next unless file.is_a?(ActionDispatch::Http::UploadedFile) || file.is_a?(ActiveStorage::Blob)
+
+      # Create a ProjectFile for this upload
+      project_file = @project.project_files.build(
+        original_filename: file.respond_to?(:original_filename) ? file.original_filename : file.filename.to_s,
+        is_directory: false,
+        parent_id: parent_id,
+        path: build_file_path(parent_id, file.respond_to?(:original_filename) ? file.original_filename : file.filename.to_s)
+      )
+
+      # Attach the file
+      if file.is_a?(ActiveStorage::Blob)
+        project_file.file.attach(file)
+      else
+        project_file.file.attach(file)
+      end
+
+      if project_file.save
+        uploaded_files << project_file
+      else
+        errors << "#{file.original_filename}: #{project_file.errors.full_messages.join(', ')}"
+      end
+    end
+
+    # Handle signed blob IDs (from Direct Upload)
+    if params[:signed_id].present?
+      blob = ActiveStorage::Blob.find_signed(params[:signed_id])
+      if blob
+        project_file = @project.project_files.build(
+          original_filename: blob.filename.to_s,
+          is_directory: false,
+          parent_id: parent_id,
+          path: build_file_path(parent_id, blob.filename.to_s)
+        )
+        project_file.file.attach(blob)
+
+        if project_file.save
+          uploaded_files << project_file
+        else
+          errors << "#{blob.filename}: #{project_file.errors.full_messages.join(', ')}"
+        end
+      end
+    end
+
+    respond_to do |format|
+      format.html do
+        if errors.any?
+          redirect_back fallback_location: project_path(@project), alert: errors.join("; ")
+        else
+          redirect_back fallback_location: project_path(@project), notice: "#{uploaded_files.count} file(s) uploaded successfully"
+        end
+      end
+      format.json do
+        if errors.any?
+          render json: { success: false, errors: errors }, status: :unprocessable_entity
+        else
+          render json: { success: true, files: uploaded_files.map { |f| { id: f.id, filename: f.original_filename } } }
+        end
+      end
+    end
+  end
+
   # Creates a folder inside a project (as a ProjectFile)
   def create_subfolder
     @project = current_user.projects.find(params[:id])
@@ -256,6 +337,16 @@ class ProjectsController < ApplicationController
       "#{parent.path}/#{folder_name}"
     else
       folder_name
+    end
+  end
+
+  # Builds the full path for a new file
+  def build_file_path(parent_id, filename)
+    if parent_id.present?
+      parent = @project.project_files.find(parent_id)
+      "#{parent.path}/#{filename}"
+    else
+      filename
     end
   end
 

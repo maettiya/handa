@@ -26,6 +26,8 @@ Rails.application.routes.draw do
       patch :rename
       # Create a folder inside a project
       post :create_subfolder
+      # Upload files to a project
+      post :upload_files
     end
 
     # Nested share links (for creating)

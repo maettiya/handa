@@ -3,14 +3,11 @@
 <%# Uses the same grid layout as library for consistent UX %>
 <% content_for :page_title, @project.title.upcase %>
 
-<div data-controller="share">
+<div data-controller="share project-upload" data-project-upload-project-id-value="<%= @project.id %>" data-project-upload-parent-id-value="<%= @current_folder&.id %>">
 
-<%# Breadcrumb navigation - file path style %>
-<%= render "projects/breadcrumbs" %>
-
-<%# Upload buttons - same as library %>
+<%# Upload buttons - same as library, ABOVE breadcrumbs %>
 <div class="library-actions">
-  <div class="add-project-btn" id="add-project-btn">
+  <div class="add-project-btn" id="add-project-btn" data-action="click->project-upload#openFilePicker">
     + Add files
   </div>
   <button class="add-folder-btn" id="add-folder-btn">
@@ -18,16 +15,14 @@
   </button>
 </div>
 
+<%# Breadcrumb navigation - file path style %>
+<%= render "projects/breadcrumbs" %>
+
 <%# Hidden file input for uploads %>
-<%= form_with url: create_subfolder_project_path(@project), method: :post, id: "upload-form", local: true do |f| %>
-  <input type="file" class="file-input" id="file-input" name="files[]" multiple accept=".als,.logicx,.wav,.mp3,.zip,.aif,.aiff,.flac">
-  <% if @current_folder %>
-    <input type="hidden" name="parent_id" value="<%= @current_folder.id %>">
-  <% end %>
-<% end %>
+<input type="file" class="file-input" id="file-input" name="files[]" multiple accept=".als,.logicx,.wav,.mp3,.zip,.aif,.aiff,.flac" data-project-upload-target="fileInput" data-direct-upload-url="<%= rails_direct_uploads_url %>" data-action="change->project-upload#handleFileSelect">
 
 <%# File grid - same styling as library %>
-<div class="drop-zone" id="drop-zone">
+<div class="drop-zone" id="drop-zone" data-project-upload-target="dropZone" data-action="dragover->project-upload#dragOver dragleave->project-upload#dragLeave drop->project-upload#drop">
   <% if @files.any? %>
     <div class="projects-grid">
       <% @files.each do |file| %>
@@ -178,4 +173,15 @@
   </div>
 </div>
 
-</div> <!-- Close share controller wrapper -->
+<!-- Upload Progress -->
+<div class="upload-progress" id="upload-progress" data-project-upload-target="progressContainer">
+  <div class="upload-progress-bar">
+    <div class="upload-progress-fill" id="upload-progress-fill" data-project-upload-target="progressFill"></div>
+  </div>
+  <div class="upload-progress-info">
+    <span id="upload-filename" data-project-upload-target="progressFilename">Uploading...</span>
+    <span id="upload-percent" data-project-upload-target="progressPercent">0%</span>
+  </div>
+</div>
+
+</div> <!-- Close share/project-upload controller wrapper -->
