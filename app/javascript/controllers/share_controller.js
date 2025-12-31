@@ -6,12 +6,12 @@ export default class extends Controller {
   open(event) {
     const projectId = event.currentTarget.dataset.projectId
     this.currentProjectId = projectId
-    this.modalTarget.classList.add("active")
+    this.modalTarget.classList.add("visible")
     this.resetForm()
   }
 
   close() {
-    this.modalTarget.classList.remove("active")
+    this.modalTarget.classList.remove("visible")
     this.resetForm()
   }
 
