@@ -67,5 +67,13 @@ class ShareLinksController < ApplicationController
     end
   end
 
+  # DELETE /share_links/:id
+  # Delete a share link (owner only)
+  def destroy
+    @share_link = current_user.projects.find(params[:project_id]).share_links.find(params[:id])
+    @share_link.destroy
+    render json: { success: true }
+  end
+
 
 end
