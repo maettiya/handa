@@ -1,0 +1,108 @@
+<% content_for :page_title, "SHARE" %>
+
+<!-- Tab Navigation -->
+<div class="nav-tabs">
+  <%= link_to "LIBRARY", root_path, class: "nav-tab" %>
+  <%= link_to "SHARE", quick_shares_path, class: "nav-tab active" %>
+</div>
+
+<div data-controller="quick-share" data-quick-share-create-url-value="<%= quick_shares_path %>" data-quick-share-direct-upload-url-value="<%= rails_direct_uploads_url %>">
+
+<!-- Upload Zone -->
+<div class="quick-share-dropzone"
+     data-quick-share-target="dropzone"
+     data-action="dragover->quick-share#dragOver dragleave->quick-share#dragLeave drop->quick-share#drop">
+  <div class="dropzone-content" data-quick-share-target="dropzoneContent">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <polyline points="17 8 12 3 7 8"></polyline>
+      <line x1="12" y1="3" x2="12" y2="15"></line>
+    </svg>
+    <p>Drag & drop a file to share</p>
+    <span class="dropzone-hint">or</span>
+    <button class="dropzone-btn" data-action="click->quick-share#openFilePicker">Choose file</button>
+  </div>
+
+  <!-- Options form (shown after file selected) -->
+  <div class="quick-share-options hidden" data-quick-share-target="options">
+    <p class="selected-filename" data-quick-share-target="filename"></p>
+
+    <div class="share-form-field">
+      <label>Password (optional)</label>
+      <input type="password" placeholder="Leave blank for no password" class="folder-name-input" data-quick-share-target="password">
+    </div>
+
+    <div class="share-form-field">
+      <label>Expires</label>
+      <select class="folder-name-input" data-quick-share-target="expires">
+        <option value="24_hours">24 hours</option>
+        <option value="7_days">7 days</option>
+        <option value="30_days">30 days</option>
+        <option value="">Never</option>
+      </select>
+    </div>
+
+    <div class="quick-share-actions">
+      <button class="cancel-btn" data-action="click->quick-share#reset">Cancel</button>
+      <button class="save-btn" data-action="click->quick-share#createShare">Create Link</button>
+    </div>
+  </div>
+
+  <!-- Result (shown after link created) -->
+  <div class="quick-share-result hidden" data-quick-share-target="result">
+    <p class="result-filename" data-quick-share-target="resultFilename"></p>
+    <div class="share-link-display">
+      <input type="text" readonly class="share-link-input" data-quick-share-target="url">
+      <button class="copy-btn" data-action="click->quick-share#copyLink" data-quick-share-target="copyBtn">Copy</button>
+    </div>
+    <button class="save-btn" data-action="click->quick-share#reset" style="width: 100%; margin-top: 16px;">Share Another</button>
+  </div>
+</div>
+
+<!-- Hidden file input -->
+<input type="file" class="file-input" data-quick-share-target="fileInput" data-action="change->quick-share#handleFileSelect" accept=".als,.logicx,.wav,.mp3,.zip,.aif,.aiff,.flac">
+
+<!-- Upload Progress -->
+<div class="upload-progress" data-quick-share-target="progress">
+  <div class="upload-progress-bar">
+    <div class="upload-progress-fill" data-quick-share-target="progressFill"></div>
+  </div>
+  <div class="upload-progress-info">
+    <span data-quick-share-target="progressFilename">Uploading...</span>
+    <span data-quick-share-target="progressPercent">0%</span>
+  </div>
+</div>
+
+<!-- Recent Quick Shares -->
+<% if @quick_shares.any? %>
+  <div class="quick-share-history">
+    <h3>Recent Shares</h3>
+    <div class="quick-share-list">
+      <% @quick_shares.each do |project| %>
+        <% share_link = project.share_links.first %>
+        <div class="quick-share-item">
+          <div class="quick-share-item-info">
+            <span class="quick-share-item-title"><%= project.title %></span>
+            <% if share_link %>
+              <% if share_link.expired? %>
+                <span class="quick-share-item-status expired">Expired</span>
+              <% elsif share_link.expires_at %>
+                <span class="quick-share-item-status">Expires <%= time_ago_in_words(share_link.expires_at) %></span>
+              <% else %>
+                <span class="quick-share-item-status">Never expires</span>
+              <% end %>
+            <% end %>
+          </div>
+          <div class="quick-share-item-actions">
+            <% if share_link && !share_link.expired? %>
+              <button class="copy-link-btn" data-url="<%= share_link_url(share_link.token) %>" data-action="click->quick-share#copyExistingLink">Copy Link</button>
+            <% end %>
+            <%= link_to "Delete", quick_share_path(project), data: { turbo_method: :delete, turbo_confirm: "Delete this share?" }, class: "delete-link-btn" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+</div>
