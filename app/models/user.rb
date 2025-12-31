@@ -5,12 +5,23 @@ class User < ApplicationRecord
   has_many :collaborations, dependent: :destroy
   has_many :inverse_collaborations, class_name: 'Collaboration', foreign_key: 'collaborator_id', dependent: :destroy
   has_many :notifications
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
   validates :username, presence: true, uniqueness: true
+
+  # Library projects (non-ephemeral)
+  def library_projects
+    projects.library.order(created_at: :desc)
+  end
+
+  # Quick shares (ephemeral)
+  def quick_shares
+    projects.ephemeral_shares.order(created_at: :desc)
+  end
 
   # Get all collaborators (mutual - both directions)
   def collaborators
