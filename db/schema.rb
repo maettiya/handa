@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_30_053833) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_31_064649) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -89,6 +89,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_30_053833) do
     t.datetime "updated_at", null: false
     t.string "project_type"
     t.boolean "extracted", default: false
+    t.boolean "ephemeral", default: false, null: false
+    t.bigint "shared_from_user_id"
+    t.index ["shared_from_user_id"], name: "index_projects_on_shared_from_user_id"
+    t.index ["user_id", "ephemeral"], name: "index_projects_on_user_id_and_ephemeral"
     t.index ["user_id"], name: "index_projects_on_user_id"
   end
 
@@ -125,5 +129,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_30_053833) do
   add_foreign_key "project_files", "project_files", column: "parent_id"
   add_foreign_key "project_files", "projects"
   add_foreign_key "projects", "users"
+  add_foreign_key "projects", "users", column: "shared_from_user_id"
   add_foreign_key "share_links", "projects"
 end
