@@ -4,6 +4,13 @@ class Project < ApplicationRecord
   has_many :share_links, dependent: :destroy
   has_one_attached :file
 
+  # Quick share support
+  belongs_to :shared_from_user, class_name: 'User', optional: true
+
+  # Scopes for filtering library vs ephemeral
+  scope :library, -> { where(ephemeral: false) }
+  scope :ephemeral_shares, -> { where(ephemeral: true) }
+
   validates :title, presence: true
   validates :file, presence: true, unless: :folder?
 
