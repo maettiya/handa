@@ -25,8 +25,18 @@
       </div>
     <% else %>
       <%= link_to "Download", share_link_download_path(@share_link.token), class: "share-download-btn" %>
+
+      <% if user_signed_in? %>
+        <%= button_to "Save to Library", share_link_save_path(@share_link.token), method: :post, class: "share-save-btn" %>
+      <% else %>
+        <p class="share-save-prompt">
+          <%= link_to "Sign in", new_user_session_path %> to save to your library
+        </p>
+      <% end %>
     <% end %>
 
-    <p class="share-footer">Shared via Handa</p>
+    <p class="share-footer">
+      Shared by @<%= @project.user.username %> via Handa
+    </p>
   </div>
 </div>

@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { DirectUpload } from "@activestorage/direct_upload"
+import { DirectUpload } from "@rails/activestorage"
 
 export default class extends Controller {
   static targets = [

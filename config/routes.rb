@@ -41,7 +41,8 @@ Rails.application.routes.draw do
 
   # Quick share routes
   get 'share', to: 'quick_shares#index', as: :quick_shares
-  resources :quick_shares, only: [:create, :destroy]
+  post 'share', to: 'quick_shares#create'
+  delete 'share/:id', to: 'quick_shares#destroy', as: :quick_share
 
   # Save shared project to library
   post 's/:token/save', to: 'share_links#save_to_library', as: :share_link_save
