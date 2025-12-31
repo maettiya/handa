@@ -19,4 +19,15 @@ class ShareLinksController < ApplicationController
     end
   end
 
+  # GET /s/:token
+  # Public page for viewing/downloading shared project
+  def show
+    if @share_link.expired?
+      render :expired and return
+    end
+
+    @project = @share_link.project
+    @require_password = @share_link.password_required? && !session_authenticated?
+  end
+
 end
