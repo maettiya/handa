@@ -18,6 +18,11 @@ class ShareLink < ApplicationRecord
     expires_at.present? && expires_at < Time.current
   end
 
+  # Check if password is required
+  def password_required
+    password_digest.present?
+  end
+
   private
 
   def generate_token
