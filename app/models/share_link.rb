@@ -10,6 +10,10 @@ class ShareLink < ApplicationRecord
   validates :token, uniqueness: true, allow_nil: true
   validates :project, presence: true
 
+  # Scopes
+  scope :active, -> { where("expires_at IS NULL OR expires_at > ?", Time.current) }
+
+
   private
 
   def generate_token
