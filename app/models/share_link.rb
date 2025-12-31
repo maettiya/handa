@@ -13,6 +13,10 @@ class ShareLink < ApplicationRecord
   # Scopes
   scope :active, -> { where("expires_at IS NULL OR expires_at > ?", Time.current) }
 
+  # Check if link has expired
+  def expired?
+    expires_at.present? && expires_at < Time.current
+  end
 
   private
 
