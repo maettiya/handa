@@ -1,5 +1,5 @@
 class ShareLinksController < ApplicationController
-  before_action :authenticate_user!, only: [:create, :destroy]
+  before_action :authenticate_user!, only: [:create, :destroy, :save_to_library]
   before_action :set_share_link, only: [:show, :download, :verify_password]
   before_action :set_project, only: [:create]
 
@@ -60,7 +60,7 @@ class ShareLinksController < ApplicationController
     end
 
     # Check password if required
-    if @share_link.password_required? && !session["share_link_#{@share_link.id}_verified"]
+    if @share_link.password_required? && !session["share_link_#{@share_link.token}"]
       redirect_to share_link_path(@share_link.token), alert: "Please verify password first"
       return
     end
