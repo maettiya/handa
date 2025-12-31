@@ -75,5 +75,24 @@ class ShareLinksController < ApplicationController
     render json: { success: true }
   end
 
+  private
+
+  def set_share_link
+    @share_link = ShareLink.find_by!(token: params[:token])
+  rescue ActiveRecord::RecordNotFound
+    render :not_found
+  end
+
+  def set_project
+    @project = current_user.projects.find(params[:project_id])
+  end
+
+  def share_link_params
+    params.permit(:password, :expires_at)
+  end
+
+  def session_authenticated?
+    session["share_link_#{@share_link.token}"] == true
+  end
 
 end
