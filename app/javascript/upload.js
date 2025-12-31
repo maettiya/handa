@@ -12,7 +12,9 @@ document.addEventListener("turbo:load", function() {
   const progressFilename = document.getElementById("upload-filename");
   const progressPercent = document.getElementById("upload-percent");
 
-  if (!addBtn) return;
+  // Only run on library page (where titleInput exists)
+  // Project show page uses project_upload_controller.js instead
+  if (!addBtn || !titleInput) return;
 
   // Click button to open file browser
   addBtn.addEventListener("click", function() {

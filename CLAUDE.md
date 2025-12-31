@@ -24,7 +24,8 @@ app/
 ├── controllers/
 │   ├── application_controller.rb      # Devise auth, requires login for all pages
 │   ├── library_controller.rb          # index - main dashboard
-│   ├── projects_controller.rb         # create, show, download, destroy, download_file, download_folder, destroy_file
+│   ├── projects_controller.rb         # create, show, download, destroy, download_file, download_folder, destroy_file, upload_files
+│   ├── share_links_controller.rb      # create, destroy, show, download, verify_password - public share links
 │   ├── profile_controller.rb          # show, edit, update - user profile page
 │   ├── collaborators_controller.rb    # index, create, destroy, search - manage collaborators
 │   └── notifications_controller.rb    # mark_read - notification management
@@ -38,7 +39,7 @@ app/
 │   ├── project_file.rb                # Extracted files with tree structure
 │   ├── collaboration.rb               # User-to-user collaboration relationship
 │   ├── notification.rb                # User notifications (collaborator_added, etc.)
-│   └── share_link.rb                  # Sharing (model exists, not implemented)
+│   └── share_link.rb                  # Shareable links with optional password/expiry
 ├── services/
 │   └── project_extraction_service.rb  # ZIP extraction logic
 ├── views/
@@ -49,14 +50,17 @@ app/
 │   │   └── _breadcrumbs.html.erb      # File path navigation partial
 │   ├── profile/                       # User profile views
 │   ├── collaborators/                 # Collaborator management views
+│   ├── share_links/                   # Public share page views (show, expired, not_found)
 │   └── devise/                        # Auth forms
 └── javascript/
     ├── application.js                  # Entry point
-    ├── upload.js                       # Drag-drop, file picker, progress bar
+    ├── upload.js                       # Drag-drop, file picker, progress bar (library page)
     └── controllers/
-        ├── dropdown_controller.js              # Three-dot menu toggle
+        ├── dropdown_controller.js              # Three-dot menu toggle with submenu support
         ├── notification_dropdown_controller.js # Notification bell dropdown + mark as read
-        └── collaborator_search_controller.js   # Autocomplete search for adding collaborators
+        ├── collaborator_search_controller.js   # Autocomplete search for adding collaborators
+        ├── share_controller.js                 # Share link modal (create link, copy URL)
+        └── project_upload_controller.js        # File uploads within projects (drag-drop + picker)
 ```
 
 ## Key Models & Relationships
@@ -74,6 +78,7 @@ User
 Project
 ├── belongs_to :user
 ├── has_many :project_files, dependent: :destroy
+├── has_many :share_links, dependent: :destroy
 ├── has_one_attached :file (original ZIP)
 ├── fields: title, project_type (ableton/logic/folder), extracted
 ├── validates: title presence, file presence
@@ -100,9 +105,12 @@ Notification
 ├── scopes: unread, recent
 ├── Types: 'collaborator_added'
 
-ShareLink (NOT YET IMPLEMENTED)
+ShareLink
 ├── belongs_to :project
+├── has_secure_password (optional - for password-protected links)
 ├── fields: token, expires_at, download_count, password_digest
+├── methods: expired?, password_required?
+├── Token auto-generated on create (SecureRandom.urlsafe_base64)
 ```
 
 ## Routes
@@ -122,8 +130,15 @@ resources :projects, only: [:create, :show, :destroy] do
     post :duplicate                                    # Duplicate a project
     patch :rename                                      # Rename a project
     post :create_subfolder                             # Create folder inside project
+    post :upload_files                                 # Upload files to existing project
   end
+  resources :share_links, only: [:create, :destroy]    # Nested share link management
 end
+
+# Public share link routes (no auth required)
+get 's/:token', to: 'share_links#show'                 # View shared project
+get 's/:token/download', to: 'share_links#download'    # Download shared project
+post 's/:token/verify', to: 'share_links#verify_password'  # Verify password
 
 resource :profile, only: [:show, :edit, :update]       # User profile
 
@@ -171,8 +186,10 @@ yarn build:css             # Build Tailwind CSS
 | Background extraction | `app/jobs/project_extraction_job.rb` |
 | File hiding rules | `app/models/project_file.rb` (HIDDEN_EXTENSIONS, HIDDEN_FOLDERS) |
 | File icon selection | `app/helpers/file_icon_helper.rb` |
-| Upload UI/UX + progress | `app/javascript/upload.js` |
+| Upload UI/UX + progress (library) | `app/javascript/upload.js` |
+| Upload within projects | `app/javascript/controllers/project_upload_controller.js` |
 | Dropdown menus | `app/javascript/controllers/dropdown_controller.js` |
+| Share link modal | `app/javascript/controllers/share_controller.js` |
 | Notification dropdown | `app/javascript/controllers/notification_dropdown_controller.js` |
 | Collaborator search | `app/javascript/controllers/collaborator_search_controller.js` |
 | Library view | `app/views/library/index.html.erb` |
@@ -232,10 +249,15 @@ Supported file types:
 - **Notifications**: Bell icon with unread count badge, dropdown showing recent activity, auto mark-as-read on open
   - Currently supports: `collaborator_added` notification type
   - Polymorphic `notifiable` ready for future notification types (e.g., file shared, project downloaded)
+- **Share Links**: Create shareable URLs for projects with optional password protection and expiry
+  - Public URLs at `/s/:token` (no login required)
+  - Password protection with session-based verification
+  - Expiry options: 1 hour, 24 hours, 7 days, 30 days, or never
+  - Download tracking (download_count field)
+- **File uploads within projects**: Drag & drop or file picker to add files to existing projects/folders
 
 ## What's NOT Implemented Yet
 
-- **ShareLink functionality** (model exists, no controller/UI)
 - **Search** (icon in UI, no logic)
 - **Audio previews/waveforms**
 - **Payment integration**
@@ -248,9 +270,11 @@ Supported file types:
 4. **Self-referential association**: ProjectFile uses `parent_id` for folder tree structure
 5. **Helper modules**: FileIconHelper for icon selection logic, included in views
 6. **Stimulus Controllers**:
-   - `DropdownController` - Three-dot menu toggle
+   - `DropdownController` - Three-dot menu toggle with submenu support (CSS bridge for hover stability)
    - `NotificationDropdownController` - Bell icon dropdown with AJAX mark-as-read
    - `CollaboratorSearchController` - Autocomplete search with avatar display
+   - `ShareController` - Share link modal (create, display URL, copy to clipboard)
+   - `ProjectUploadController` - File uploads within projects (Direct Upload to R2)
 7. **Cloud Storage**: Cloudflare R2 (S3-compatible) configured with special checksum settings
 8. **Polymorphic associations**: Notification `notifiable` allows linking to any model (future: projects, files)
 
@@ -259,11 +283,19 @@ Supported file types:
 ### ProjectsController
 - `show` - View project contents, supports subfolder navigation via `folder_id` param
 - `create` - Upload new project, triggers background extraction job
-- `download` - Download original uploaded file
+- `download` - Download original file, or ZIP of contents, or empty ZIP for folders
 - `download_file` - Download individual extracted file with original filename
 - `download_folder` - Download folder as in-memory ZIP file
 - `destroy` - Delete entire project and all extracted files
 - `destroy_file` - Delete individual file or folder (cascades to children)
+- `upload_files` - Upload files to existing project (handles Direct Upload signed blobs)
+
+### ShareLinksController
+- `create` - Create new share link (nested under project, requires auth)
+- `destroy` - Delete a share link
+- `show` - Public page to view/download shared project (no auth, renders expired/not_found views)
+- `download` - Download shared project (checks password if required)
+- `verify_password` - AJAX endpoint to verify password, stores in session
 
 ### LibraryController
 - `index` - Main dashboard (empty action, view renders user's projects)
@@ -311,7 +343,6 @@ Test framework is Minitest but **no tests have been written yet**. Test files ex
 
 ## Known Issues / Technical Debt
 
-1. ShareLink model unused
-2. Devise mailer not configured for password resets
-3. Zero test coverage
-4. No error handling UI for failed extractions
+1. Devise mailer not configured for password resets
+2. Zero test coverage
+3. No error handling UI for failed extractions
