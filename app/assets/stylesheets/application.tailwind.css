@@ -2039,6 +2039,53 @@ body {
   margin-top: 8px;
 }
 
+/* Share Modal Styles */
+.share-form-field {
+  margin-bottom: 16px;
+}
+
+.share-form-field label {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.share-link-display {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.share-link-input {
+  flex: 1;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.copy-btn {
+  background: #333;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.copy-btn:hover {
+  background: #444;
+}
+
+.hidden {
+  display: none !important;
+}
+
 
 
 
