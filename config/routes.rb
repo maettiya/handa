@@ -39,6 +39,13 @@ Rails.application.routes.draw do
   get 's/:token/download', to: 'share_links#download', as: :share_link_download
   post 's/:token/verify', to: 'share_links#verify_password', as: :share_link_verify
 
+  # Quick share routes
+  get 'share', to: 'quick_shares#index', as: :quick_shares
+  resources :quick_shares, only: [:create, :destroy]
+
+  # Save shared project to library
+  post 's/:token/save', to: 'share_links#save_to_library', as: :share_link_save
+
   # Library - main dashboard showing all user's files
   get 'library/index'
   root "library#index"
