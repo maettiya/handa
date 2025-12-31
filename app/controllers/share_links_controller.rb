@@ -30,4 +30,18 @@ class ShareLinksController < ApplicationController
     @require_password = @share_link.password_required? && !session_authenticated?
   end
 
+  # POST /s/:token/verify_password
+  # Verify password for protected links
+  def verify_password
+    if @share_link.authenticate(params[:password])
+      session["share_link_#{@share_link.token}"] = true
+      redirect_to share_link_path(@share_link.token)
+    else
+      @project = @share_link.project
+      @requires_password = true
+      @password_error = "Incorrect password"
+      render :show
+    end
+  end
+
 end
