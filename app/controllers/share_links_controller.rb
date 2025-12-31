@@ -15,7 +15,7 @@ class ShareLinksController < ApplicationController
         token: @share_link.token
       }
     else
-      render json: { success: false, errors: @share_link.errors.full_messages }, status: unprocessable_entity
+      render json: { success: false, errors: @share_link.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
