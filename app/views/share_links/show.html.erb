@@ -1,0 +1,32 @@
+<div class="share-page">
+  <div class="share-card">
+    <div class="share-icon">
+      <%= image_tag project_icon_for(@project), class: "icon-image" %>
+    </div>
+
+    <h1 class="share-title"><%= @project.title %></h1>
+
+    <% if @project.file.attached? %>
+      <p class="share-meta"><%= number_to_human_size(@project.file.byte_size) %></p>
+    <% end %>
+
+    <% if @require_password %>
+      <div class="share-password-form">
+        <p class="share-password-label">This file is password protected</p>
+
+        <% if @password_error %>
+          <p class="share-error"><%= @password_error %></p>
+        <% end %>
+
+        <%= form_with url: share_link_verify_path(@share_link.token), method: :post, local: true do |f| %>
+          <%= f.password_field :password, placeholder: "Enter password", class: "share-password-input" %>
+          <%= f.submit "Unlock", class: "share-download-btn" %>
+        <% end %>
+      </div>
+    <% else %>
+      <%= link_to "Download", share_link_download_path(@share_link.token), class: "share-download-btn" %>
+    <% end %>
+
+    <p class="share-footer">Shared via Handa</p>
+  </div>
+</div>

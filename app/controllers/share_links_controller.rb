@@ -88,7 +88,20 @@ class ShareLinksController < ApplicationController
   end
 
   def share_link_params
-    params.permit(:password, :expires_at)
+    permitted = params.permit(:password, :expires_at)
+
+    # Convert expiry option to actual timestamp
+    if permitted[:expires_at].present?
+      permitted[:expires_at] = case permitted[:expires_at]
+      when '1_hour' then 1.hour.from_now
+      when '24_hours' then 24.hours.from_now
+      when '7_days' then 7.days.from_now
+      when '30_days' then 30.days.from_now
+      else nil
+      end
+    end
+
+    permitted
   end
 
   def session_authenticated?
