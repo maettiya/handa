@@ -19,13 +19,13 @@ class ShareLink < ApplicationRecord
   end
 
   # Check if password is required
-  def password_required
+  def password_required?
     password_digest.present?
   end
 
   # Increment download count
   def record_download!
-    increment!(download_count)
+    increment!(:download_count)
   end
 
   private
