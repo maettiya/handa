@@ -44,6 +44,59 @@ class ShareLinksController < ApplicationController
     end
   end
 
+  # POST /s/:token/save - Save shared project to current user's library
+  def save_to_library
+    @share_link = ShareLink.find_by(token: params[:token])
+
+    # Handle missing/expired links
+    unless @share_link
+      redirect_to root_path, alert: "Share link not found"
+      return
+    end
+
+    if @share_link.expired?
+      redirect_to root_path, alert: "Share link has expired"
+      return
+    end
+
+    # Check password if required
+    if @share_link.password_required? && !session["share_link_#{@share_link.id}_verified"]
+      redirect_to share_link_path(@share_link.token), alert: "Please verify password first"
+      return
+    end
+
+    original_project = @share_link.project
+
+    # Clone the project to current user's library
+    new_project = current_user.projects.build(
+      title: original_project.title,
+      project_type: original_project.project_type,
+      ephemeral: false,  # Save to permanent library
+      shared_from_user: original_project.user  # Attribution
+    )
+
+    # Copy the attached file
+    if original_project.file.attached?
+      new_project.file.attach(
+        io: StringIO.new(original_project.file.download),
+        filename: original_project.file.filename.to_s,
+        content_type: original_project.file.content_type
+      )
+    end
+
+    if new_project.save
+      # If original had extracted files, trigger extraction for the copy
+      if original_project.project_files.any?
+        ProjectExtractionJob.perform_later(new_project.id)
+      end
+
+      redirect_to root_path, notice: "Saved to your library!"
+    else
+      redirect_to share_link_path(@share_link.token), alert: "Could not save to library"
+    end
+  end
+
+
   # GET /s/:token/download
   # Download the shared project
   def download
