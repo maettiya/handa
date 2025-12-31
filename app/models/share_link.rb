@@ -23,6 +23,11 @@ class ShareLink < ApplicationRecord
     password_digest.present?
   end
 
+  # Increment download count
+  def record_download!
+    increment!(download_count)
+  end
+
   private
 
   def generate_token
