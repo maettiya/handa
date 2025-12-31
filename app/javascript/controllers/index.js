@@ -21,3 +21,6 @@ application.register("notification-dropdown", NotificationDropdownController)
 
 import SearchFiltersController from "./search_filters_controller"
 application.register("search-filters", SearchFiltersController)
+
+import ShareController from "./share_controller"
+application.register("share", ShareController)
