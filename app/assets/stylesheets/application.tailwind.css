@@ -658,18 +658,34 @@ body {
   position: absolute;
   left: 100%;
   top: 0;
-  margin-left: 4px;
+  margin-left: 0;
+  padding-left: 4px;
+  background: transparent;
+  z-index: 101;
+}
+
+.submenu-inner {
   background: #2a2a2a;
   border: 1px solid #3a3a3a;
   border-radius: 8px;
   min-width: 160px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  z-index: 101;
   overflow: hidden;
 }
 
+/* Show submenu on hover with bridge area */
 .menu-item-with-submenu:hover .submenu {
   display: block;
+}
+
+/* Invisible bridge to prevent losing hover when moving to submenu */
+.submenu::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 0;
+  width: 14px;
+  height: 100%;
 }
 
 /* Access Submenu */

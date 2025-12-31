@@ -14,6 +14,15 @@ export default class extends Controller {
       }
     }
     document.addEventListener("click", this.outsideClickHandler)
+
+    // Close all other dropdowns when this one opens
+    this.element.addEventListener("click", () => {
+      document.querySelectorAll(".menu-dropdown.open").forEach((menu) => {
+        if (menu !== this.menuTarget) {
+          menu.classList.remove("open")
+        }
+      })
+    })
   }
 
   disconnect() {
@@ -28,5 +37,12 @@ export default class extends Controller {
 
   close() {
     this.menuTarget.classList.remove("open")
+  }
+
+  // Close when a menu item is clicked (except submenu parents)
+  closeOnAction(event) {
+    if (!event.target.closest(".menu-item-with-submenu")) {
+      this.close()
+    }
   }
 }

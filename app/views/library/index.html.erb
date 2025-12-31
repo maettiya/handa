@@ -92,9 +92,11 @@
                   </svg>
                 </button>
                 <div class="submenu">
-                  <button class="menu-item" data-action="click->share#open" data-project-id="<%= project.id %>">
-                    Create a link
-                  </button>
+                  <div class="submenu-inner">
+                    <button class="menu-item" data-action="click->share#open" data-project-id="<%= project.id %>">
+                      Create a link
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -116,23 +118,25 @@
                     <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none"/>
                   </svg>
                 </button>
-                <div class="submenu access-submenu">
-                  <div class="access-submenu-item">
-                    <div class="access-mini-avatar" style="background: #6366f1;">T</div>
-                    <span>Thundercat</span>
-                  </div>
-                  <div class="access-submenu-item">
-                    <div class="access-mini-avatar" style="background: #22c55e;">K</div>
-                    <span>Korvo</span>
-                  </div>
-                  <div class="access-submenu-item">
-                    <div class="access-mini-avatar" style="background: #f59e0b;">P</div>
-                    <span>Puba</span>
-                  </div>
-                  <div class="submenu-divider"></div>
-                  <div class="access-submenu-item owner">
-                    <div class="access-mini-avatar" style="background: #4a4a4a;"><%= current_user.username.first.upcase %></div>
-                    <span><%= current_user.username %> (you)</span>
+                <div class="submenu">
+                  <div class="submenu-inner access-submenu">
+                    <div class="access-submenu-item">
+                      <div class="access-mini-avatar" style="background: #6366f1;">T</div>
+                      <span>Thundercat</span>
+                    </div>
+                    <div class="access-submenu-item">
+                      <div class="access-mini-avatar" style="background: #22c55e;">K</div>
+                      <span>Korvo</span>
+                    </div>
+                    <div class="access-submenu-item">
+                      <div class="access-mini-avatar" style="background: #f59e0b;">P</div>
+                      <span>Puba</span>
+                    </div>
+                    <div class="submenu-divider"></div>
+                    <div class="access-submenu-item owner">
+                      <div class="access-mini-avatar" style="background: #4a4a4a;"><%= current_user.username.first.upcase %></div>
+                      <span><%= current_user.username %> (you)</span>
+                    </div>
                   </div>
                 </div>
               </div>
