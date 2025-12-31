@@ -87,10 +87,28 @@ class ProjectsController < ApplicationController
     end
   end
 
-  # Downloads the original uploaded file
+  # Downloads the original uploaded file or creates a ZIP for folders/extracted projects
   def download
     @project = current_user.projects.find(params[:id])
-    redirect_to rails_blob_path(@project.file, disposition: "attachment")
+
+    if @project.file.attached?
+      # Has original file - download it directly
+      redirect_to rails_blob_path(@project.file, disposition: "attachment")
+    elsif @project.project_files.any?
+      # Has extracted contents - create a ZIP
+      zip_data = create_project_zip(@project)
+      send_data zip_data,
+        type: 'application/zip',
+        disposition: 'attachment',
+        filename: "#{@project.title}.zip"
+    else
+      # Empty folder - create empty ZIP
+      zip_data = create_empty_zip(@project.title)
+      send_data zip_data,
+        type: 'application/zip',
+        disposition: 'attachment',
+        filename: "#{@project.title}.zip"
+    end
   end
 
   # Downloads a single file from a project
@@ -274,6 +292,38 @@ class ProjectsController < ApplicationController
         zio.write(child.file.download)
       end
     end
+  end
+
+  # Creates a ZIP of all project files
+  def create_project_zip(project)
+    require 'zip'
+
+    stringio = Zip::OutputStream.write_buffer do |zio|
+      project.project_files.visible.where(parent_id: nil).each do |file|
+        if file.is_directory?
+          add_folder_to_zip(zio, file, file.original_filename)
+        elsif file.file.attached?
+          zio.put_next_entry(file.original_filename)
+          zio.write(file.file.download)
+        end
+      end
+    end
+
+    stringio.rewind
+    stringio.read
+  end
+
+  # Creates an empty ZIP (for empty folders)
+  def create_empty_zip(folder_name)
+    require 'zip'
+
+    stringio = Zip::OutputStream.write_buffer do |zio|
+      # Add an empty directory entry
+      zio.put_next_entry("#{folder_name}/")
+    end
+
+    stringio.rewind
+    stringio.read
   end
 
 end

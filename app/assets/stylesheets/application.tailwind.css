@@ -448,7 +448,7 @@ body {
 }
 
 .drop-zone {
-  min-height: 500px;
+  min-height: calc(100vh - 250px);
   border: 2px dashed transparent;
   border-radius: 8px;
   margin: 30px auto;

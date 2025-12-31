@@ -3,8 +3,28 @@
 <%# Uses the same grid layout as library for consistent UX %>
 <% content_for :page_title, @project.title.upcase %>
 
+<div data-controller="share">
+
 <%# Breadcrumb navigation - file path style %>
 <%= render "projects/breadcrumbs" %>
+
+<%# Upload buttons - same as library %>
+<div class="library-actions">
+  <div class="add-project-btn" id="add-project-btn">
+    + Add files
+  </div>
+  <button class="add-folder-btn" id="add-folder-btn">
+    + New folder
+  </button>
+</div>
+
+<%# Hidden file input for uploads %>
+<%= form_with url: create_subfolder_project_path(@project), method: :post, id: "upload-form", local: true do |f| %>
+  <input type="file" class="file-input" id="file-input" name="files[]" multiple accept=".als,.logicx,.wav,.mp3,.zip,.aif,.aiff,.flac">
+  <% if @current_folder %>
+    <input type="hidden" name="parent_id" value="<%= @current_folder.id %>">
+  <% end %>
+<% end %>
 
 <%# File grid - same styling as library %>
 <div class="drop-zone" id="drop-zone">
@@ -50,11 +70,29 @@
               </svg>
             </button>
             <div class="menu-dropdown" data-dropdown-target="menu">
+              <!-- Share with submenu -->
+              <div class="menu-item-with-submenu">
+                <button class="menu-item menu-item-parent">
+                  <span>Share</span>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                  </svg>
+                </button>
+                <div class="submenu">
+                  <div class="submenu-inner">
+                    <button class="menu-item" data-action="click->share#open" data-project-id="<%= @project.id %>">
+                      Create a link
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <% if file.is_directory? %>
-                <%= link_to "Download as ZIP", download_folder_project_path(@project, folder_id: file.id), class: "menu-item" %>
-              <% else %>
+                <%= link_to "Download", download_folder_project_path(@project, folder_id: file.id), class: "menu-item" %>
+              <% elsif file.file.attached? %>
                 <%= link_to "Download", download_file_project_path(@project, file_id: file.id), class: "menu-item" %>
               <% end %>
+
               <div class="menu-divider"></div>
               <%= link_to "Delete", destroy_file_project_path(@project, file_id: file.id),
                   data: { turbo_method: :delete, turbo_confirm: "Delete '#{file.original_filename}'?#{file.is_directory? ? ' This will delete all contents inside.' : ''}" },
@@ -65,7 +103,7 @@
       <% end %>
     </div>
   <% else %>
-    <p class="empty-state">This folder is empty. Right-click to create a new folder.</p>
+    <p class="empty-state">Drag & drop files here or use the button above</p>
   <% end %>
 </div>
 
@@ -97,3 +135,47 @@
     <% end %>
   </div>
 </div>
+
+<!-- Share Link Modal -->
+<div id="share-modal" class="modal-overlay" data-share-target="modal" data-action="click->share#clickOutside">
+  <div class="modal-content">
+    <h3>Share Link</h3>
+
+    <!-- Create Form -->
+    <div data-share-target="createForm">
+      <div class="share-form-field">
+        <label>Password (optional)</label>
+        <input type="password" placeholder="Leave blank for no password" class="folder-name-input" data-share-target="passwordField">
+      </div>
+
+      <div class="share-form-field">
+        <label>Expires (optional)</label>
+        <select class="folder-name-input" data-share-target="expiresField">
+          <option value="">Never</option>
+          <option value="1_hour">1 hour</option>
+          <option value="24_hours">24 hours</option>
+          <option value="7_days">7 days</option>
+          <option value="30_days">30 days</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" data-action="click->share#close">Cancel</button>
+        <button type="button" class="save-btn" data-action="click->share#createLink">Create Link</button>
+      </div>
+    </div>
+
+    <!-- Link Display (shown after creation) -->
+    <div data-share-target="linkDisplay" class="hidden">
+      <div class="share-link-display">
+        <input type="text" readonly class="share-link-input" data-share-target="url">
+        <button type="button" class="copy-btn" data-action="click->share#copyLink" data-share-target="copyBtn">Copy</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="save-btn" data-action="click->share#close" style="width: 100%;">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div> <!-- Close share controller wrapper -->

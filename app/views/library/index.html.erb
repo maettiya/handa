@@ -100,9 +100,7 @@
                 </div>
               </div>
 
-              <% if project.file.attached? %>
-                <%= link_to "Download", download_project_path(project), class: "menu-item" %>
-              <% end %>
+              <%= link_to "Download", download_project_path(project), class: "menu-item" %>
 
               <%= button_to "Duplicate", duplicate_project_path(project), method: :post, class: "menu-item", form: { data: { turbo: false } } %>
 
