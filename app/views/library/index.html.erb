@@ -1,5 +1,11 @@
 <% content_for :page_title, "LIBRARY" %>
 
+<!-- Tab Navigation -->
+<div class="nav-tabs">
+  <%= link_to "LIBRARY", root_path, class: "nav-tab active" %>
+  <%= link_to "SHARE", quick_shares_path, class: "nav-tab" %>
+</div>
+
 <div data-controller="share">
 
 <div class="library-actions">
