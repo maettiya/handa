@@ -44,4 +44,28 @@ class ShareLinksController < ApplicationController
     end
   end
 
+  # GET /s/:token/download
+  # Download the shared project
+  def download
+    if @share_link.expired?
+      redirect_to share_link_path(@share_link.token), alert: "This link has expired"
+      return
+    end
+
+    if @share_link.password_required? && !session_authenticated?
+      redirect_to share_link_path(@share_link.token)
+      return
+    end
+
+    @share_link.record_download!
+    @project = @share_link.project
+
+    if @project.file.attached?
+      redirect_to rails_blob_path(@project.file, disposition: "attachment")
+    else
+      redirect_to share_link_path(@share_link.token), alert: "File not available"
+    end
+  end
+
+
 end
