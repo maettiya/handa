@@ -328,6 +328,13 @@ class ProjectsController < ApplicationController
       @other_file = project.project_files.find(merge_with_id)
       folder_name = generate_untitled_folder_name(@file.parent_id)
 
+      # Create the new folder
+      new_folder = @project.project_files.create!(
+        original_filename: foldeR_name,
+        is_directory: true,
+        parent_id: @file.parent_id,
+        path: build_file_path(@file.parent_id, folder_name)
+      )
     end
   end
 
