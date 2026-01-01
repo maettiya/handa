@@ -383,6 +383,19 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def generate_untitled_folder_name(parent_id)
+    existing = @project.project_files
+                        .where(parent_id: parent_id, is_directory: true)
+                        .where("original_filename LIKE 'untitled folder%'")
+                        .pluck(:original_filename)
+
+    return "untitled folder" unless existing.include?("untitled folder")
+
+    numbers = existing.map { |n| n[/\d+$/]&.to_i }.compact
+    next_num = numbers.empty? ? 2 : numbers.max + 1
+    "untitled folder #{next_num}"
+  end
+
   # Detects if project has a single root folder that should be auto-skipped
   def detect_skipped_root_folder
     root_files = @project.project_files
