@@ -17,6 +17,10 @@ module FileIconHelper
       return "icons/ableton.svg"
     when "logic"
       return "icons/logic.svg"
+    when "lossless_audio"
+      return "icons/audio.svg"
+    when "compressed_audio"
+      return "icons/mp3.svg"
     end
 
     # Regular directories/folders get the folder icon
