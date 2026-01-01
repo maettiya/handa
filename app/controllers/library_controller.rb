@@ -19,13 +19,15 @@ class LibraryController < ApplicationController
       # Create the new folder at root level
       new_folder = current_user.assets.create!(
         title: folder_name,
+        original_filename: folder_name,
         is_directory: true,
-        asset_type: 'folder'
+        asset_type: 'folder',
+        path: folder_name
       )
 
       # Move both assets into the new folder
-      @asset.update!(parent_id: new_folder.id)
-      @other_asset.update!(parent_id: new_folder.id)
+      move_asset_to_folder(@asset, new_folder)
+      move_asset_to_folder(@other_asset, new_folder)
 
       render json: { success: true, folder_id: new_folder.id }
     elsif target_id.present?
@@ -37,7 +39,7 @@ class LibraryController < ApplicationController
         return
       end
 
-      @asset.update!(parent_id: target_folder.id)
+      move_asset_to_folder(@asset, target_folder)
       render json: { success: true }
     else
       render json: { success: false, error: "No target specified" }, status: :unprocessable_entity
@@ -49,6 +51,20 @@ class LibraryController < ApplicationController
   end
 
   private
+
+  # Move an asset into a folder, properly setting path and original_filename
+  def move_asset_to_folder(asset, folder)
+    # For root-level assets, original_filename may not be set - derive from title or attached file
+    filename = asset.original_filename.presence ||
+               asset.file&.filename&.to_s ||
+               asset.title
+
+    asset.update!(
+      parent_id: folder.id,
+      original_filename: filename,
+      path: "#{folder.path}/#{filename}"
+    )
+  end
 
   def generate_untitled_folder_name
     existing = current_user.assets.root_level.where(is_directory: true)
