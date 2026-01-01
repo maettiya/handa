@@ -3,7 +3,10 @@
 <%# Uses the same grid layout as library for consistent UX %>
 <% content_for :page_title, @project.title.upcase %>
 
-<div data-controller="share project-upload" data-project-upload-project-id-value="<%= @project.id %>" data-project-upload-parent-id-value="<%= @current_folder&.id %>">
+<div data-controller="share project-upload file-drag"
+     data-project-upload-project-id-value="<%= @project.id %>"
+     data-project-upload-parent-id-value="<%= @current_folder&.id %>"
+     data-file-drag-move-url-value="<%= move_file_project_path(@project) %>">
 
 <%# Upload buttons - same as library, ABOVE breadcrumbs %>
 <div class="library-actions">
@@ -26,7 +29,13 @@
   <% if @files.any? %>
     <div class="projects-grid">
       <% @files.each do |file| %>
-        <div class="project-card-wrapper">
+        <div class="project-card-wrapper"
+            draggable="true"
+            data-file-id="<%= file.id %>"
+            data-file-type="<%= file.is_directory? ? 'folder' : file.extension %>"
+            data-is-directory="<%= file.is_directory? %>"
+            data-action="dragstart->file-drag#dragStart dragend->file-drag#dragEnd dragover->file-drag#dragOver dragleave->file-drag#dragLeave drop->file-drag#drop">
+
           <% if file.is_directory? %>
             <%# Folder - clicking navigates into it %>
             <%= link_to project_path(@project, folder_id: file.id), class: "project-card" do %>
