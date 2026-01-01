@@ -340,8 +340,20 @@ class ProjectsController < ApplicationController
       move_to_parent(@file, new_folder)
       move_to_parent(@other_file, new_folder)
 
+      render json: { success: true, folder_id: new_folder.id }
+    else
+      # Simple move to folder or root
+      new_parent_id = target_id == "root" ? nil : target_id
+      new_parent = new_parent_id ? @project.project_files.find(new_parent_id) : nil
 
+      move_to_parent(@file, new_parent)
+
+      render json: { success: true }
     end
+  rescue ActiveRecord::RecordNotFound
+    render json: { success: false, error: "File not found" }, status: :not_found
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
   end
 
   # ////////////////////////////////////////////////////////////////////////////////
@@ -352,6 +364,16 @@ class ProjectsController < ApplicationController
   # ////////////////////////////////////////////////////////////////////////////////
   # ////////////////////////////////////////////////////////////////////////////////
   # ////////////////////////////////////////////////////////////////////////////////
+
+
+  def move_to_parent(file, new_parent)
+    file.parent_id = new_parent&.id
+    file.path = new_parent ? "#{new_parent.path}/#{file.original_filename}" : file.original_filename
+    file.save!
+
+    # Recursively update children paths if it's a folder
+    rebuild_children_paths(file) if file.is_directory
+  end
 
   # Detects if project has a single root folder that should be auto-skipped
   def detect_skipped_root_folder
