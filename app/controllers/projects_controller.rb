@@ -335,6 +335,12 @@ class ProjectsController < ApplicationController
         parent_id: @file.parent_id,
         path: build_file_path(@file.parent_id, folder_name)
       )
+
+      # Move both files into the new folder
+      move_to_parent(@file, new_folder)
+      move_to_parent(@other_file, new_folder)
+
+
     end
   end
 
