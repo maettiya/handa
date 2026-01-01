@@ -3,13 +3,13 @@
 
 <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
   <%# LIBRARY - always links back to main library %>
-  <%= link_to "LIBRARY", root_path, class: "breadcrumb-link" %>
+  <%= link_to "LIBRARY", root_path, class: "breadcrumb-link", data: { folder_id: "root", action: "dragover->file-drag#breadcrumbDragOver dragleave->file-drag#breadcrumbDragLeave drop->file-drag#breadcrumbDrop" } %>
 
   <span class="breadcrumb-separator">/</span>
 
   <%# Project name - links to project root (no folder_id) %>
   <% if @current_folder %>
-    <%= link_to @project.title, project_path(@project), class: "breadcrumb-link" %>
+    <%= link_to @project.title, project_path(@project), class: "breadcrumb-link", data: { folder_id: "project_root", action: "dragover->file-drag#breadcrumbDragOver dragleave->file-drag#breadcrumbDragLeave drop->file-drag#breadcrumbDrop" } %>
 
     <%# Build and display folder chain %>
     <%
@@ -30,7 +30,7 @@
       <% if index == ancestors.length - 1 %>
         <span class="breadcrumb-current"><%= ancestor.original_filename %></span>
       <% else %>
-        <%= link_to ancestor.original_filename, project_path(@project, folder_id: ancestor.id), class: "breadcrumb-link" %>
+        <%= link_to ancestor.original_filename, project_path(@project, folder_id: ancestor.id), class: "breadcrumb-link", data: { folder_id: ancestor.id, action: "dragover->file-drag#breadcrumbDragOver dragleave->file-drag#breadcrumbDragLeave drop->file-drag#breadcrumbDrop" } %>
       <% end %>
     <% end %>
   <% else %>
