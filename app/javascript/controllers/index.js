@@ -30,3 +30,6 @@ application.register("project-upload", ProjectUploadController)
 
 import QuickShareController from "./quick_share_controller"
 application.register("quick-share", QuickShareController)
+
+import FileDragController from "./file_drag_controller"
+application.register("file-drag", FileDragController)
