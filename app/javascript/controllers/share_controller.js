@@ -4,8 +4,8 @@ export default class extends Controller {
   static targets = ["modal", "url", "copyBtn", "passwordField", "expiresField", "createForm", "linkDisplay"]
 
   open(event) {
-    const projectId = event.currentTarget.dataset.projectId
-    this.currentProjectId = projectId
+    const assetId = event.currentTarget.dataset.assetId
+    this.currentAssetId = assetId
     this.modalTarget.classList.add("visible")
     this.resetForm()
   }
@@ -32,7 +32,7 @@ export default class extends Controller {
 
   async createLink(event) {
     event.preventDefault()
-    const projectId = event.currentTarget.dataset.projectId || this.currentProjectId
+    const assetId = event.currentTarget.dataset.assetId || this.currentAssetId
 
     const formData = new FormData()
     if (this.hasPasswordFieldTarget && this.passwordFieldTarget.value) {
@@ -43,7 +43,7 @@ export default class extends Controller {
     }
 
     try {
-      const response = await fetch(`/projects/${projectId}/share_links`, {
+      const response = await fetch(`/items/${assetId}/share_links`, {
         method: "POST",
         headers: {
           "X-CSRF-Token": document.querySelector("[name='csrf-token']").content

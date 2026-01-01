@@ -1,12 +1,12 @@
 class ShareLinksController < ApplicationController
   before_action :authenticate_user!, only: [:create, :destroy, :save_to_library]
   before_action :set_share_link, only: [:show, :download, :verify_password]
-  before_action :set_project, only: [:create]
+  before_action :set_asset, only: [:create]
 
-  # POST /projects/:project_id/share_links
-  # Creates a new share link for a project (requires login)
+  # POST /assets/:asset_id/share_links
+  # Creates a new share link for an asset (requires login)
   def create
-    @share_link = @project.share_links.new(share_link_params)
+    @share_link = @asset.share_links.new(share_link_params)
 
     if @share_link.save
       render json: {
@@ -20,13 +20,13 @@ class ShareLinksController < ApplicationController
   end
 
   # GET /s/:token
-  # Public page for viewing/downloading shared project
+  # Public page for viewing/downloading shared asset
   def show
     if @share_link.expired?
       render :expired and return
     end
 
-    @project = @share_link.project
+    @asset = @share_link.asset
     @require_password = @share_link.password_required? && !session_authenticated?
   end
 
@@ -37,14 +37,14 @@ class ShareLinksController < ApplicationController
       session["share_link_#{@share_link.token}"] = true
       redirect_to share_link_path(@share_link.token)
     else
-      @project = @share_link.project
+      @asset = @share_link.asset
       @requires_password = true
       @password_error = "Incorrect password"
       render :show
     end
   end
 
-  # POST /s/:token/save - Save shared project to current user's library
+  # POST /s/:token/save - Save shared asset to current user's library
   def save_to_library
     @share_link = ShareLink.find_by(token: params[:token])
 
@@ -65,29 +65,31 @@ class ShareLinksController < ApplicationController
       return
     end
 
-    original_project = @share_link.project
+    original_asset = @share_link.asset
 
-    # Clone the project to current user's library
-    new_project = current_user.projects.build(
-      title: original_project.title,
-      project_type: original_project.project_type,
+    # Clone the asset to current user's library
+    new_asset = current_user.assets.build(
+      title: original_asset.title,
+      original_filename: original_asset.original_filename,
+      asset_type: original_asset.asset_type,
+      is_directory: original_asset.is_directory?,
       ephemeral: false,  # Save to permanent library
-      shared_from_user: original_project.user  # Attribution
+      shared_from_user: original_asset.user  # Attribution
     )
 
     # Copy the attached file
-    if original_project.file.attached?
-      new_project.file.attach(
-        io: StringIO.new(original_project.file.download),
-        filename: original_project.file.filename.to_s,
-        content_type: original_project.file.content_type
+    if original_asset.file.attached?
+      new_asset.file.attach(
+        io: StringIO.new(original_asset.file.download),
+        filename: original_asset.file.filename.to_s,
+        content_type: original_asset.file.content_type
       )
     end
 
-    if new_project.save
-      # If original had extracted files, trigger extraction for the copy
-      if original_project.project_files.any?
-        ProjectExtractionJob.perform_later(new_project.id)
+    if new_asset.save
+      # If original had children, trigger extraction for the copy
+      if original_asset.children.any?
+        AssetExtractionJob.perform_later(new_asset.id)
       end
 
       redirect_to root_path, notice: "Saved to your library!"
@@ -96,9 +98,8 @@ class ShareLinksController < ApplicationController
     end
   end
 
-
   # GET /s/:token/download
-  # Download the shared project
+  # Download the shared asset
   def download
     if @share_link.expired?
       redirect_to share_link_path(@share_link.token), alert: "This link has expired"
@@ -111,10 +112,10 @@ class ShareLinksController < ApplicationController
     end
 
     @share_link.record_download!
-    @project = @share_link.project
+    @asset = @share_link.asset
 
-    if @project.file.attached?
-      redirect_to rails_blob_path(@project.file, disposition: "attachment")
+    if @asset.file.attached?
+      redirect_to rails_blob_path(@asset.file, disposition: "attachment")
     else
       redirect_to share_link_path(@share_link.token), alert: "File not available"
     end
@@ -123,7 +124,7 @@ class ShareLinksController < ApplicationController
   # DELETE /share_links/:id
   # Delete a share link (owner only)
   def destroy
-    @share_link = current_user.projects.find(params[:project_id]).share_links.find(params[:id])
+    @share_link = current_user.assets.find(params[:asset_id]).share_links.find(params[:id])
     @share_link.destroy
     render json: { success: true }
   end
@@ -136,8 +137,8 @@ class ShareLinksController < ApplicationController
     render :not_found
   end
 
-  def set_project
-    @project = current_user.projects.find(params[:project_id])
+  def set_asset
+    @asset = current_user.assets.find(params[:asset_id])
   end
 
   def share_link_params

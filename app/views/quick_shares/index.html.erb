@@ -73,11 +73,11 @@
   <div class="quick-share-history">
     <h3>Recent Shares</h3>
     <div class="quick-share-list">
-      <% @quick_shares.each do |project| %>
-        <% share_link = project.share_links.first %>
+      <% @quick_shares.each do |asset| %>
+        <% share_link = asset.share_links.first %>
         <div class="quick-share-item">
           <div class="quick-share-item-info">
-            <span class="quick-share-item-title"><%= project.title %></span>
+            <span class="quick-share-item-title"><%= asset.title %></span>
             <% if share_link %>
               <% if share_link.expired? %>
                 <span class="quick-share-item-status expired">Expired</span>
@@ -92,7 +92,7 @@
             <% if share_link && !share_link.expired? %>
               <button class="copy-link-btn" data-url="<%= share_link_url(share_link.token) %>" data-action="click->quick-share#copyExistingLink">Copy Link</button>
             <% end %>
-            <%= link_to "Delete", quick_share_path(project), data: { turbo_method: :delete, turbo_confirm: "Delete this share?" }, class: "delete-link-btn" %>
+            <%= link_to "Delete", quick_share_path(asset), data: { turbo_method: :delete, turbo_confirm: "Delete this share?" }, class: "delete-link-btn" %>
           </div>
         </div>
       <% end %>

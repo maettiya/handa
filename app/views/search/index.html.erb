@@ -137,9 +137,9 @@
             <div class="projects-grid">
               <% @daw_files.each do |file| %>
                 <div class="project-card-wrapper">
-                  <%= link_to project_path(file.project), class: "project-card" do %>
+                  <%= link_to asset_path(file.root_asset, folder_id: file.parent_id), class: "project-card" do %>
                     <div class="project-icon">
-                      <%= image_tag file_icon_for(file), class: "icon-image" %>
+                      <%= image_tag asset_icon_for(file), class: "icon-image" %>
                     </div>
                     <p><%= file.original_filename %></p>
                   <% end %>
@@ -154,52 +154,52 @@
           <div class="results-group">
             <h3 class="results-group-title">Audio & Files (<%= audio_count %>)</h3>
             <div class="projects-grid">
-              <%# Non-DAW Projects (folders, standalone audio uploads) %>
-              <% @other_projects.each do |project| %>
+              <%# Root-level assets (folders, standalone audio uploads) %>
+              <% @other_projects.each do |asset| %>
                 <div class="project-card-wrapper">
-                  <% if project.folder? %>
-                    <%= link_to project_path(project), class: "project-card" do %>
+                  <% if asset.folder? %>
+                    <%= link_to asset_path(asset), class: "project-card" do %>
                       <div class="project-icon">
-                        <%= image_tag "icons/folder.svg", class: "icon-image" %>
+                        <%= image_tag asset_icon_for(asset), class: "icon-image" %>
                       </div>
-                      <p><%= project.title %></p>
+                      <p><%= asset.title %></p>
                     <% end %>
-                  <% elsif project.file.attached? %>
-                    <% ext = File.extname(project.file.filename.to_s).downcase.delete(".") %>
+                  <% elsif asset.file.attached? %>
+                    <% ext = File.extname(asset.file.filename.to_s).downcase.delete(".") %>
                     <% if %w[wav mp3 aif aiff flac m4a].include?(ext) %>
                       <div class="project-card"
-                           data-audio-url="<%= url_for(project.file) %>"
-                           data-audio-title="<%= project.title %>">
+                           data-audio-url="<%= url_for(asset.file) %>"
+                           data-audio-title="<%= asset.title %>">
                         <div class="project-icon">
-                          <%= image_tag project_icon_for(project), class: "icon-image" %>
+                          <%= image_tag asset_icon_for(asset), class: "icon-image" %>
                         </div>
-                        <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
+                        <p><%= asset.title %><%= File.extname(asset.file.filename.to_s) %></p>
                       </div>
                     <% else %>
-                      <%= link_to project_path(project), class: "project-card" do %>
+                      <%= link_to asset_path(asset), class: "project-card" do %>
                         <div class="project-icon">
-                          <%= image_tag project_icon_for(project), class: "icon-image" %>
+                          <%= image_tag asset_icon_for(asset), class: "icon-image" %>
                         </div>
-                        <p><%= project.title %></p>
+                        <p><%= asset.title %></p>
                       <% end %>
                     <% end %>
                   <% else %>
-                    <%= link_to project_path(project), class: "project-card" do %>
+                    <%= link_to asset_path(asset), class: "project-card" do %>
                       <div class="project-icon">
-                        <%= image_tag project_icon_for(project), class: "icon-image" %>
+                        <%= image_tag asset_icon_for(asset), class: "icon-image" %>
                       </div>
-                      <p><%= project.title %></p>
+                      <p><%= asset.title %></p>
                     <% end %>
                   <% end %>
                 </div>
               <% end %>
-              <%# Audio files and other ProjectFiles %>
+              <%# Child assets (audio files and folders within extracted ZIPs) %>
               <% @audio_files.each do |file| %>
                 <div class="project-card-wrapper">
                   <% if file.is_directory %>
-                    <%= link_to project_path(file.project, folder_id: file.id), class: "project-card" do %>
+                    <%= link_to asset_path(file.root_asset, folder_id: file.id), class: "project-card" do %>
                       <div class="project-icon">
-                        <%= image_tag file_icon_for(file), class: "icon-image" %>
+                        <%= image_tag asset_icon_for(file), class: "icon-image" %>
                       </div>
                       <p><%= file.original_filename %></p>
                     <% end %>
@@ -208,14 +208,14 @@
                          data-audio-url="<%= url_for(file.file) %>"
                          data-audio-title="<%= file.original_filename %>">
                       <div class="project-icon">
-                        <%= image_tag file_icon_for(file), class: "icon-image" %>
+                        <%= image_tag asset_icon_for(file), class: "icon-image" %>
                       </div>
                       <p><%= file.original_filename %></p>
                     </div>
                   <% else %>
-                    <%= link_to project_path(file.project), class: "project-card" do %>
+                    <%= link_to asset_path(file.root_asset, folder_id: file.parent_id), class: "project-card" do %>
                       <div class="project-icon">
-                        <%= image_tag file_icon_for(file), class: "icon-image" %>
+                        <%= image_tag asset_icon_for(file), class: "icon-image" %>
                       </div>
                       <p><%= file.original_filename %></p>
                     <% end %>

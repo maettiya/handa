@@ -1,5 +1,5 @@
-<%# app/views/projects/_breadcrumbs.html.erb %>
-<%# File-path style breadcrumb navigation: LIBRARY / Project / Folder / Subfolder %>
+<%# app/views/assets/_breadcrumbs.html.erb %>
+<%# File-path style breadcrumb navigation: LIBRARY / Asset / Folder / Subfolder %>
 
 <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
   <%# LIBRARY - always links back to main library %>
@@ -7,20 +7,22 @@
 
   <span class="breadcrumb-separator">/</span>
 
-  <%# Project name - links to project root (no folder_id) %>
+  <%# Asset name - links to asset root (no folder_id) %>
   <% if @current_folder %>
-    <%= link_to @project.title, project_path(@project), class: "breadcrumb-link", data: { folder_id: "project_root", action: "dragover->file-drag#breadcrumbDragOver dragleave->file-drag#breadcrumbDragLeave drop->file-drag#breadcrumbDrop" } %>
+    <%= link_to @asset.title, asset_path(@asset), class: "breadcrumb-link", data: { folder_id: "asset_root", action: "dragover->file-drag#breadcrumbDragOver dragleave->file-drag#breadcrumbDragLeave drop->file-drag#breadcrumbDrop" } %>
 
     <%# Build and display folder chain %>
     <%
-      # Walk up the tree to build ancestry
+      # Walk up the tree to build ancestry (stop when we hit the root asset)
       ancestors = []
       folder = @current_folder
-      while folder
+      while folder && folder.id != @asset.id
         # Skip the auto-skipped root folder from breadcrumbs
         unless @skipped_root_folder && folder.id == @skipped_root_folder.id
           ancestors.unshift(folder)
         end
+        # Stop if this folder's parent is the root asset
+        break if folder.parent_id == @asset.id
         folder = folder.parent
       end
 
@@ -30,11 +32,11 @@
       <% if index == ancestors.length - 1 %>
         <span class="breadcrumb-current"><%= ancestor.original_filename %></span>
       <% else %>
-        <%= link_to ancestor.original_filename, project_path(@project, folder_id: ancestor.id), class: "breadcrumb-link", data: { folder_id: ancestor.id, action: "dragover->file-drag#breadcrumbDragOver dragleave->file-drag#breadcrumbDragLeave drop->file-drag#breadcrumbDrop" } %>
+        <%= link_to ancestor.original_filename, asset_path(@asset, folder_id: ancestor.id), class: "breadcrumb-link", data: { folder_id: ancestor.id, action: "dragover->file-drag#breadcrumbDragOver dragleave->file-drag#breadcrumbDragLeave drop->file-drag#breadcrumbDrop" } %>
       <% end %>
     <% end %>
   <% else %>
-    <%# At project root - show as current (not linked) %>
-    <span class="breadcrumb-current"><%= @project.title %></span>
+    <%# At asset root - show as current (not linked) %>
+    <span class="breadcrumb-current"><%= @asset.title %></span>
   <% end %>
 </nav>

@@ -1,32 +1,33 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  # Projects
-  # Create: Upload new project (ZIP or single file)
-  # Show: View extracted contents of a project (Look inside)
-  # Destroy: Delete a project (and it's contents)
+  # Library items (files and folders)
+  # Using 'items' path to avoid conflict with Rails asset pipeline (/assets)
+  # Create: Upload new asset (ZIP or single file)
+  # Show: View contents of an asset (browse children)
+  # Destroy: Delete an asset (and its children)
   # Download: Download the original uploaded file
-  resources :projects, only: [:create, :show, :destroy] do
+  resources :assets, path: 'items', only: [:create, :show, :destroy] do
     collection do
       post :create_folder
     end
 
     member do
-      # Downloads the original ZIP file
+      # Downloads the original file
       get :download
-      # Downloads an individual file
-      get 'download_file/:file_id', to: 'projects#download_file', as: :download_file
+      # Downloads an individual child file
+      get 'download_file/:file_id', to: 'assets#download_file', as: :download_file
       # Downloads an individual folder
-      get 'download_folder/:folder_id', to: 'projects#download_folder', as: :download_folder
+      get 'download_folder/:folder_id', to: 'assets#download_folder', as: :download_folder
       # Deletes an individual file or folder
-      delete 'delete_file/:file_id', to: 'projects#destroy_file', as: :destroy_file
-      # Duplicate a project
+      delete 'delete_file/:file_id', to: 'assets#destroy_file', as: :destroy_file
+      # Duplicate an asset
       post :duplicate
-      # Rename a project
+      # Rename an asset
       patch :rename
-      # Create a folder inside a project
+      # Create a folder inside an asset
       post :create_subfolder
-      # Upload files to a project
+      # Upload files to an asset
       post :upload_files
       # Move files
       post :move_file
@@ -46,11 +47,12 @@ Rails.application.routes.draw do
   post 'share', to: 'quick_shares#create'
   delete 'share/:id', to: 'quick_shares#destroy', as: :quick_share
 
-  # Save shared project to library
+  # Save shared asset to library
   post 's/:token/save', to: 'share_links#save_to_library', as: :share_link_save
 
   # Library - main dashboard showing all user's files
   get 'library/index'
+  post 'library/move_asset', to: 'library#move_asset', as: :library_move_asset
   root "library#index"
 
   # Profile - user profile dashboard

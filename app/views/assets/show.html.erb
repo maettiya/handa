@@ -1,16 +1,16 @@
-<%# app/views/projects/show.html.erb %>
-<%# Displays the contents of a project (extracted files from ZIP) %>
+<%# app/views/assets/show.html.erb %>
+<%# Displays the contents of an asset (extracted files from ZIP or folder contents) %>
 <%# Uses the same grid layout as library for consistent UX %>
-<% content_for :page_title, @project.title.upcase %>
+<% content_for :page_title, @asset.title.upcase %>
 
-<div data-controller="share project-upload file-drag"
-     data-project-upload-project-id-value="<%= @project.id %>"
-     data-project-upload-parent-id-value="<%= @current_folder&.id %>"
-     data-file-drag-move-url-value="<%= move_file_project_path(@project) %>">
+<div data-controller="share asset-upload file-drag"
+     data-asset-upload-asset-id-value="<%= @asset.id %>"
+     data-asset-upload-parent-id-value="<%= @current_folder&.id %>"
+     data-file-drag-move-url-value="<%= move_file_asset_path(@asset) %>">
 
 <%# Upload buttons - same as library, ABOVE breadcrumbs %>
 <div class="library-actions">
-  <div class="add-project-btn" id="add-project-btn" data-action="click->project-upload#openFilePicker">
+  <div class="add-project-btn" id="add-project-btn" data-action="click->asset-upload#openFilePicker">
     + Add files
   </div>
   <button class="add-folder-btn" id="add-folder-btn">
@@ -19,13 +19,13 @@
 </div>
 
 <%# Breadcrumb navigation - file path style %>
-<%= render "projects/breadcrumbs" %>
+<%= render "assets/breadcrumbs" %>
 
 <%# Hidden file input for uploads %>
-<input type="file" class="file-input" id="file-input" name="files[]" multiple accept=".als,.logicx,.wav,.mp3,.zip,.aif,.aiff,.flac" data-project-upload-target="fileInput" data-direct-upload-url="<%= rails_direct_uploads_url %>" data-action="change->project-upload#handleFileSelect">
+<input type="file" class="file-input" id="file-input" name="files[]" multiple accept=".als,.logicx,.wav,.mp3,.zip,.aif,.aiff,.flac" data-asset-upload-target="fileInput" data-direct-upload-url="<%= rails_direct_uploads_url %>" data-action="change->asset-upload#handleFileSelect">
 
 <%# File grid - same styling as library %>
-<div class="drop-zone" id="drop-zone" data-project-upload-target="dropZone" data-action="dragover->project-upload#dragOver dragleave->project-upload#dragLeave drop->project-upload#drop">
+<div class="drop-zone" id="drop-zone" data-asset-upload-target="dropZone" data-action="dragover->asset-upload#dragOver dragleave->asset-upload#dragLeave drop->asset-upload#drop">
   <% if @files.any? %>
     <div class="projects-grid">
       <% @files.each do |file| %>
@@ -38,7 +38,7 @@
 
           <% if file.is_directory? %>
             <%# Folder - clicking navigates into it %>
-            <%= link_to project_path(@project, folder_id: file.id), class: "project-card" do %>
+            <%= link_to asset_path(@asset, folder_id: file.id), class: "project-card" do %>
               <div class="project-icon">
                 <%= image_tag "icons/folder.svg", class: "icon-image" %>
               </div>
@@ -50,7 +50,7 @@
                  data-audio-url="<%= url_for(file.file) %>"
                  data-audio-title="<%= file.original_filename %>">
               <div class="project-icon">
-                <%= image_tag file_icon_for(file), class: "icon-image" %>
+                <%= image_tag asset_icon_for(file), class: "icon-image" %>
               </div>
               <p><%= file.original_filename %></p>
             </div>
@@ -58,7 +58,7 @@
             <%# Other file - display with icon %>
             <div class="project-card">
               <div class="project-icon">
-                <%= image_tag file_icon_for(file), class: "icon-image" %>
+                <%= image_tag asset_icon_for(file), class: "icon-image" %>
               </div>
               <p><%= file.original_filename %></p>
             </div>
@@ -84,7 +84,7 @@
                 </button>
                 <div class="submenu">
                   <div class="submenu-inner">
-                    <button class="menu-item" data-action="click->share#open" data-project-id="<%= @project.id %>">
+                    <button class="menu-item" data-action="click->share#open" data-asset-id="<%= @asset.id %>">
                       Create a link
                     </button>
                   </div>
@@ -92,13 +92,13 @@
               </div>
 
               <% if file.is_directory? %>
-                <%= link_to "Download", download_folder_project_path(@project, folder_id: file.id), class: "menu-item" %>
+                <%= link_to "Download", download_folder_asset_path(@asset, folder_id: file.id), class: "menu-item" %>
               <% elsif file.file.attached? %>
-                <%= link_to "Download", download_file_project_path(@project, file_id: file.id), class: "menu-item" %>
+                <%= link_to "Download", download_file_asset_path(@asset, file_id: file.id), class: "menu-item" %>
               <% end %>
 
               <div class="menu-divider"></div>
-              <%= link_to "Delete", destroy_file_project_path(@project, file_id: file.id),
+              <%= link_to "Delete", destroy_file_asset_path(@asset, file_id: file.id),
                   data: { turbo_method: :delete, turbo_confirm: "Delete '#{file.original_filename}'?#{file.is_directory? ? ' This will delete all contents inside.' : ''}" },
                   class: "menu-item menu-item-danger" %>
             </div>
@@ -127,7 +127,7 @@
 <div id="folder-modal" class="modal-overlay">
   <div class="modal-content">
     <h3>Create New Folder</h3>
-    <%= form_with url: create_subfolder_project_path(@project), method: :post, class: "folder-form" do %>
+    <%= form_with url: create_subfolder_asset_path(@asset), method: :post, class: "folder-form" do %>
       <% if @current_folder %>
         <input type="hidden" name="parent_id" value="<%= @current_folder.id %>">
       <% end %>
@@ -183,14 +183,14 @@
 </div>
 
 <!-- Upload Progress -->
-<div class="upload-progress" id="upload-progress" data-project-upload-target="progressContainer">
+<div class="upload-progress" id="upload-progress" data-asset-upload-target="progressContainer">
   <div class="upload-progress-bar">
-    <div class="upload-progress-fill" id="upload-progress-fill" data-project-upload-target="progressFill"></div>
+    <div class="upload-progress-fill" id="upload-progress-fill" data-asset-upload-target="progressFill"></div>
   </div>
   <div class="upload-progress-info">
-    <span id="upload-filename" data-project-upload-target="progressFilename">Uploading...</span>
-    <span id="upload-percent" data-project-upload-target="progressPercent">0%</span>
+    <span id="upload-filename" data-asset-upload-target="progressFilename">Uploading...</span>
+    <span id="upload-percent" data-asset-upload-target="progressPercent">0%</span>
   </div>
 </div>
 
-</div> <!-- Close share/project-upload controller wrapper -->
+</div> <!-- Close share/asset-upload controller wrapper -->

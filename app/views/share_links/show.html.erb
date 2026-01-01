@@ -1,13 +1,13 @@
 <div class="share-page">
   <div class="share-card">
     <div class="share-icon">
-      <%= image_tag project_icon_for(@project), class: "icon-image" %>
+      <%= image_tag asset_icon_for(@asset), class: "icon-image" %>
     </div>
 
-    <h1 class="share-title"><%= @project.title %></h1>
+    <h1 class="share-title"><%= @asset.title %></h1>
 
-    <% if @project.file.attached? %>
-      <p class="share-meta"><%= number_to_human_size(@project.file.byte_size) %></p>
+    <% if @asset.file.attached? %>
+      <p class="share-meta"><%= number_to_human_size(@asset.file.byte_size) %></p>
     <% end %>
 
     <% if @require_password %>
@@ -36,7 +36,7 @@
     <% end %>
 
     <p class="share-footer">
-      Shared by @<%= @project.user.username %> via Handa
+      Shared by @<%= @asset.user.username %> via Handa
     </p>
   </div>
 </div>

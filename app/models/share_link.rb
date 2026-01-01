@@ -1,5 +1,5 @@
 class ShareLink < ApplicationRecord
-  belongs_to :project
+  belongs_to :asset
 
   has_secure_password validations: false
 
@@ -8,7 +8,7 @@ class ShareLink < ApplicationRecord
 
   # Validations
   validates :token, uniqueness: true, allow_nil: true
-  validates :project, presence: true
+  validates :asset, presence: true
 
   # Scopes
   scope :active, -> { where("expires_at IS NULL OR expires_at > ?", Time.current) }

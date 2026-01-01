@@ -133,13 +133,13 @@ export default class extends Controller {
     const folderId = event.target.dataset.folderId
 
     if (folderId === 'root') {
-      // Moving to library - not supported (different model)
-      console.log('Moving to library not supported')
+      // Moving to library root level
+      this.moveFile(this.draggedFileId, 'library')
       return
     }
 
-    // project_root means the project's root level (parent_id = nil)
-    const targetId = folderId === 'project_root' ? 'root' : folderId
+    // asset_root means the asset's root level (parent_id = asset.id)
+    const targetId = folderId === 'asset_root' ? 'root' : folderId
     this.moveFile(this.draggedFileId, targetId)
   }
 
@@ -164,8 +164,12 @@ export default class extends Controller {
       const data = await response.json()
 
       if (data.success) {
-        // Reload the page to show updated file structure
-        window.location.reload()
+        // Redirect to library if specified, otherwise reload current page
+        if (data.redirect) {
+          window.location.href = data.redirect
+        } else {
+          window.location.reload()
+        }
       } else {
         alert('Failed to move file: ' + (data.error || 'Unknown error'))
       }

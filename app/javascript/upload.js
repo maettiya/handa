@@ -91,13 +91,13 @@ document.addEventListener("turbo:load", function() {
 
       // Create form and submit
       const formData = new FormData();
-      formData.append("project[file]", blob.signed_id);
-      formData.append("project[title]", title);
+      formData.append("asset[file]", blob.signed_id);
+      formData.append("asset[title]", title);
 
       // Get CSRF token
       const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-      fetch("/projects", {
+      fetch("/items", {
         method: "POST",
         headers: {
           "X-CSRF-Token": csrfToken,

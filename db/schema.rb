@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_31_064649) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_01_114948) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,29 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_31_064649) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "assets", force: :cascade do |t|
+    t.string "title"
+    t.string "original_filename"
+    t.bigint "user_id", null: false
+    t.bigint "parent_id"
+    t.string "path"
+    t.bigint "file_size"
+    t.boolean "is_directory", default: false
+    t.boolean "hidden", default: false
+    t.string "file_type"
+    t.string "asset_type"
+    t.boolean "extracted", default: false
+    t.boolean "ephemeral", default: false, null: false
+    t.bigint "shared_from_user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["parent_id"], name: "index_assets_on_parent_id"
+    t.index ["shared_from_user_id"], name: "index_assets_on_shared_from_user_id"
+    t.index ["user_id", "ephemeral"], name: "index_assets_on_user_id_and_ephemeral"
+    t.index ["user_id", "parent_id"], name: "index_assets_on_user_id_and_parent_id"
+    t.index ["user_id"], name: "index_assets_on_user_id"
   end
 
   create_table "collaborations", force: :cascade do |t|
@@ -101,10 +124,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_31_064649) do
     t.datetime "expires_at"
     t.integer "download_count"
     t.string "password_digest"
-    t.bigint "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["project_id"], name: "index_share_links_on_project_id"
+    t.bigint "asset_id", null: false
+    t.index ["asset_id"], name: "index_share_links_on_asset_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -122,6 +145,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_31_064649) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "assets", "assets", column: "parent_id"
+  add_foreign_key "assets", "users"
+  add_foreign_key "assets", "users", column: "shared_from_user_id"
   add_foreign_key "collaborations", "users"
   add_foreign_key "collaborations", "users", column: "collaborator_id"
   add_foreign_key "notifications", "users"
@@ -130,5 +156,5 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_31_064649) do
   add_foreign_key "project_files", "projects"
   add_foreign_key "projects", "users"
   add_foreign_key "projects", "users", column: "shared_from_user_id"
-  add_foreign_key "share_links", "projects"
+  add_foreign_key "share_links", "assets"
 end

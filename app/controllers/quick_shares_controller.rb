@@ -4,9 +4,9 @@ class QuickSharesController < ApplicationController
     @quick_shares = current_user.quick_shares.includes(:share_links)
   end
 
-  # POST /quick_shares - Create ephemeral project + auto-generate share link
+  # POST /quick_shares - Create ephemeral asset + auto-generate share link
   def create
-    @project = current_user.projects.build(
+    @asset = current_user.assets.build(
       title: params[:title] || "Quick Share",
       ephemeral: true
     )
@@ -14,37 +14,38 @@ class QuickSharesController < ApplicationController
     # Attach file from signed blob ID (Direct Upload)
     if params[:signed_id].present?
       blob = ActiveStorage::Blob.find_signed(params[:signed_id])
-      @project.file.attach(blob)
-      @project.title = blob.filename.base if @project.title == "Quick Share"
+      @asset.file.attach(blob)
+      @asset.original_filename = blob.filename.to_s
+      @asset.title = blob.filename.base if @asset.title == "Quick Share"
     end
 
-    if @project.save
+    if @asset.save
       # Auto-create share link with expiry
       expires_at = parse_expiry(params[:expires])
-      share_link = @project.share_links.create!(
+      share_link = @asset.share_links.create!(
         expires_at: expires_at,
         password: params[:password].presence
       )
 
       # Trigger extraction if it's a ZIP
-      if @project.file.attached? && @project.file.content_type == 'application/zip'
-        ProjectExtractionJob.perform_later(@project.id)
+      if @asset.file.attached? && @asset.file.content_type == 'application/zip'
+        AssetExtractionJob.perform_later(@asset.id)
       end
 
       render json: {
         success: true,
         url: share_link_url(share_link.token),
-        project_id: @project.id
+        asset_id: @asset.id
       }
     else
-      render json: { success: false, errors: @project.errors.full_messages }, status: :unprocessable_entity
+      render json: { success: false, errors: @asset.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   # DELETE /quick_shares/:id - Delete a quick share
   def destroy
-    @project = current_user.projects.ephemeral_shares.find(params[:id])
-    @project.destroy
+    @asset = current_user.assets.ephemeral_shares.find(params[:id])
+    @asset.destroy
     redirect_to quick_shares_path, notice: "Share deleted"
   end
 

@@ -5,72 +5,87 @@
 
 <div class="library-actions">
   <div class="add-project-btn" id="add-project-btn">
-    + Add projects
+    + Add files
   </div>
   <button class="add-folder-btn" id="add-folder-btn">
     + New folder
   </button>
 </div>
 
-<%= form_with model: Project.new, id: "upload-form" do |f| %>
+<%= form_with model: Asset.new, id: "upload-form" do |f| %>
   <%= f.file_field :file, class: "file-input", id: "file-input", accept: ".als,.logicx,.wav,.mp3,.zip", direct_upload: true %>
 
   <div id="file-details" style="display: none;">
     <p id="selected-file-title" style="text-align: center; margin-bottom: 10px;"></p>
-    <%= f.text_field :title, placeholder: "Project title", class: "project-title-input", id: "project-title-input" %>
+    <%= f.text_field :title, placeholder: "Title", class: "project-title-input", id: "project-title-input" %>
     <%= f.submit "Upload", class: "upload-btn" %>
   </div>
 <% end %>
 
-<div class="drop-zone" id="drop-zone">
-  <% if @projects.any? %>
+<div class="drop-zone" id="drop-zone" data-controller="file-drag" data-file-drag-move-url-value="<%= library_move_asset_path %>">
+  <% if @assets.any? %>
     <div class="projects-grid">
-      <% @projects.each do |project| %>
-        <div class="project-card-wrapper">
-          <% if project.folder? %>
+      <% @assets.each do |asset| %>
+        <%
+          # Determine file type for drag/drop logic
+          file_type = if asset.is_directory?
+            'directory'
+          elsif asset.file.attached?
+            File.extname(asset.file.filename.to_s).delete('.').downcase
+          else
+            'unknown'
+          end
+        %>
+        <div class="project-card-wrapper"
+             draggable="true"
+             data-file-id="<%= asset.id %>"
+             data-file-type="<%= file_type %>"
+             data-is-directory="<%= asset.is_directory? %>"
+             data-action="dragstart->file-drag#dragStart dragend->file-drag#dragEnd dragover->file-drag#dragOver dragleave->file-drag#dragLeave drop->file-drag#drop">
+          <% if asset.folder? %>
             <%# Empty folder - clickable to browse inside %>
-            <%= link_to project_path(project), class: "project-card" do %>
+            <%= link_to asset_path(asset), class: "project-card" do %>
               <div class="project-icon">
                 <%= image_tag "icons/folder.svg", class: "icon-image" %>
               </div>
-              <p><%= project.title %></p>
+              <p><%= asset.title %></p>
             <% end %>
-          <% elsif project.file.attached? && project.project_files.any? %>
-            <%# Project has extracted contents - clickable to browse inside %>
-            <%= link_to project_path(project), class: "project-card" do %>
+          <% elsif asset.file.attached? && asset.children.any? %>
+            <%# Asset has extracted contents - clickable to browse inside %>
+            <%= link_to asset_path(asset), class: "project-card" do %>
               <div class="project-icon">
-                <%= image_tag project_icon_for(project), class: "icon-image" %>
+                <%= image_tag asset_icon_for(asset), class: "icon-image" %>
               </div>
-              <p><%= project.title %></p>
+              <p><%= asset.title %></p>
             <% end %>
-          <% elsif project.file.attached? %>
-            <% ext = File.extname(project.file.filename.to_s).downcase.delete(".") %>
+          <% elsif asset.file.attached? %>
+            <% ext = File.extname(asset.file.filename.to_s).downcase.delete(".") %>
             <% if %w[wav mp3 aif aiff flac].include?(ext) %>
               <%# Audio file - clickable to play %>
               <div class="project-card"
-                   data-audio-url="<%= url_for(project.file) %>"
-                   data-audio-title="<%= project.title %>">
+                   data-audio-url="<%= url_for(asset.file) %>"
+                   data-audio-title="<%= asset.title %>">
                 <div class="project-icon">
-                  <%= image_tag project_icon_for(project), class: "icon-image" %>
+                  <%= image_tag asset_icon_for(asset), class: "icon-image" %>
                 </div>
-                <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
+                <p><%= asset.title %><%= File.extname(asset.file.filename.to_s) %></p>
               </div>
             <% else %>
               <%# Other single file - not clickable %>
               <div class="project-card">
                 <div class="project-icon">
-                  <%= image_tag project_icon_for(project), class: "icon-image" %>
+                  <%= image_tag asset_icon_for(asset), class: "icon-image" %>
                 </div>
-                <p><%= project.title %><%= File.extname(project.file.filename.to_s) %></p>
+                <p><%= asset.title %><%= File.extname(asset.file.filename.to_s) %></p>
               </div>
             <% end %>
           <% else %>
             <%# No file attached - just display %>
             <div class="project-card">
               <div class="project-icon">
-                <%= image_tag project_icon_for(project), class: "icon-image" %>
+                <%= image_tag asset_icon_for(asset), class: "icon-image" %>
               </div>
-              <p><%= project.title %></p>
+              <p><%= asset.title %></p>
             </div>
           <% end %>
 
@@ -94,18 +109,18 @@
                 </button>
                 <div class="submenu">
                   <div class="submenu-inner">
-                    <button class="menu-item" data-action="click->share#open" data-project-id="<%= project.id %>">
+                    <button class="menu-item" data-action="click->share#open" data-asset-id="<%= asset.id %>">
                       Create a link
                     </button>
                   </div>
                 </div>
               </div>
 
-              <%= link_to "Download", download_project_path(project), class: "menu-item" %>
+              <%= link_to "Download", download_asset_path(asset), class: "menu-item" %>
 
-              <%= button_to "Duplicate", duplicate_project_path(project), method: :post, class: "menu-item", form: { data: { turbo: false } } %>
+              <%= button_to "Duplicate", duplicate_asset_path(asset), method: :post, class: "menu-item", form: { data: { turbo: false } } %>
 
-              <button class="menu-item" data-action="click->rename#open" data-project-id="<%= project.id %>" data-project-title="<%= project.title %>">
+              <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= asset.id %>" data-asset-title="<%= asset.title %>">
                 Rename
               </button>
 
@@ -142,8 +157,8 @@
 
               <div class="menu-divider"></div>
 
-              <%= link_to "Delete", project_path(project),
-                  data: { turbo_method: :delete, turbo_confirm: "Delete '#{project.title}'? This cannot be undone." },
+              <%= link_to "Delete", asset_path(asset),
+                  data: { turbo_method: :delete, turbo_confirm: "Delete '#{asset.title}'? This cannot be undone." },
                   class: "menu-item menu-item-danger" %>
             </div>
           </div>
@@ -171,7 +186,7 @@
 <div id="folder-modal" class="modal-overlay">
   <div class="modal-content">
     <h3>Create New Folder</h3>
-    <%= form_with url: create_folder_projects_path, method: :post, class: "folder-form" do %>
+    <%= form_with url: create_folder_assets_path, method: :post, class: "folder-form" do %>
       <input type="text" name="folder_name" placeholder="Folder name" class="folder-name-input" id="folder-name-input" required>
       <div class="modal-actions">
         <button type="button" class="cancel-btn" id="cancel-folder">Cancel</button>
@@ -186,7 +201,7 @@
   <div class="modal-content">
     <h3>Rename</h3>
     <form id="rename-form" data-action="submit->rename#submit">
-      <input type="hidden" id="rename-project-id" data-rename-target="projectId">
+      <input type="hidden" id="rename-asset-id" data-rename-target="assetId">
       <input type="text" name="title" placeholder="New name" class="folder-name-input" id="rename-input" data-rename-target="input" required>
       <div class="modal-actions">
         <button type="button" class="cancel-btn" data-action="click->rename#close">Cancel</button>

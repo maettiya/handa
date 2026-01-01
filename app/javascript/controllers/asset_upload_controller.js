@@ -1,4 +1,4 @@
-// Handles file uploads within a project (adding files to existing project)
+// Handles file uploads within an asset (adding files to existing asset/folder)
 // Supports drag & drop and file picker
 
 import { Controller } from "@hotwired/stimulus"
@@ -6,7 +6,7 @@ import { DirectUpload } from "@rails/activestorage"
 
 export default class extends Controller {
   static targets = ["fileInput", "dropZone", "progressContainer", "progressFill", "progressFilename", "progressPercent"]
-  static values = { projectId: Number, parentId: Number }
+  static values = { assetId: Number, parentId: Number }
 
   connect() {
     // Initialization if needed
@@ -99,7 +99,7 @@ export default class extends Controller {
         // Get CSRF token
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content
 
-        fetch(`/projects/${this.projectIdValue}/upload_files`, {
+        fetch(`/items/${this.assetIdValue}/upload_files`, {
           method: "POST",
           headers: {
             "X-CSRF-Token": csrfToken,
