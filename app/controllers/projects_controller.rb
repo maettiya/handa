@@ -316,6 +316,14 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def move_file
+    @file = @project.project_files.find(params[:file_id])
+
+    # Determine target: folder ID. "root" for project root, or another file ID for merge
+    target_id = params[:target_id]
+    merge_with_id = params[:merge_with_id]
+  end
+
   # ////////////////////////////////////////////////////////////////////////////////
   # ////////////////////////////////////////////////////////////////////////////////
   # ////////////////////////////////////////////////////////////////////////////////
