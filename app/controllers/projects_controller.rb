@@ -375,6 +375,14 @@ class ProjectsController < ApplicationController
     rebuild_children_paths(file) if file.is_directory
   end
 
+  def rebuild_children_paths(folder)
+    folder.children.each do |child|
+      child.path = "#{folder.path}/#{child.original_filename}"
+      child.save!
+      rebuild_children_paths(child) if child.is_directory
+    end
+  end
+
   # Detects if project has a single root folder that should be auto-skipped
   def detect_skipped_root_folder
     root_files = @project.project_files
