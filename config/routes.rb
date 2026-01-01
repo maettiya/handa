@@ -28,6 +28,8 @@ Rails.application.routes.draw do
       post :create_subfolder
       # Upload files to a project
       post :upload_files
+      # Move files
+      post :move_file
     end
 
     # Nested share links (for creating)
