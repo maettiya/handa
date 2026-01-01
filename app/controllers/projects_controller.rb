@@ -317,6 +317,7 @@ class ProjectsController < ApplicationController
   end
 
   def move_file
+    @project = current_user.projects.find(params[:id])
     @file = @project.project_files.find(params[:file_id])
 
     # Determine target: folder ID. "root" for project root, or another file ID for merge
@@ -325,12 +326,12 @@ class ProjectsController < ApplicationController
 
     if merge_with_id.present?
       # Merging two audio files into a new folder
-      @other_file = project.project_files.find(merge_with_id)
+      @other_file = @project.project_files.find(merge_with_id)
       folder_name = generate_untitled_folder_name(@file.parent_id)
 
       # Create the new folder
       new_folder = @project.project_files.create!(
-        original_filename: foldeR_name,
+        original_filename: folder_name,
         is_directory: true,
         parent_id: @file.parent_id,
         path: build_file_path(@file.parent_id, folder_name)
