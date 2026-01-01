@@ -322,6 +322,13 @@ class ProjectsController < ApplicationController
     # Determine target: folder ID. "root" for project root, or another file ID for merge
     target_id = params[:target_id]
     merge_with_id = params[:merge_with_id]
+
+    if merge_with_id.present?
+      # Merging two audio files into a new folder
+      @other_file = project.project_files.find(merge_with_id)
+      folder_name = generate_untitled_folder_name(@file.parent_id)
+
+    end
   end
 
   # ////////////////////////////////////////////////////////////////////////////////
