@@ -33,3 +33,6 @@ application.register("quick-share", QuickShareController)
 
 import FileDragController from "./file_drag_controller"
 application.register("file-drag", FileDragController)
+
+import RenameController from "./rename_controller"
+application.register("rename", RenameController)

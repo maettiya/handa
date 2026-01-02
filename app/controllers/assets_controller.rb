@@ -85,8 +85,11 @@ class AssetsController < ApplicationController
     @asset = current_user.assets.find(params[:id])
 
     if @asset.file.attached? && !@asset.is_directory?
-      # Has original file - download it directly
-      redirect_to rails_blob_path(@asset.file, disposition: "attachment")
+      # Has original file - download with the renamed filename
+      send_data @asset.file.download,
+        type: @asset.file.content_type,
+        disposition: 'attachment',
+        filename: @asset.download_filename
     elsif @asset.children.any?
       # Has children - create a ZIP
       zip_data = create_asset_zip(@asset)
@@ -115,8 +118,11 @@ class AssetsController < ApplicationController
       return
     end
 
-    # The actual file download with original filename
-    redirect_to rails_blob_path(@file.file, disposition: "attachment", filename: @file.original_filename)
+    # Download with the renamed filename
+    send_data @file.file.download,
+      type: @file.file.content_type,
+      disposition: 'attachment',
+      filename: @file.download_filename
   end
 
   # Downloads a folder from an asset
@@ -153,13 +159,13 @@ class AssetsController < ApplicationController
     end
   end
 
-  # Duplicates an asset (creates a copy with " (copy)" suffix)
+  # Duplicates an asset (creates a copy with " (copy)" or " (copy N)" suffix)
   def duplicate
     @asset = current_user.assets.find(params[:id])
 
     # Create new asset with copied attributes
     new_asset = current_user.assets.build(
-      title: "#{@asset.title} (copy)",
+      title: generate_copy_name(@asset.title),
       original_filename: @asset.original_filename,
       asset_type: @asset.asset_type,
       is_directory: @asset.is_directory?
@@ -185,7 +191,7 @@ class AssetsController < ApplicationController
     end
   end
 
-  # Renames an asset
+  # Renames a root-level asset
   def rename
     @asset = current_user.assets.find(params[:id])
 
@@ -194,6 +200,29 @@ class AssetsController < ApplicationController
     else
       redirect_to root_path, alert: "Could not rename"
     end
+  end
+
+  # Renames a child file/folder within an asset
+  def rename_file
+    @asset = current_user.assets.find(params[:id])
+    @file = find_descendant(@asset, params[:file_id])
+
+    new_name = params[:title].to_s.strip
+    return render json: { success: false, error: "Name cannot be blank" }, status: :unprocessable_entity if new_name.blank?
+
+    # Update original_filename and rebuild path
+    old_filename = @file.original_filename
+    @file.original_filename = new_name
+    @file.title = new_name
+    @file.path = @file.path.sub(/#{Regexp.escape(old_filename)}$/, new_name) if @file.path.present?
+
+    if @file.save
+      render json: { success: true }
+    else
+      render json: { success: false, error: @file.errors.full_messages.join(', ') }, status: :unprocessable_entity
+    end
+  rescue ActiveRecord::RecordNotFound
+    render json: { success: false, error: "File not found" }, status: :not_found
   end
 
   # Uploads files to an existing asset
@@ -438,6 +467,41 @@ class AssetsController < ApplicationController
     else
       filename
     end
+  end
+
+  # Generates a unique copy name like "title (copy)", "title (copy 2)", etc.
+  def generate_copy_name(original_title)
+    # Strip any existing " (copy)" or " (copy N)" suffix to get base name
+    base_name = original_title.sub(/\s*\(copy(?:\s+\d+)?\)\s*$/i, "").strip
+
+    # Find all existing copies of this base name
+    existing = current_user.assets.root_level
+      .where("LOWER(title) LIKE ?", "#{base_name.downcase} (copy%")
+      .pluck(:title)
+
+    # If no copies exist yet, use "base (copy)"
+    return "#{base_name} (copy)" if existing.empty?
+
+    # Check if "base (copy)" exists (without number)
+    has_simple_copy = existing.any? { |t| t.downcase == "#{base_name.downcase} (copy)" }
+
+    # Extract all existing copy numbers
+    numbers = existing.map do |title|
+      if title.match(/\(copy\s+(\d+)\)/i)
+        $1.to_i
+      elsif title.downcase == "#{base_name.downcase} (copy)"
+        1  # Treat "(copy)" as copy 1
+      else
+        nil
+      end
+    end.compact
+
+    # Find the next available number
+    next_num = has_simple_copy ? (numbers.max || 1) + 1 : 2
+    next_num = 2 if next_num < 2
+
+    # Return numbered copy name
+    "#{base_name} (copy #{next_num})"
   end
 
   # Strong parameters - only allow these fields from the form

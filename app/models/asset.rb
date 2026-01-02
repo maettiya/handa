@@ -76,9 +76,19 @@ class Asset < ApplicationRecord
     title.presence || original_filename
   end
 
-  # Download filename
+  # Download filename - uses the renamed name
+  # For root-level assets: title + extension
+  # For child assets: original_filename (which gets updated on rename)
   def download_filename
-    original_filename.presence || "#{title}#{file&.filename&.extension_with_delimiter}"
+    if parent_id.nil?
+      # Root-level asset - use title with the file's extension
+      ext = file&.filename&.extension_with_delimiter || ""
+      title_without_ext = title.sub(/#{Regexp.escape(ext)}$/i, "")
+      "#{title_without_ext}#{ext}"
+    else
+      # Child asset - use original_filename (updated on rename)
+      original_filename.presence || file&.filename&.to_s
+    end
   end
 
   # Find the root-level asset (walks up the tree)

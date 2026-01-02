@@ -1,17 +1,38 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["input", "projectId"]
+  static targets = ["input", "assetId", "fileId"]
 
-  open(event) {
-    event.preventDefault()
-    event.stopPropagation()
+  connect() {
+    // Listen for rename button clicks anywhere on the page
+    document.addEventListener("click", this.handleRenameClick.bind(this))
+  }
 
-    const projectId = event.currentTarget.dataset.projectId
-    const projectTitle = event.currentTarget.dataset.projectTitle
+  disconnect() {
+    document.removeEventListener("click", this.handleRenameClick.bind(this))
+  }
 
-    this.projectIdTarget.value = projectId
-    this.inputTarget.value = projectTitle
+  handleRenameClick(event) {
+    const button = event.target.closest('[data-action="click->rename#open"]')
+    if (button) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.openModal(button)
+    }
+  }
+
+  openModal(button) {
+    const assetId = button.dataset.assetId
+    const assetTitle = button.dataset.assetTitle
+    const fileId = button.dataset.fileId
+
+    this.assetIdTarget.value = assetId
+    this.inputTarget.value = assetTitle
+
+    // Store fileId if renaming a child file (not root-level asset)
+    if (this.hasFileIdTarget) {
+      this.fileIdTarget.value = fileId || ""
+    }
 
     this.element.classList.add("visible")
     setTimeout(() => {
@@ -20,23 +41,67 @@ export default class extends Controller {
     }, 50)
   }
 
+  // Keep open() for direct calls if needed
+  open(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    this.openModal(event.currentTarget)
+  }
+
   close() {
     this.element.classList.remove("visible")
     this.inputTarget.value = ""
   }
 
-  submit(event) {
+  async submit(event) {
     event.preventDefault()
 
-    const projectId = this.projectIdTarget.value
+    const assetId = this.assetIdTarget.value
     const newTitle = this.inputTarget.value.trim()
+    const fileId = this.hasFileIdTarget ? this.fileIdTarget.value : null
 
     if (!newTitle) return
 
-    // Create and submit a form
+    // If fileId is present, this is renaming a child file (use AJAX)
+    if (fileId) {
+      await this.renameChildFile(assetId, fileId, newTitle)
+    } else {
+      // Renaming a root-level asset (use form submission)
+      this.renameRootAsset(assetId, newTitle)
+    }
+  }
+
+  async renameChildFile(assetId, fileId, newTitle) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content
+
+    try {
+      const response = await fetch(`/items/${assetId}/rename_file/${fileId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken
+        },
+        body: JSON.stringify({ title: newTitle })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        window.location.reload()
+      } else {
+        alert("Could not rename: " + (data.error || "Unknown error"))
+      }
+    } catch (error) {
+      console.error("Rename failed:", error)
+      alert("Failed to rename")
+    }
+  }
+
+  renameRootAsset(assetId, newTitle) {
+    // Create and submit a form for root-level assets
     const form = document.createElement("form")
     form.method = "POST"
-    form.action = `/projects/${projectId}/rename`
+    form.action = `/items/${assetId}/rename`
 
     // CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content

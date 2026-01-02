@@ -161,14 +161,14 @@ class SearchController < ApplicationController
       flat_note = flat_notes[note]
 
       minor_patterns.each do |mode|
-        pattern = /(?:^|[\s_\-\.\(\)])#{note}[\s_\-]?flat[\s_\-]?#{mode}(?:[\s_\-\.\(\)]|$)/i
+        pattern = /(?:^|[\s_\-\.\(\)\[\]])#{note}[\s_\-]?flat[\s_\-]?#{mode}(?:[\s_\-\.\(\)\[\]]|$)/i
         if filename.match?(pattern)
           return "#{flat_note}m"
         end
       end
 
       major_patterns.each do |mode|
-        pattern = /(?:^|[\s_\-\.\(\)])#{note}[\s_\-]?flat[\s_\-]?#{mode}(?:[\s_\-\.\(\)]|$)/i
+        pattern = /(?:^|[\s_\-\.\(\)\[\]])#{note}[\s_\-]?flat[\s_\-]?#{mode}(?:[\s_\-\.\(\)\[\]]|$)/i
         if filename.match?(pattern)
           return flat_note
         end
@@ -178,14 +178,14 @@ class SearchController < ApplicationController
     # SECOND: Check for standard accidental notation (Ab, Bb, C#, etc.)
     notes_with_accidentals.each do |note|
       minor_patterns.each do |mode|
-        pattern = /(?:^|[\s_\-\.\(\)])#{Regexp.escape(note)}\s*#{mode}(?:[\s_\-\.\(\)]|$)/i
+        pattern = /(?:^|[\s_\-\.\(\)\[\]])#{Regexp.escape(note)}\s*#{mode}(?:[\s_\-\.\(\)\[\]]|$)/i
         if filename.match?(pattern)
           return "#{note}m"
         end
       end
 
       major_patterns.each do |mode|
-        pattern = /(?:^|[\s_\-\.\(\)])#{Regexp.escape(note)}\s*#{mode}(?:[\s_\-\.\(\)]|$)/i
+        pattern = /(?:^|[\s_\-\.\(\)\[\]])#{Regexp.escape(note)}\s*#{mode}(?:[\s_\-\.\(\)\[\]]|$)/i
         if filename.match?(pattern)
           return note
         end
@@ -196,12 +196,12 @@ class SearchController < ApplicationController
     simple_notes.each do |note|
       minor_patterns.each do |mode|
         if mode == 'm'
-          pattern = /(?:^|[\s_\-\.\(\)])#{note}m(?:[\s_\-\.\(\)]|$)/i
+          pattern = /(?:^|[\s_\-\.\(\)\[\]])#{note}m(?:[\s_\-\.\(\)\[\]]|$)/i
           if filename.match?(pattern)
             return "#{note}m"
           end
         else
-          pattern = /(?:^|[\s_\-\.\(\)])#{note}\s*#{mode}(?:[\s_\-\.\(\)]|$)/i
+          pattern = /(?:^|[\s_\-\.\(\)\[\]])#{note}\s*#{mode}(?:[\s_\-\.\(\)\[\]]|$)/i
           if filename.match?(pattern)
             return "#{note}m"
           end
@@ -209,7 +209,7 @@ class SearchController < ApplicationController
       end
 
       major_patterns.each do |mode|
-        pattern = /(?:^|[\s_\-\.\(\)])#{note}\s*#{mode}(?:[\s_\-\.\(\)]|$)/i
+        pattern = /(?:^|[\s_\-\.\(\)\[\]])#{note}\s*#{mode}(?:[\s_\-\.\(\)\[\]]|$)/i
         if filename.match?(pattern)
           return note
         end

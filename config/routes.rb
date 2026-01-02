@@ -21,6 +21,8 @@ Rails.application.routes.draw do
       get 'download_folder/:folder_id', to: 'assets#download_folder', as: :download_folder
       # Deletes an individual file or folder
       delete 'delete_file/:file_id', to: 'assets#destroy_file', as: :destroy_file
+      # Rename an individual file or folder
+      patch 'rename_file/:file_id', to: 'assets#rename_file', as: :rename_file
       # Duplicate an asset
       post :duplicate
       # Rename an asset

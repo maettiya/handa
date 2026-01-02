@@ -97,6 +97,10 @@
                 <%= link_to "Download", download_file_asset_path(@asset, file_id: file.id), class: "menu-item" %>
               <% end %>
 
+              <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= @asset.id %>" data-file-id="<%= file.id %>" data-asset-title="<%= file.original_filename %>">
+                Rename
+              </button>
+
               <div class="menu-divider"></div>
               <%= link_to "Delete", destroy_file_asset_path(@asset, file_id: file.id),
                   data: { turbo_method: :delete, turbo_confirm: "Delete '#{file.original_filename}'?#{file.is_directory? ? ' This will delete all contents inside.' : ''}" },
@@ -194,3 +198,19 @@
 </div>
 
 </div> <!-- Close share/asset-upload controller wrapper -->
+
+<!-- Rename Modal -->
+<div id="rename-modal" class="modal-overlay" data-controller="rename">
+  <div class="modal-content">
+    <h3>Rename</h3>
+    <form id="rename-form" data-action="submit->rename#submit">
+      <input type="hidden" id="rename-asset-id" data-rename-target="assetId">
+      <input type="hidden" id="rename-file-id" data-rename-target="fileId">
+      <input type="text" name="title" placeholder="New name" class="folder-name-input" id="rename-input" data-rename-target="input" required>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" data-action="click->rename#close">Cancel</button>
+        <button type="submit" class="save-btn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
