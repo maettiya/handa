@@ -55,7 +55,7 @@ Rails.application.routes.draw do
   # Library - main dashboard showing all user's files
   get 'library/index'
   post 'library/move_asset', to: 'library#move_asset', as: :library_move_asset
-  root "library#index"
+  root "library#landing"
 
   # Profile - user profile dashboard
   resource :profile, only: [:show, :edit, :update], controller: 'profile'
