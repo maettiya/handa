@@ -99,6 +99,13 @@
     </div>
 
     <!-- Storage Usage -->
+    <div class="profile-field">
+      <label>Storage</label>
+      <div class="field-value">
+        <span><%= (@total_storage.to_f / 10.gigabytes * 100).round(1) %> used</span>
+        <span class="membership-storage">10 GB</span>
+      </div>
+    </div>
 
     <!-- Email -->
     <div class="profile-field">
