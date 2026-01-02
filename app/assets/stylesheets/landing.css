@@ -1,30 +1,169 @@
 /* Landing Page Styles */
-.landing-container {
-  min-height: 100vh;
-  background-color: #3a3a3a;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
+body {
+  background-color: #2a2a2a;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* Header */
 .landing-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
+  padding: 24px 48px;
+  position: sticky;
+  top: 0;
+  background-color: #2a2a2a;
+  z-index: 100;
 }
 
 .landing-header .logo {
-  height: 30px;
+  height: 28px;
   width: auto;
 }
 
 .enter-app-btn {
   color: #888;
   text-decoration: none;
-  font-size: 14px;
-  letter-spacing: 1px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  transition: color 0.2s ease;
 }
 
 .enter-app-btn:hover {
   color: white;
+}
+
+/* Uniform section spacing */
+.section {
+  padding: 80px 48px;
+  text-align: center;
+}
+
+.section-last {
+  padding-bottom: 120px;
+}
+
+/* Hero Headings */
+.hero-heading {
+  font-size: 32px;
+  font-weight: 400;
+  color: white;
+  line-height: 1.4;
+  letter-spacing: 0.5px;
+}
+
+/* Glitchy H Logos */
+.h-logos-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 120px;
+}
+
+.h-logo {
+  width: 200px;
+  height: auto;
+  opacity: 0.85;
+}
+
+/* Screenshots Row */
+.screenshots-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 100px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.screenshot-block {
+  text-align: center;
+  flex: 1;
+  max-width: 500px;
+}
+
+.screenshot {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.screenshot-title {
+  margin-top: 24px;
+  font-size: 18px;
+  color: white;
+  font-weight: 400;
+}
+
+.screenshot-subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Video Section */
+.demo-video {
+  width: 100%;
+  max-width: 1000px;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .landing-header {
+    padding: 16px 24px;
+  }
+
+  .section {
+    padding: 60px 24px;
+  }
+
+  .hero-heading {
+    font-size: 24px;
+  }
+
+  .h-logos-row {
+    gap: 60px;
+    flex-wrap: wrap;
+  }
+
+  .h-logo {
+    width: 120px;
+  }
+
+  .screenshots-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+  }
+
+  .screenshot-block {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .h-logos-row {
+    gap: 32px;
+  }
+
+  .h-logo {
+    width: 80px;
+  }
+
+  .hero-heading {
+    font-size: 20px;
+  }
 }

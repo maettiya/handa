@@ -1,7 +1,70 @@
 <%= stylesheet_link_tag "landing", media: "all" %>
 
-<div class="landing-container">
-  <header class="landing-header">
-    <%= link_to "Enter handa", new_user_session_path, class: "enter-app-btn" %>
-  </header>
-</div>
+<!-- Header -->
+<header class="landing-header">
+  <%= image_tag "handa-logo.png", class: "logo" %>
+  <%= link_to "ENTER HANDA", new_user_session_path, class: "enter-app-btn" %>
+</header>
+
+<!-- Hero Section -->
+<section class="section">
+  <h1 class="hero-heading">File sharing.<br>Built for music.</h1>
+</section>
+
+<!-- Glitchy H Logos Row -->
+<section class="section">
+  <div class="h-logos-row">
+    <% 4.times do %>
+      <%= image_tag "landing/h-glitch.png", class: "h-logo" %>
+    <% end %>
+  </div>
+</section>
+
+<!-- Screenshots Row 1 -->
+<section class="section">
+  <div class="screenshots-row">
+    <div class="screenshot-block">
+      <%= image_tag "landing/screenshot-project.png", class: "screenshot" %>
+      <p class="screenshot-title">View your projects like real music files.</p>
+      <p class="screenshot-subtitle">View projects as real DAW session files, listen, edit, and organise.</p>
+    </div>
+
+    <div class="screenshot-block">
+      <%= image_tag "landing/screenshot-search.png", class: "screenshot" %>
+      <p class="screenshot-title">Search built for musicians.</p>
+      <p class="screenshot-subtitle">Search with bpm, key, title, genre to easily find what you're looking for.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Second Header -->
+<section class="section">
+  <h2 class="hero-heading">handa</h2>
+</section>
+
+<!-- Screenshots Row 2 -->
+<section class="section">
+  <div class="screenshots-row">
+    <div class="screenshot-block">
+      <%= image_tag "landing/screenshot-share.png", class: "screenshot" %>
+      <p class="screenshot-title">Share files effortlessly</p>
+      <p class="screenshot-subtitle">Share music files effortlessly. Drop a link to anyone to listen, download or save to their account.</p>
+    </div>
+
+    <div class="screenshot-block">
+      <%= image_tag "landing/screenshot-share-modal.png", class: "screenshot" %>
+      <p class="screenshot-title">Protected for creators.</p>
+      <p class="screenshot-subtitle">Set password security, expiry time & track everything with real-time notifications.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Third Header -->
+<section class="section">
+  <h2 class="hero-heading">For musicians, built by musicians.</h2>
+</section>
+
+<!-- Video Section -->
+<section class="section section-last">
+  <video src="/videos/screenrecording.mov" autoplay loop muted playsinline class="demo-video"></video>
+</section>
