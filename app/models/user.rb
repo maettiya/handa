@@ -75,32 +75,14 @@ class User < ApplicationRecord
     }
 
     # Process root-level assets
-    assets.root_level.includes(file_attachment: :blob).find_each do |asset|
-      # Calculate total size of all children
-      children_size = asset.children.files.sum(:file_size) || 0
-
-      # If no children, use the original file size
-      if children_size.zero? && asset.file.attached?
-        asset_size = asset.file.byte_size || 0
-      else
-        asset_size = children_size
-      end
-
-      case asset.asset_type
-      when 'ableton', 'logic', 'fl_studio', 'pro_tools'
-        breakdown[:daw] += asset_size
-      when 'lossless_audio'
-        breakdown[:lossless] += asset_size
-      when 'compressed_audio'
-        breakdown[:compressed] += asset_size
-      when 'folder'
-        # For folders, categorize by what's inside
-        categorize_folder_contents(asset, breakdown)
-      when nil
-        # Standalone file uploads - categorize by file extension
-        categorize_standalone_file(asset, asset_size, breakdown)
-      else
-        breakdown[:other] += asset_size
+    assets.root_level.find_each do |asset|
+      if asset.is_directory? || asset.children.exists?
+        # For directories/projects with children, categorize ALL descendant files
+        categorize_all_descendants(asset, breakdown)
+      elsif asset.file.attached?
+        # Standalone file - categorize by extension
+        size = asset.file.byte_size || 0
+        categorize_by_extension(asset.file.filename.to_s, size, breakdown)
       end
     end
 
@@ -126,30 +108,25 @@ class User < ApplicationRecord
 
   private
 
-  # For standalone folders, categorize by file type
-  def categorize_folder_contents(asset, breakdown)
-    asset.children.files.visible.find_each do |child|
-      ext = child.extension
-      size = child.file_size || 0
+  # Categorize ALL files under an asset (recursive via path query)
+  def categorize_all_descendants(asset, breakdown)
+    # For root-level assets, path may be nil - use title as the path prefix
+    path_prefix = asset.path.presence || asset.title
 
-      case ext
-      when 'als', 'logicx', 'flp', 'ptx'
-        breakdown[:daw] += size
-      when 'wav', 'aif', 'aiff', 'flac'
-        breakdown[:lossless] += size
-      when 'mp3', 'm4a', 'aac', 'ogg'
-        breakdown[:compressed] += size
-      else
-        breakdown[:other] += size
-      end
+    # Get all file descendants (not directories) at any depth using path prefix
+    all_files = assets.files.where("path LIKE ?", "#{path_prefix}/%")
+
+    all_files.find_each do |file|
+      size = file.file_size || 0
+      categorize_by_extension(file.original_filename, size, breakdown)
     end
   end
 
-  # For standalone file uploads, categorize by file extension
-  def categorize_standalone_file(asset, size, breakdown)
-    return if size.zero? || !asset.file.attached?
+  # Categorize a single file by its extension
+  def categorize_by_extension(filename, size, breakdown)
+    return if size.zero?
 
-    ext = File.extname(asset.file.filename.to_s).delete('.').downcase
+    ext = File.extname(filename.to_s).delete('.').downcase
 
     case ext
     when 'als', 'logicx', 'flp', 'ptx'
