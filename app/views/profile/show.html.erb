@@ -102,7 +102,7 @@
     <div class="profile-field">
       <label>Storage</label>
       <div class="field-value">
-        <span><%= (@total_storage.to_f / 10.gigabytes * 100).round(1) %>% used</span>
+        <span><%= number_to_human_size(@total_storage) %> of 10 GB used</span>
         <span class="membership-storage"></span>
       </div>
       <%= link_to "10 GB Limit", "#", class: "field-action" %>
