@@ -102,9 +102,10 @@
     <div class="profile-field">
       <label>Storage</label>
       <div class="field-value">
-        <span><%= (@total_storage.to_f / 10.gigabytes * 100).round(1) %> used</span>
-        <span class="membership-storage">10 GB</span>
+        <span><%= (@total_storage.to_f / 10.gigabytes * 100).round(1) %>% used</span>
+        <span class="membership-storage"></span>
       </div>
+      <%= link_to "10 GB Limit", "#", class: "field-action" %>
     </div>
 
     <!-- Email -->
