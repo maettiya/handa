@@ -1,0 +1,30 @@
+/* Landing Page Styles */
+.landing-container {
+  min-height: 100vh;
+  background-color: #3a3a3a;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+}
+
+.landing-header .logo {
+  height: 30px;
+  width: auto;
+}
+
+.enter-app-btn {
+  color: #888;
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.enter-app-btn:hover {
+  color: white;
+}
