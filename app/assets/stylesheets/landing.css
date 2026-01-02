@@ -44,7 +44,7 @@ body {
 
 /* Uniform section spacing */
 .section {
-  padding: 80px 48px;
+  padding: 80px 60px;
   text-align: center;
 }
 
@@ -64,9 +64,8 @@ body {
 /* Glitchy H Logos */
 .h-logos-row {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 120px;
 }
 
 .h-logo {
@@ -80,15 +79,12 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 100px;
-  max-width: 1400px;
-  margin: 0 auto;
+  gap: 60px;
 }
 
 .screenshot-block {
   text-align: center;
   flex: 1;
-  max-width: 500px;
 }
 
 .screenshot {
@@ -134,13 +130,8 @@ body {
     font-size: 24px;
   }
 
-  .h-logos-row {
-    gap: 60px;
-    flex-wrap: wrap;
-  }
-
   .h-logo {
-    width: 120px;
+    width: 100px;
   }
 
   .screenshots-row {
@@ -155,12 +146,8 @@ body {
 }
 
 @media (max-width: 600px) {
-  .h-logos-row {
-    gap: 32px;
-  }
-
   .h-logo {
-    width: 80px;
+    width: 60px;
   }
 
   .hero-heading {
