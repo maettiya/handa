@@ -69,9 +69,14 @@ body {
 }
 
 .h-logo {
-  width: 200px;
+  width: 220px;
   height: auto;
   opacity: 0.85;
+}
+
+.center-logo {
+  height: 80px;
+  width: auto;
 }
 
 /* Screenshots Row */
