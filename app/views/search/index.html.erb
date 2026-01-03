@@ -1,4 +1,4 @@
-<% content_for :page_title, "SEARCH" %>
+<% content_for :page_title, "SEARCH FILES" %>
 
 <div class="search-container">
   <!-- Search Input Section -->
@@ -29,7 +29,7 @@
       <!-- Filters Row -->
       <div class="search-filters">
         <!-- Sort By -->
-        <div class="filter-group">
+        <div class="filter-group filter-group-sort">
           <label class="filter-label">Sort by</label>
           <select name="sort" class="filter-select" data-action="change->search-filters#submit">
             <option value="" <%= 'selected' if @sort.blank? %>>------</option>
@@ -41,14 +41,15 @@
         </div>
 
         <!-- Date Range -->
-        <div class="filter-group">
-          <label class="filter-label">From</label>
-          <input type="date" name="date_from" value="<%= @date_from %>" class="filter-date" data-action="change->search-filters#submit">
-        </div>
-
-        <div class="filter-group">
-          <label class="filter-label">To</label>
-          <input type="date" name="date_to" value="<%= @date_to %>" class="filter-date" data-action="change->search-filters#submit">
+        <div class="filter-row filter-row-dates">
+          <div class="filter-group">
+            <label class="filter-label">From</label>
+            <input type="date" name="date_from" value="<%= @date_from %>" class="filter-date" data-action="change->search-filters#submit">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">To</label>
+            <input type="date" name="date_to" value="<%= @date_to %>" class="filter-date" data-action="change->search-filters#submit">
+          </div>
         </div>
 
         <!-- BPM with Exact/Range toggle -->
@@ -74,43 +75,46 @@
           </div>
         </div>
 
-        <!-- Musical Key -->
-        <div class="filter-group">
-          <label class="filter-label">Key</label>
-          <select name="key" class="filter-select" data-action="change->search-filters#submit">
-            <option value="">Any key</option>
-            <optgroup label="Major">
-              <option value="C" <%= 'selected' if @key == 'C' %>>C Major</option>
-              <option value="C#" <%= 'selected' if @key == 'C#' %>>C# Major</option>
-              <option value="D" <%= 'selected' if @key == 'D' %>>D Major</option>
-              <option value="Eb" <%= 'selected' if @key == 'Eb' %>>Eb Major</option>
-              <option value="E" <%= 'selected' if @key == 'E' %>>E Major</option>
-              <option value="F" <%= 'selected' if @key == 'F' %>>F Major</option>
-              <option value="F#" <%= 'selected' if @key == 'F#' %>>F# Major</option>
-              <option value="G" <%= 'selected' if @key == 'G' %>>G Major</option>
-              <option value="Ab" <%= 'selected' if @key == 'Ab' %>>Ab Major</option>
-              <option value="A" <%= 'selected' if @key == 'A' %>>A Major</option>
-              <option value="Bb" <%= 'selected' if @key == 'Bb' %>>Bb Major</option>
-              <option value="B" <%= 'selected' if @key == 'B' %>>B Major</option>
-            </optgroup>
-            <optgroup label="Minor">
-              <option value="Cm" <%= 'selected' if @key == 'Cm' %>>C Minor</option>
-              <option value="C#m" <%= 'selected' if @key == 'C#m' %>>C# Minor</option>
-              <option value="Dm" <%= 'selected' if @key == 'Dm' %>>D Minor</option>
-              <option value="Ebm" <%= 'selected' if @key == 'Ebm' %>>Eb Minor</option>
-              <option value="Em" <%= 'selected' if @key == 'Em' %>>E Minor</option>
-              <option value="Fm" <%= 'selected' if @key == 'Fm' %>>F Minor</option>
-              <option value="F#m" <%= 'selected' if @key == 'F#m' %>>F# Minor</option>
-              <option value="Gm" <%= 'selected' if @key == 'Gm' %>>G Minor</option>
-              <option value="Abm" <%= 'selected' if @key == 'Abm' %>>Ab Minor</option>
-              <option value="Am" <%= 'selected' if @key == 'Am' %>>A Minor</option>
-              <option value="Bbm" <%= 'selected' if @key == 'Bbm' %>>Bb Minor</option>
-              <option value="Bm" <%= 'selected' if @key == 'Bm' %>>B Minor</option>
-            </optgroup>
-          </select>
-        </div>
+        <!-- Key & Clear All -->
+        <div class="filter-row filter-row-key">
+          <!-- Musical Key -->
+          <div class="filter-group">
+            <label class="filter-label">Key</label>
+            <select name="key" class="filter-select" data-action="change->search-filters#submit">
+              <option value="">Any key</option>
+              <optgroup label="Major">
+                <option value="C" <%= 'selected' if @key == 'C' %>>C Major</option>
+                <option value="C#" <%= 'selected' if @key == 'C#' %>>C# Major</option>
+                <option value="D" <%= 'selected' if @key == 'D' %>>D Major</option>
+                <option value="Eb" <%= 'selected' if @key == 'Eb' %>>Eb Major</option>
+                <option value="E" <%= 'selected' if @key == 'E' %>>E Major</option>
+                <option value="F" <%= 'selected' if @key == 'F' %>>F Major</option>
+                <option value="F#" <%= 'selected' if @key == 'F#' %>>F# Major</option>
+                <option value="G" <%= 'selected' if @key == 'G' %>>G Major</option>
+                <option value="Ab" <%= 'selected' if @key == 'Ab' %>>Ab Major</option>
+                <option value="A" <%= 'selected' if @key == 'A' %>>A Major</option>
+                <option value="Bb" <%= 'selected' if @key == 'Bb' %>>Bb Major</option>
+                <option value="B" <%= 'selected' if @key == 'B' %>>B Major</option>
+              </optgroup>
+              <optgroup label="Minor">
+                <option value="Cm" <%= 'selected' if @key == 'Cm' %>>C Minor</option>
+                <option value="C#m" <%= 'selected' if @key == 'C#m' %>>C# Minor</option>
+                <option value="Dm" <%= 'selected' if @key == 'Dm' %>>D Minor</option>
+                <option value="Ebm" <%= 'selected' if @key == 'Ebm' %>>Eb Minor</option>
+                <option value="Em" <%= 'selected' if @key == 'Em' %>>E Minor</option>
+                <option value="Fm" <%= 'selected' if @key == 'Fm' %>>F Minor</option>
+                <option value="F#m" <%= 'selected' if @key == 'F#m' %>>F# Minor</option>
+                <option value="Gm" <%= 'selected' if @key == 'Gm' %>>G Minor</option>
+                <option value="Abm" <%= 'selected' if @key == 'Abm' %>>Ab Minor</option>
+                <option value="Am" <%= 'selected' if @key == 'Am' %>>A Minor</option>
+                <option value="Bbm" <%= 'selected' if @key == 'Bbm' %>>Bb Minor</option>
+                <option value="Bm" <%= 'selected' if @key == 'Bm' %>>B Minor</option>
+              </optgroup>
+            </select>
+          </div>
 
-        <%= link_to "Clear all", search_path, class: "filter-clear-btn" %>
+          <%= link_to "Clear all", search_path, class: "filter-clear-btn" %>
+        </div>
       </div>
     <% end %>
   </div>

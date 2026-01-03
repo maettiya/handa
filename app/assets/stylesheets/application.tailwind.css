@@ -1532,15 +1532,20 @@ body {
 }
 
 .collaborators-list {
-  border-top: 1px solid #4a4a4a;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
 }
 
 .collaborator-item {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px 0;
-  border-bottom: 1px solid #4a4a4a;
+  padding: 16px;
+  background: #2a2a2a;
+  border-radius: 8px;
+  border: 1px solid #4a4a4a;
 }
 
 .collaborator-avatar {
@@ -1596,6 +1601,7 @@ body {
   text-align: center;
   padding: 40px 0;
   color: #888;
+  grid-column: 1 / -1;
 }
 
 .empty-collaborators p {
@@ -1823,11 +1829,14 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  justify-content: space-between;
   gap: 16px;
   padding: 16px 20px;
   background: #2a2a2a;
   border-radius: 8px;
+}
+
+.filter-row {
+  display: contents;
 }
 
 .filter-group {
@@ -2281,14 +2290,18 @@ body {
    =================== */
 
 .quick-share-dropzone {
-  max-width: 500px;
+  max-width: 800px;
   margin: 60px auto;
   background: #2a2a2a;
   border: 2px dashed #4a4a4a;
   border-radius: 16px;
-  padding: 48px 32px;
+  padding: 80px 48px;
   text-align: center;
   transition: all 0.2s ease;
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .quick-share-dropzone.dragover {
@@ -2695,16 +2708,6 @@ body {
     margin: 40px 16px 0;
   }
 
-  .quick-share-item {
-    flex-wrap: wrap;
-  }
-
-  .quick-share-item-actions {
-    width: 100%;
-    justify-content: flex-end;
-    margin-top: 8px;
-  }
-
   /* ----- PROFILE PAGE ----- */
   .profile-container {
     padding: 0 16px;
@@ -2789,6 +2792,70 @@ body {
   .menu-item-parent {
     padding: 12px 14px;
     min-height: 44px;
+  }
+
+  /* ----- NOTIFICATIONS DROPDOWN ----- */
+  .notification-dropdown {
+    position: fixed;
+    top: 60px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+
+  /* ----- COLLABORATORS ----- */
+  .collaborators-list {
+    grid-template-columns: 1fr;
+  }
+
+  /* ----- SEARCH FILTERS ----- */
+  .search-filters {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Sort by - full width at top */
+  .filter-group-sort {
+    width: 100%;
+  }
+
+  /* FROM & TO - side by side */
+  .filter-row-dates {
+    display: flex;
+    width: 100%;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .filter-row-dates .filter-group {
+    flex: 1;
+  }
+
+  .filter-date {
+    width: 100%;
+  }
+
+  /* BPM - full width */
+  .filter-group-bpm {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .bpm-controls {
+    flex-wrap: wrap;
+  }
+
+  /* KEY & Clear all - side by side */
+  .filter-row-key {
+    display: flex;
+    width: 100%;
+    gap: 12px;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .filter-row-key .filter-group {
+    flex: 1;
   }
 }
 
