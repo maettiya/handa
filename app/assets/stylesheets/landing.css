@@ -61,6 +61,30 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Typing animation */
+.typing-text {
+  display: inline-block;
+  overflow: hidden;
+  border-right: 2px solid white;
+  max-width: 0;
+  white-space: nowrap;
+  animation: typing 2.5s steps(30) forwards, blink 0.7s step-end infinite;
+}
+
+@keyframes typing {
+  to {
+    max-width: 600px;
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}
+
+
+
 /* Glitchy H Logos */
 .h-logos-row {
   display: flex;
