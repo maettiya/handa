@@ -4,7 +4,7 @@
 
 **Handa** is a Ruby on Rails application designed as a "GitHub for music files" - a seamless storage and collaboration platform for music creators. It consolidates the workflow of sharing music projects into a single platform with automatic file extraction, preview creation, and flexible sharing.
 
-**Current Status**: Early development - Core upload/download/extraction and project browsing functionality is working. Many planned features not yet built.
+**Current Status**: Core functionality complete - Upload, download, extraction, browsing, search, sharing, and audio playback all working. Landing page live.
 
 ## Tech Stack
 
@@ -23,326 +23,293 @@
 app/
 ├── controllers/
 │   ├── application_controller.rb      # Devise auth, requires login for all pages
-│   ├── library_controller.rb          # index - main dashboard
-│   ├── projects_controller.rb         # create, show, download, destroy, download_file, download_folder, destroy_file, upload_files
-│   ├── share_links_controller.rb      # create, destroy, show, download, verify_password - public share links
-│   ├── profile_controller.rb          # show, edit, update - user profile page
-│   ├── collaborators_controller.rb    # index, create, destroy, search - manage collaborators
-│   └── notifications_controller.rb    # mark_read - notification management
+│   ├── pages_controller.rb            # Landing page (public)
+│   ├── library_controller.rb          # index, move_asset - main dashboard
+│   ├── assets_controller.rb           # CRUD for assets (files/folders)
+│   ├── search_controller.rb           # Search with filters (bpm, key, title)
+│   ├── share_links_controller.rb      # Public share links + save to library
+│   ├── quick_shares_controller.rb     # Ephemeral quick shares
+│   ├── profile_controller.rb          # User profile page
+│   ├── collaborators_controller.rb    # Manage collaborators
+│   └── notifications_controller.rb    # Notification management
 ├── helpers/
-│   └── file_icon_helper.rb            # Icon selection for projects and files
+│   └── file_icon_helper.rb            # Icon selection for assets
 ├── jobs/
-│   └── project_extraction_job.rb      # Background ZIP extraction
+│   └── asset_extraction_job.rb        # Background ZIP extraction
 ├── models/
-│   ├── user.rb                        # Devise user, has_many :projects, :collaborations, :notifications
-│   ├── project.rb                     # Uploaded music project (ZIP/file)
-│   ├── project_file.rb                # Extracted files with tree structure
-│   ├── collaboration.rb               # User-to-user collaboration relationship
-│   ├── notification.rb                # User notifications (collaborator_added, etc.)
-│   └── share_link.rb                  # Shareable links with optional password/expiry
+│   ├── user.rb                        # Devise user, has_many :assets
+│   ├── asset.rb                       # Unified model for files/folders
+│   ├── collaboration.rb               # User-to-user collaboration
+│   ├── notification.rb                # User notifications
+│   └── share_link.rb                  # Shareable links with password/expiry
 ├── services/
-│   └── project_extraction_service.rb  # ZIP extraction logic
+│   └── asset_extraction_service.rb    # ZIP extraction logic
 ├── views/
-│   ├── layouts/application.html.erb   # Dark theme layout with header + notification dropdown
+│   ├── layouts/
+│   │   ├── application.html.erb       # Main app layout (dark theme)
+│   │   └── landing.html.erb           # Landing page layout (no nav)
+│   ├── pages/landing.html.erb         # Public landing page
 │   ├── library/index.html.erb         # Main library grid view
-│   ├── projects/
-│   │   ├── show.html.erb              # Project file browser view
-│   │   └── _breadcrumbs.html.erb      # File path navigation partial
+│   ├── assets/
+│   │   ├── show.html.erb              # Asset browser view
+│   │   └── _breadcrumbs.html.erb      # Breadcrumb navigation
+│   ├── search/index.html.erb          # Search results with filters
+│   ├── quick_shares/index.html.erb    # Quick share management
 │   ├── profile/                       # User profile views
-│   ├── collaborators/                 # Collaborator management views
-│   ├── share_links/                   # Public share page views (show, expired, not_found)
+│   ├── share_links/                   # Public share page views
 │   └── devise/                        # Auth forms
 └── javascript/
-    ├── application.js                  # Entry point
-    ├── upload.js                       # Drag-drop, file picker, progress bar (library page)
+    ├── application.js                 # Entry point
+    ├── upload.js                      # Library upload (drag-drop + progress)
     └── controllers/
-        ├── dropdown_controller.js              # Three-dot menu toggle with submenu support
-        ├── notification_dropdown_controller.js # Notification bell dropdown + mark as read
-        ├── collaborator_search_controller.js   # Autocomplete search for adding collaborators
-        ├── share_controller.js                 # Share link modal (create link, copy URL)
-        └── project_upload_controller.js        # File uploads within projects (drag-drop + picker)
+        ├── dropdown_controller.js              # Three-dot menu toggle
+        ├── notification_dropdown_controller.js # Notification bell dropdown
+        ├── collaborator_search_controller.js   # Autocomplete user search
+        ├── share_controller.js                 # Share link modal
+        ├── quick_share_controller.js           # Quick share upload
+        ├── asset_upload_controller.js          # Upload within assets
+        ├── file_drag_controller.js             # Drag & drop file moving
+        ├── audio_player_controller.js          # Audio playback + waveform
+        ├── search_filters_controller.js        # Search filter controls
+        ├── rename_controller.js                # Inline rename modal
+        └── access_controller.js                # Share link password modal
 ```
 
 ## Key Models & Relationships
 
 ```
 User
-├── has_many :projects, dependent: :destroy
+├── has_many :assets, dependent: :destroy
 ├── has_many :collaborations, dependent: :destroy
 ├── has_many :inverse_collaborations (as collaborator)
 ├── has_many :notifications
 ├── has_one_attached :avatar
 ├── validates: username (required, unique)
-├── methods: collaborators, collaborators_count, daw_projects_count, total_storage_used, storage_breakdown
+├── methods: collaborators, daw_projects_count, total_storage_used, storage_breakdown
 
-Project
+Asset (unified model - replaces Project/ProjectFile)
 ├── belongs_to :user
-├── has_many :project_files, dependent: :destroy
+├── belongs_to :parent (self-referential, optional)
+├── belongs_to :shared_from_user (optional, for saved shares)
+├── has_many :children, dependent: :destroy
 ├── has_many :share_links, dependent: :destroy
-├── has_one_attached :file (original ZIP)
-├── fields: title, project_type (ableton/logic/folder), extracted
-├── validates: title presence, file presence
-
-ProjectFile (tree structure for extracted files)
-├── belongs_to :project
-├── belongs_to :parent (optional, self-referential)
-├── has_many :children
 ├── has_one_attached :file
-├── fields: original_filename, path, file_size, is_directory, hidden, file_type
-├── scopes: visible, directories, files, root_level
-├── methods: extension, icon_type, should_hide?
+├── fields: title, original_filename, path, file_size, is_directory, hidden,
+│           file_type, asset_type, extracted, ephemeral, shared_from_user_id
+├── scopes: root_level, library, ephemeral_shares, visible, directories, files
+├── methods: extension, all_descendants, should_hide?
+
+ShareLink
+├── belongs_to :asset
+├── has_secure_password (optional)
+├── fields: token, expires_at, download_count, password_digest
+├── methods: expired?, password_required?
 
 Collaboration
-├── belongs_to :user (the person who added the collaborator)
+├── belongs_to :user
 ├── belongs_to :collaborator (User)
-├── Represents a mutual collaboration relationship between users
 
 Notification
 ├── belongs_to :user (recipient)
-├── belongs_to :actor (User who triggered notification)
-├── belongs_to :notifiable (polymorphic, optional - for linking to projects)
-├── fields: notification_type, read (boolean)
-├── scopes: unread, recent
+├── belongs_to :actor (User)
+├── belongs_to :notifiable (polymorphic, optional)
+├── fields: notification_type, read
 ├── Types: 'collaborator_added'
-
-ShareLink
-├── belongs_to :project
-├── has_secure_password (optional - for password-protected links)
-├── fields: token, expires_at, download_count, password_digest
-├── methods: expired?, password_required?
-├── Token auto-generated on create (SecureRandom.urlsafe_base64)
 ```
 
 ## Routes
 
 ```ruby
-devise_for :users                       # Auth routes
+devise_for :users
 
-resources :projects, only: [:create, :show, :destroy] do
+# Root - Landing page (public)
+root "pages#landing"
+
+# Assets (path: /items to avoid Rails asset pipeline conflict)
+resources :assets, path: 'items', only: [:create, :show, :destroy] do
   collection do
     post :create_folder
   end
   member do
-    get :download                                      # Download original file
-    get 'download_file/:file_id', to: :download_file   # Download single file
-    get 'download_folder/:folder_id', to: :download_folder  # Download folder as ZIP
-    delete 'delete_file/:file_id', to: :destroy_file   # Delete file or folder
-    post :duplicate                                    # Duplicate a project
-    patch :rename                                      # Rename a project
-    post :create_subfolder                             # Create folder inside project
-    post :upload_files                                 # Upload files to existing project
+    get :download
+    get 'download_file/:file_id', to: :download_file
+    get 'download_folder/:folder_id', to: :download_folder
+    delete 'delete_file/:file_id', to: :destroy_file
+    patch 'rename_file/:file_id', to: :rename_file
+    post :duplicate
+    patch :rename
+    post :create_subfolder
+    post :upload_files
+    post :move_file
   end
-  resources :share_links, only: [:create, :destroy]    # Nested share link management
+  resources :share_links, only: [:create, :destroy]
 end
 
-# Public share link routes (no auth required)
-get 's/:token', to: 'share_links#show'                 # View shared project
-get 's/:token/download', to: 'share_links#download'    # Download shared project
-post 's/:token/verify', to: 'share_links#verify_password'  # Verify password
+# Public share links
+get 's/:token', to: 'share_links#show'
+get 's/:token/download', to: 'share_links#download'
+post 's/:token/verify', to: 'share_links#verify_password'
+post 's/:token/save', to: 'share_links#save_to_library'
 
-resource :profile, only: [:show, :edit, :update]       # User profile
+# Quick shares (ephemeral)
+get 'share', to: 'quick_shares#index'
+post 'share', to: 'quick_shares#create'
+delete 'share/:id', to: 'quick_shares#destroy'
 
-resources :collaborators, only: [:index, :create, :destroy] do
-  collection do
-    get :search                                        # Autocomplete search for users
-  end
-end
-
-resources :notifications, only: [] do
-  collection do
-    post :mark_read                                    # Mark all notifications as read
-  end
-end
-
+# Library
 get 'library/index'
-root "library#index"                    # Main library page
-```
+post 'library/move_asset', to: 'library#move_asset'
 
-## Common Development Tasks
+# Search
+get 'search', to: 'search#index'
 
-### Running the Application
-```bash
-bin/rails server           # Start Rails server
-bin/dev                    # Start with foreman (if Procfile.dev exists)
-```
-
-### Database
-```bash
-bin/rails db:migrate       # Run migrations
-bin/rails db:reset         # Drop, create, migrate, seed
-```
-
-### Building Assets
-```bash
-yarn build                 # Bundle JavaScript with esbuild
-yarn build:css             # Build Tailwind CSS
+# Profile, Collaborators, Notifications
+resource :profile, only: [:show, :edit, :update]
+resources :collaborators, only: [:index, :create, :destroy] do
+  collection { get :search }
+end
+resources :notifications, only: [] do
+  collection { post :mark_read }
+end
 ```
 
 ## Key Files to Know
 
 | Purpose | File |
 |---------|------|
-| ZIP extraction logic | `app/services/project_extraction_service.rb` |
-| Background extraction | `app/jobs/project_extraction_job.rb` |
-| File hiding rules | `app/models/project_file.rb` (HIDDEN_EXTENSIONS, HIDDEN_FOLDERS) |
+| Asset model | `app/models/asset.rb` |
+| Asset controller | `app/controllers/assets_controller.rb` |
+| ZIP extraction | `app/services/asset_extraction_service.rb` |
+| Background extraction | `app/jobs/asset_extraction_job.rb` |
 | File icon selection | `app/helpers/file_icon_helper.rb` |
-| Upload UI/UX + progress (library) | `app/javascript/upload.js` |
-| Upload within projects | `app/javascript/controllers/project_upload_controller.js` |
-| Dropdown menus | `app/javascript/controllers/dropdown_controller.js` |
-| Share link modal | `app/javascript/controllers/share_controller.js` |
-| Notification dropdown | `app/javascript/controllers/notification_dropdown_controller.js` |
-| Collaborator search | `app/javascript/controllers/collaborator_search_controller.js` |
+| Library upload | `app/javascript/upload.js` |
+| Asset upload | `app/javascript/controllers/asset_upload_controller.js` |
+| File drag/drop | `app/javascript/controllers/file_drag_controller.js` |
+| Audio player | `app/javascript/controllers/audio_player_controller.js` |
+| Search filters | `app/javascript/controllers/search_filters_controller.js` |
+| Landing page | `app/views/pages/landing.html.erb` |
+| Landing CSS | `app/assets/stylesheets/landing.css` |
 | Library view | `app/views/library/index.html.erb` |
-| Project browser | `app/views/projects/show.html.erb` |
-| Breadcrumb navigation | `app/views/projects/_breadcrumbs.html.erb` |
-| Styling | `app/assets/stylesheets/application.tailwind.css` |
-| Routes | `config/routes.rb` |
-| Storage config | `config/storage.yml` |
-| Database schema | `db/schema.rb` |
+| Asset browser | `app/views/assets/show.html.erb` |
+| Search page | `app/views/search/index.html.erb` |
+| Main styling | `app/assets/stylesheets/application.tailwind.css` |
 
-## ProjectFile Hidden File Logic
+## Asset Model Architecture
 
-Files are auto-hidden during extraction:
-- **Extensions**: `.asd`, `.ds_store`
-- **Folders**: `Ableton Project Info`, `__MACOSX`
-- **Patterns**: Files starting with `.` or `Icon`
+Everything is a unified **Asset** model with self-referential tree structure:
 
-See `ProjectFile.should_hide?(filename, is_directory:)` for implementation.
+```
+User's Library (parent_id: NULL, ephemeral: false)
+├── 🎵 Track.wav                    ← Asset (is_directory: false)
+├── 📁 My Folder                    ← Asset (is_directory: true, asset_type: "folder")
+│   └── 🎵 beat.wav                 ← Asset (parent_id: folder.id)
+├── 🔶 SERENADE Project             ← Asset (is_directory: true, asset_type: "ableton", extracted: true)
+│   ├── 🔶 SERENADE.als             ← Child asset
+│   └── 📁 Samples                  ← Child folder
+│       └── 🎵 kick.wav             ← Grandchild asset
 
-## FileIconHelper
+Quick Shares (parent_id: NULL, ephemeral: true)
+└── 🎵 demo.mp3                     ← Ephemeral asset with auto ShareLink
+```
 
-Provides icon selection for visual file type display:
-- `project_icon_for(project)` - Icon for library view (checks project_type first, then file extension)
-- `file_icon_for(project_file)` - Icon for extracted files within project browser
+### Asset Types
+- `ableton` - Ableton Live project (.als detected)
+- `logic` - Logic Pro project (.logicx detected)
+- `fl_studio` - FL Studio project (.flp detected)
+- `lossless_audio` - WAV, AIF, FLAC
+- `compressed_audio` - MP3, M4A, AAC
+- `folder` - User-created folder
 
-Supported file types:
-- **DAW Projects**: Ableton (.als), Logic (.logicx)
-- **Lossless Audio**: WAV, AIF, AIFF, FLAC
-- **Compressed Audio**: MP3, M4A, AAC
-- **Folders**: Directory icon
-- **Fallback**: Generic file icon
+See `docs/ASSET_ARCHITECTURE.md` for full documentation.
 
 ## What's Implemented
 
-- User authentication (sign up, login, logout, password reset)
-- Project upload with drag-drop and file picker
-- Upload progress bar with percentage display
-- ZIP file extraction with tree structure preservation
-- Background job extraction (avoids Heroku 30s timeout)
-- Project type auto-detection (Ableton/Logic/Folder)
-- Original project download
-- Individual file download
-- Folder download as ZIP (in-memory ZIP creation)
-- Project deletion
-- Individual file/folder deletion (with cascade for folders)
-- Project duplication
-- Project renaming
-- Folder creation (top-level and inside projects)
+### Core Features
+- User authentication (Devise)
+- Asset upload with drag-drop and progress bar
+- ZIP file extraction with tree structure
+- Background job extraction (async)
+- Asset type auto-detection (Ableton/Logic/FL Studio)
+- File/folder download (individual or as ZIP)
+- Asset deletion, duplication, renaming
+- Folder creation (root level and nested)
 - Library grid view with three-dot menus
-- Project file browser with subfolder navigation
-- Breadcrumb navigation in project browser
+- Asset browser with subfolder navigation
+- Breadcrumb navigation
 - File type icons throughout UI
 - Dark theme UI
-- Cloud storage (Cloudflare R2 in production)
-- **User Profile**: Avatar upload, username/email/password editing, storage usage display
-- **Collaborators**: Add/remove collaborators with autocomplete search, mutual relationship
-- **Notifications**: Bell icon with unread count badge, dropdown showing recent activity, auto mark-as-read on open
-  - Currently supports: `collaborator_added` notification type
-  - Polymorphic `notifiable` ready for future notification types (e.g., file shared, project downloaded)
-- **Share Links**: Create shareable URLs for projects with optional password protection and expiry
-  - Public URLs at `/s/:token` (no login required)
-  - Password protection with session-based verification
-  - Expiry options: 1 hour, 24 hours, 7 days, 30 days, or never
-  - Download tracking (download_count field)
-- **File uploads within projects**: Drag & drop or file picker to add files to existing projects/folders
+
+### Search
+- Full search with BPM, key, and title filters
+- Key detection from filename (e.g., "Track_Cmaj_120bpm.wav")
+- BPM detection from filename
+- Filter by exact or range BPM
+- Musical key dropdown with all keys
+
+### Sharing
+- **Share Links**: Password protection, expiry, download tracking
+- **Quick Shares**: Ephemeral uploads with auto-generated share link
+- **Save to Library**: Recipients can save shared files to their own library
+- Public share pages at `/s/:token`
+
+### Audio Player
+- Persistent audio player bar (bottom of screen)
+- Waveform visualization (WaveSurfer.js)
+- Play/pause, restart, volume control
+- Survives Turbo navigation (turbo-permanent)
+- Click any audio file to play
+
+### Profile
+- Avatar upload
+- Username/email/password editing
+- Storage usage display with breakdown bar
+- Category breakdown (DAW projects, audio, other)
+
+### Landing Page
+- Public landing page at root URL
+- Separate layout (no app header)
+- Typing animation hero text
+- Screenshot showcases
+- Screen recording video
+- Redirects to library if logged in
+
+### Other
+- Collaborators management
+- Notifications with unread badge
+- Drag & drop file organization
 
 ## What's NOT Implemented Yet
 
-- **Search** (icon in UI, no logic)
-- **Audio previews/waveforms**
-- **Payment integration**
+- Audio previews/waveforms in file browser (player works, but no inline previews)
+- Payment integration
+- Real-time collaboration
 
-## Architecture Notes
+## Common Development Tasks
 
-1. **Active Storage**: Used for both original project files AND individual extracted files
-2. **Service Objects**: Business logic in `app/services/` (e.g., ProjectExtractionService)
-3. **Background Jobs**: ProjectExtractionJob handles ZIP extraction asynchronously
-4. **Self-referential association**: ProjectFile uses `parent_id` for folder tree structure
-5. **Helper modules**: FileIconHelper for icon selection logic, included in views
-6. **Stimulus Controllers**:
-   - `DropdownController` - Three-dot menu toggle with submenu support (CSS bridge for hover stability)
-   - `NotificationDropdownController` - Bell icon dropdown with AJAX mark-as-read
-   - `CollaboratorSearchController` - Autocomplete search with avatar display
-   - `ShareController` - Share link modal (create, display URL, copy to clipboard)
-   - `ProjectUploadController` - File uploads within projects (Direct Upload to R2)
-7. **Cloud Storage**: Cloudflare R2 (S3-compatible) configured with special checksum settings
-8. **Polymorphic associations**: Notification `notifiable` allows linking to any model (future: projects, files)
+```bash
+# Run server
+bin/rails server
+bin/dev                    # With foreman
 
-## Controller Actions
+# Database
+bin/rails db:migrate
+bin/rails db:reset
 
-### ProjectsController
-- `show` - View project contents, supports subfolder navigation via `folder_id` param
-- `create` - Upload new project, triggers background extraction job
-- `download` - Download original file, or ZIP of contents, or empty ZIP for folders
-- `download_file` - Download individual extracted file with original filename
-- `download_folder` - Download folder as in-memory ZIP file
-- `destroy` - Delete entire project and all extracted files
-- `destroy_file` - Delete individual file or folder (cascades to children)
-- `upload_files` - Upload files to existing project (handles Direct Upload signed blobs)
-
-### ShareLinksController
-- `create` - Create new share link (nested under project, requires auth)
-- `destroy` - Delete a share link
-- `show` - Public page to view/download shared project (no auth, renders expired/not_found views)
-- `download` - Download shared project (checks password if required)
-- `verify_password` - AJAX endpoint to verify password, stores in session
-
-### LibraryController
-- `index` - Main dashboard (empty action, view renders user's projects)
-
-### ProfileController
-- `show` - User profile page with stats, avatar, storage breakdown
-- `edit` - Edit individual fields (username, email, password)
-- `update` - Save profile changes, handle avatar upload
-
-### CollaboratorsController
-- `index` - List all collaborators
-- `create` - Add a collaborator (creates notification for them)
-- `destroy` - Remove a collaborator
-- `search` - JSON endpoint for autocomplete (returns id, username, avatar_url)
-
-### NotificationsController
-- `mark_read` - Mark all user's notifications as read (AJAX)
+# Assets
+yarn build                 # JavaScript
+yarn build:css             # Tailwind CSS
+```
 
 ## Storage Configuration
 
 ```yaml
-# config/storage.yml
-local:
-  service: Disk
-  root: storage/
-
-cloudflare:
-  service: S3
-  endpoint: https://<account>.r2.cloudflarestorage.com
-  access_key_id: <%= ENV['CLOUDFLARE_ACCESS_KEY_ID'] %>
-  secret_access_key: <%= ENV['CLOUDFLARE_SECRET_ACCESS_KEY'] %>
-  bucket: <%= ENV['CLOUDFLARE_BUCKET'] %>
-  region: auto
-  force_path_style: true
-  request_checksum_calculation: when_required
-  response_checksum_validation: when_required
+# Development: Local disk
+# Production: Cloudflare R2 (S3-compatible)
 ```
 
-- **Development**: Uses local disk storage
-- **Production**: Uses Cloudflare R2 (S3-compatible)
+## Technical Debt / Known Issues
 
-## Testing
-
-Test framework is Minitest but **no tests have been written yet**. Test files exist as empty stubs in `test/`.
-
-## Known Issues / Technical Debt
-
-1. Devise mailer not configured for password resets
-2. Zero test coverage
-3. No error handling UI for failed extractions
+1. Legacy `projects` and `project_files` tables still in database (can be dropped)
+2. Devise mailer not configured for password resets
+3. Zero test coverage
+4. No error handling UI for failed extractions
