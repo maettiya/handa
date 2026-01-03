@@ -1475,7 +1475,7 @@ body {
    =================== */
 
 .collaborators-container {
-  max-width: 500px;
+  max-width: 700px;
   margin: 40px auto;
   padding: 0 20px;
 }
@@ -1533,8 +1533,8 @@ body {
 
 .collaborators-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
   margin-top: 20px;
 }
 
@@ -2092,6 +2092,7 @@ body {
   font-size: 14px;
   color: #666;
   margin-top: 8px;
+  text-align: center;
 }
 
 /* Share Modal Styles */
