@@ -83,8 +83,6 @@ body {
   }
 }
 
-
-
 /* Glitchy H Logos */
 .h-logos-row {
   display: flex;
@@ -99,7 +97,7 @@ body {
 }
 
 .center-logo {
-  height: 80px;
+  height: 40px;
   width: auto;
 }
 
