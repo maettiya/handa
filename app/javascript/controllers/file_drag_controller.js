@@ -48,21 +48,14 @@ export default class extends Controller {
       return
     }
 
-    // If clicking on a link (folder navigation), don't handle selection
-    if (event.target.closest('a.project-card')) {
-      // Unless Cmd/Ctrl is held - then prevent navigation and select instead
-      if (event.metaKey || event.ctrlKey) {
-        event.preventDefault()
-        if (wrapper) {
-          this.toggleSelection(wrapper)
-        }
-      }
-      return
-    }
-
-    // If clicking on a card wrapper with Cmd/Ctrl or Shift held
-    if (wrapper && (event.metaKey || event.ctrlKey || event.shiftKey)) {
+    // If Cmd/Ctrl or Shift is held, handle selection instead of normal action
+    if (event.metaKey || event.ctrlKey || event.shiftKey) {
       event.preventDefault()
+      event.stopPropagation()
+
+      if (!wrapper) {
+        return
+      }
 
       if (event.shiftKey && this.lastSelectedWrapper) {
         // Shift+click: select range
@@ -74,19 +67,12 @@ export default class extends Controller {
       return
     }
 
-    // Regular click on empty space or without modifier - clear selection
-    if (!wrapper || (!event.metaKey && !event.ctrlKey && !event.shiftKey)) {
-      // Don't clear if clicking on audio player card (to play audio)
-      if (wrapper && wrapper.querySelector('[data-audio-url]')) {
-        // Allow audio to play, but clear selection
-        this.clearSelection()
-        return
-      }
-
-      if (!wrapper) {
-        this.clearSelection()
-      }
+    // Regular click without modifier
+    if (!wrapper) {
+      // Clicked on empty space - clear selection
+      this.clearSelection()
     }
+    // Let normal clicks (folder open, audio play) happen naturally
   }
 
   handleKeydown(event) {

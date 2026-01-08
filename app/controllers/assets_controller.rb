@@ -345,48 +345,69 @@ class AssetsController < ApplicationController
 
   def move_file
     @asset = current_user.assets.find(params[:id])
-    @file = find_descendant(@asset, params[:file_id])
 
-    # Determine target: folder ID. "root" for asset root, or another file ID for merge
+    file_ids = params[:file_ids] || [params[:file_id]]
     target_id = params[:target_id]
     merge_with_id = params[:merge_with_id]
+    create_folder = params[:create_folder]
 
-    if merge_with_id.present?
-      # Merging two audio files into a new folder
-      @other_file = find_descendant(@asset, merge_with_id)
-      folder_name = generate_untitled_folder_name(@file.parent_id)
+    @files = file_ids.map { |id| find_descendant(@asset, id) }
 
-      # Create the new folder
+    if @files.empty?
+      render json: { success: false, error: "No files found" }, status: :not_found
+      return
+    end
+
+    # Get the parent of the first file (they should all be in the same location)
+    common_parent_id = @files.first.parent_id
+
+    if create_folder
+      # Create a new folder and move all files into it
+      folder_name = generate_untitled_folder_name(common_parent_id)
       new_folder = @asset.user.assets.create!(
         title: folder_name,
         original_filename: folder_name,
         is_directory: true,
-        parent_id: @file.parent_id,
-        path: build_file_path(@file.parent_id, folder_name)
+        parent_id: common_parent_id,
+        path: build_file_path(common_parent_id, folder_name)
       )
 
-      # Move both files into the new folder
-      move_to_parent(@file, new_folder)
+      @files.each { |file| move_to_parent(file, new_folder) }
+      render json: { success: true, folder_id: new_folder.id }
+
+    elsif merge_with_id.present?
+      # Merging files into a new folder
+      @other_file = find_descendant(@asset, merge_with_id)
+      folder_name = generate_untitled_folder_name(common_parent_id)
+
+      new_folder = @asset.user.assets.create!(
+        title: folder_name,
+        original_filename: folder_name,
+        is_directory: true,
+        parent_id: common_parent_id,
+        path: build_file_path(common_parent_id, folder_name)
+      )
+
+      @files.each { |file| move_to_parent(file, new_folder) }
       move_to_parent(@other_file, new_folder)
 
       render json: { success: true, folder_id: new_folder.id }
+
     elsif target_id == "library"
-      # Moving to library root level (makes this file a top-level asset)
-      move_to_library(@file)
+      # Moving to library root level
+      @files.each { |file| move_to_library(file) }
       render json: { success: true, redirect: root_path }
+
     else
       # Simple move to folder or root
       if target_id == "root"
-        # Moving to asset root - check if there's a skipped root folder
         skipped = detect_skipped_root_folder
         new_parent = skipped || @asset
       else
-        # Moving to a folder within the asset
         new_parent = find_descendant(@asset, target_id)
       end
 
-      move_to_parent(@file, new_parent)
-
+      @files.each { |file| move_to_parent(file, new_parent) }
       render json: { success: true }
     end
   rescue ActiveRecord::RecordNotFound

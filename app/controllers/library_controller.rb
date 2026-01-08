@@ -6,17 +6,24 @@ class LibraryController < ApplicationController
 
   # Move/merge library-level assets
   # Uses same param names as AssetsController#move_file for consistency
+  # Move/merge library-level assets
+# Supports single file (file_id) or multiple files (file_ids array)
   def move_asset
-    @asset = current_user.assets.root_level.find(params[:file_id])
+    file_ids = params[:file_ids] || [params[:file_id]]
     target_id = params[:target_id]
     merge_with_id = params[:merge_with_id]
+    create_folder = params[:create_folder]
 
-    if merge_with_id.present?
-      # Merging two assets into a new folder
-      @other_asset = current_user.assets.root_level.find(merge_with_id)
+    @assets = current_user.assets.root_level.where(id: file_ids)
+
+    if @assets.empty?
+      render json: { success: false, error: "No assets found" }, status: :not_found
+      return
+    end
+
+    if create_folder
+      # Create a new folder and move all files into it
       folder_name = generate_untitled_folder_name
-
-      # Create the new folder at root level
       new_folder = current_user.assets.create!(
         title: folder_name,
         original_filename: folder_name,
@@ -25,11 +32,27 @@ class LibraryController < ApplicationController
         path: folder_name
       )
 
-      # Move both assets into the new folder
-      move_asset_to_folder(@asset, new_folder)
+      @assets.each { |asset| move_asset_to_folder(asset, new_folder) }
+      render json: { success: true, folder_id: new_folder.id }
+
+    elsif merge_with_id.present?
+      # Merging files into a new folder (original 2-file merge behavior)
+      @other_asset = current_user.assets.root_level.find(merge_with_id)
+      folder_name = generate_untitled_folder_name
+
+      new_folder = current_user.assets.create!(
+        title: folder_name,
+        original_filename: folder_name,
+        is_directory: true,
+        asset_type: 'folder',
+        path: folder_name
+      )
+
+      @assets.each { |asset| move_asset_to_folder(asset, new_folder) }
       move_asset_to_folder(@other_asset, new_folder)
 
       render json: { success: true, folder_id: new_folder.id }
+
     elsif target_id.present?
       # Moving into an existing folder
       target_folder = current_user.assets.root_level.find(target_id)
@@ -39,8 +62,9 @@ class LibraryController < ApplicationController
         return
       end
 
-      move_asset_to_folder(@asset, target_folder)
+      @assets.each { |asset| move_asset_to_folder(asset, target_folder) }
       render json: { success: true }
+
     else
       render json: { success: false, error: "No target specified" }, status: :unprocessable_entity
     end
