@@ -1,3 +1,5 @@
+import * as Turbo from "@hotwired/turbo"
+
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
@@ -87,7 +89,7 @@ export default class extends Controller {
       const data = await response.json()
 
       if (data.success) {
-        window.location.reload()
+        Turbo.visit(window.location.href)
       } else {
         alert("Could not rename: " + (data.error || "Unknown error"))
       }
