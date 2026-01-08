@@ -99,35 +99,33 @@ export default class extends Controller {
     }
   }
 
-  renameRootAsset(assetId, newTitle) {
-    // Create and submit a form for root-level assets
-    const form = document.createElement("form")
-    form.method = "POST"
-    form.action = `/items/${assetId}/rename`
-
-    // CSRF token
+  async renameRootAsset(assetId, newTitle) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content
-    const csrfInput = document.createElement("input")
-    csrfInput.type = "hidden"
-    csrfInput.name = "authenticity_token"
-    csrfInput.value = csrfToken
-    form.appendChild(csrfInput)
 
-    // Method override for PATCH
-    const methodInput = document.createElement("input")
-    methodInput.type = "hidden"
-    methodInput.name = "_method"
-    methodInput.value = "patch"
-    form.appendChild(methodInput)
+    const formData = new FormData()
+    formData.append("title", newTitle)
 
-    // Title
-    const titleInput = document.createElement("input")
-    titleInput.type = "hidden"
-    titleInput.name = "title"
-    titleInput.value = newTitle
-    form.appendChild(titleInput)
+    try {
+      const response = await fetch(`/items/${assetId}/rename`, {
+        method: "PATCH",
+        headers: {
+          "X-CSRF-Token": csrfToken,
+          "Accept": "application/json"
+        },
+        body: formData
+      })
 
-    document.body.appendChild(form)
-    form.submit()
+      const data = await response.json()
+
+      if (data.success) {
+        this.close()
+        Turbo.visit(window.location.href)
+      } else {
+        alert("Could not rename: " + (data.error || "Unknown error"))
+      }
+    } catch (error) {
+      console.error("Rename failed:", error)
+      alert("Failed to rename")
+    }
   }
 }

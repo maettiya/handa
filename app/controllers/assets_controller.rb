@@ -196,9 +196,15 @@ class AssetsController < ApplicationController
     @asset = current_user.assets.find(params[:id])
 
     if @asset.update(title: params[:title])
-      redirect_to root_path
+      respond_to do |format|
+        format.html { redirect_to root_path }
+        format.json { render json: { success: true } }
+      end
     else
-      redirect_to root_path, alert: "Could not rename"
+      respond_to do |format|
+        format.html { redirect_to root_path, alert: "Could not rename" }
+        format.json { render json: { success: false, error: "Could not rename" }, status: :unprocessable_entity }
+      end
     end
   end
 
