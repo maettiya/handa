@@ -1,3 +1,5 @@
+import * as Turbo from "@hotwired/turbo"
+
 import { DirectUpload } from "@rails/activestorage"
 
 document.addEventListener("turbo:load", function() {
@@ -153,7 +155,7 @@ document.addEventListener("turbo:load", function() {
 
     if (activeUploads === 0) {
       progressContainer.classList.remove("active");
-      window.location.href = "/";
+      Turbo.visit("/");
     }
   }
 });
