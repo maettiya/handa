@@ -4,6 +4,8 @@
 import { Controller } from "@hotwired/stimulus"
 import { DirectUpload } from "@rails/activestorage"
 
+import * as Turbo from "@hotwired/turbo"
+
 export default class extends Controller {
   static targets = ["fileInput", "dropZone"]
   static values = { assetId: Number, parentId: Number }
@@ -154,7 +156,7 @@ export default class extends Controller {
 
     if (this.activeUploads === 0) {
       this.progressContainer.classList.remove("active")
-      window.location.reload()
+      Turbo.visit(window.location.href)
     }
   }
 }
