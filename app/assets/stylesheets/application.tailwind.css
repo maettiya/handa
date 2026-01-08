@@ -2548,6 +2548,22 @@ body {
   border-radius: 8px;
 }
 
+/* Multi-select styles */
+.project-card-wrapper.selected {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.project-card-wrapper.selected .project-card {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.project-card-wrapper.dragging {
+  opacity: 0.5;
+}
+
+
 /* Breadcrumb drop target */
 .breadcrumb-link.drop-target {
   background: rgba(96, 165, 250, 0.2);
