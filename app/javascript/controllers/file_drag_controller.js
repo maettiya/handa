@@ -1,5 +1,6 @@
-import { Controller } from "@hotwired/stimulus"
+import * as Turbo from "@hotwired/turbo"
 
+import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static values = {
     moveUrl: String
@@ -166,9 +167,9 @@ export default class extends Controller {
       if (data.success) {
         // Redirect to library if specified, otherwise reload current page
         if (data.redirect) {
-          window.location.href = data.redirect
+          Turbo.visit(data.redirect)
         } else {
-          window.location.reload()
+          Turbo.visit(window.location.href)
         }
       } else {
         alert('Failed to move file: ' + (data.error || 'Unknown error'))
@@ -196,7 +197,7 @@ export default class extends Controller {
       const data = await response.json()
 
       if (data.success) {
-        window.location.reload()
+        Turbo.visit(window.location.href)
       } else {
         alert('Failed to merge files: ' + (data.error || 'Unknown error'))
       }
