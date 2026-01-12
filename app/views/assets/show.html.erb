@@ -3,7 +3,7 @@
 <%# Uses the same grid layout as library for consistent UX %>
 <% content_for :page_title, @asset.title.upcase %>
 
-<div data-controller="share asset-upload file-drag"
+<div data-controller="share asset-upload file-drag folder-search"
      data-asset-upload-asset-id-value="<%= @asset.id %>"
      data-asset-upload-parent-id-value="<%= @current_folder&.id %>"
      data-file-drag-move-url-value="<%= move_file_asset_path(@asset) %>">
@@ -19,7 +19,21 @@
 </div>
 
 <%# Breadcrumb navigation - file path style %>
-<%= render "assets/breadcrumbs" %>
+<div class="breadcrumb-row">
+  <%= render "assets/breadcrumbs" %>
+
+  <%# Folder search input %>
+  <div class="folder-search-wrapper">
+    <svg class="folder-search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+    <input type="text"
+           placeholder="Search in folder..."
+           class="folder-search-input"
+           data-folder-search-target="input"
+           data-action="input->folder-search#filterCards">
+  </div>
+</div>
 
 <%# Hidden file input for uploads %>
 <input type="file" class="file-input" id="file-input" name="files[]" multiple accept=".als,.logicx,.wav,.mp3,.zip,.aif,.aiff,.flac" data-asset-upload-target="fileInput" data-direct-upload-url="<%= rails_direct_uploads_url %>" data-action="change->asset-upload#handleFileSelect">
@@ -38,6 +52,8 @@
             data-file-id="<%= file.id %>"
             data-file-type="<%= file.is_directory? ? 'folder' : file.extension %>"
             data-is-directory="<%= acts_as_directory %>"
+            data-filename="<%= file.original_filename %>"
+            data-folder-search-target="card"
             data-action="dragstart->file-drag#dragStart dragend->file-drag#dragEnd dragover->file-drag#dragOver dragleave->file-drag#dragLeave drop->file-drag#drop">
 
           <% if file.is_directory? %>

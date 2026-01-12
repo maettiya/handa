@@ -36,3 +36,6 @@ application.register("file-drag", FileDragController)
 
 import RenameController from "./rename_controller"
 application.register("rename", RenameController)
+
+import FolderSearchController from "./folder_search_controller"
+application.register("folder-search", FolderSearchController)
