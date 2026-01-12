@@ -105,6 +105,10 @@ body {
   color: #ffffff;
 }
 
+.notification-wrapper.active .notification-bell {
+  color: #ffffff;
+}
+
 .notification-badge {
   position: absolute;
   top: 2px;
@@ -255,6 +259,10 @@ body {
   color: #ffffff;
 }
 
+.search-icon.active {
+  color: #ffffff;
+}
+
 /* =============================================
    PROFILE ICON
    ============================================= */
@@ -271,6 +279,10 @@ body {
 }
 
 .profile-icon:hover {
+  color: #ffffff;
+}
+
+.profile-icon.active {
   color: #ffffff;
 }
 
