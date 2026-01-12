@@ -3,7 +3,7 @@ class SearchController < ApplicationController
 
   def index
     @query = params[:q].to_s.strip
-    @sort = params[:sort]  # nil by default, no forced sorting
+    @sort = params[:sort].presence || 'recent'  # Default to recent so results show
     @date_from = params[:date_from]
     @date_to = params[:date_to]
     @bpm_mode = params[:bpm_mode] || 'range'  # 'exact' or 'range'
