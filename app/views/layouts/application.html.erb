@@ -23,6 +23,11 @@
         <% if content_for?(:show_tabs) %>
           <div class="nav-tabs">
             <%= link_to "LIBRARY", root_path, class: "nav-tab #{'active' if controller_name == 'library'}" %>
+            <% if controller_name == 'search' %>
+              <%= link_to "SEARCH FILES", search_path, class: "nav-tab active" %>
+            <% elsif controller_name == 'profile' %>
+              <%= link_to "PROFILE", profile_path, class: "nav-tab active" %>
+            <% end %>
             <%= link_to "SHARE", quick_shares_path, class: "nav-tab #{'active' if controller_name == 'quick_shares'}" %>
           </div>
         <% else %>
