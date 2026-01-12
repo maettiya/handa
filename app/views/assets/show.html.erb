@@ -29,11 +29,15 @@
   <% if @files.any? %>
     <div class="projects-grid">
       <% @files.each do |file| %>
+        <%
+          # Treat extracted ZIPs (files with children) as directories for drop purposes
+          acts_as_directory = file.is_directory? || file.children.any?
+        %>
         <div class="project-card-wrapper"
             draggable="true"
             data-file-id="<%= file.id %>"
             data-file-type="<%= file.is_directory? ? 'folder' : file.extension %>"
-            data-is-directory="<%= file.is_directory? %>"
+            data-is-directory="<%= acts_as_directory %>"
             data-action="dragstart->file-drag#dragStart dragend->file-drag#dragEnd dragover->file-drag#dragOver dragleave->file-drag#dragLeave drop->file-drag#drop">
 
           <% if file.is_directory? %>

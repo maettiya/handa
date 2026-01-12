@@ -54,10 +54,11 @@ class LibraryController < ApplicationController
       render json: { success: true, folder_id: new_folder.id }
 
     elsif target_id.present?
-      # Moving into an existing folder
+      # Moving into an existing folder or extracted ZIP
       target_folder = current_user.assets.root_level.find(target_id)
 
-      unless target_folder.is_directory?
+      # Allow dropping into directories OR extracted assets with children
+      unless target_folder.is_directory? || target_folder.children.any?
         render json: { success: false, error: "Target is not a folder" }, status: :unprocessable_entity
         return
       end

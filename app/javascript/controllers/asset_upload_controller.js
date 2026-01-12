@@ -28,6 +28,14 @@ export default class extends Controller {
   }
 
   dragOver(event) {
+    // If dragging over a card wrapper, let file-drag controller handle it
+    if (event.target.closest('.project-card-wrapper')) {
+      return
+    }
+    // Only handle external file drops (from desktop), not internal card drags
+    if (!event.dataTransfer.types.includes('Files')) {
+      return
+    }
     event.preventDefault()
     this.dropZoneTarget.classList.add("drag-over")
   }
@@ -37,13 +45,19 @@ export default class extends Controller {
   }
 
   drop(event) {
+    // If dropping on a card wrapper, let file-drag controller handle it
+    if (event.target.closest('.project-card-wrapper')) {
+      return
+    }
+    // Only handle external file drops, not internal card drags
+    const files = Array.from(event.dataTransfer.files)
+    if (files.length === 0) {
+      return
+    }
+
     event.preventDefault()
     this.dropZoneTarget.classList.remove("drag-over")
-
-    const files = Array.from(event.dataTransfer.files)
-    if (files.length > 0) {
-      this.uploadMultipleFiles(files)
-    }
+    this.uploadMultipleFiles(files)
   }
 
   uploadMultipleFiles(files) {

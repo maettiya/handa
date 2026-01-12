@@ -35,12 +35,14 @@
           else
             'unknown'
           end
+          # Treat extracted ZIPs (files with children) as directories for drop purposes
+          acts_as_directory = asset.is_directory? || asset.children.any?
         %>
         <div class="project-card-wrapper"
              draggable="true"
              data-file-id="<%= asset.id %>"
              data-file-type="<%= file_type %>"
-             data-is-directory="<%= asset.is_directory? %>"
+             data-is-directory="<%= acts_as_directory %>"
              data-action="dragstart->file-drag#dragStart dragend->file-drag#dragEnd dragover->file-drag#dragOver dragleave->file-drag#dragLeave drop->file-drag#drop">
           <% if asset.folder? %>
             <%# Empty folder - clickable to browse inside %>

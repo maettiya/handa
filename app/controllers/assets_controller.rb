@@ -61,7 +61,7 @@ class AssetsController < ApplicationController
   # Deletes a single file or folder (and all children if it's a folder)
   def destroy_file
     @asset = current_user.assets.find(params[:id])
-    @file = @asset.children.find(params[:file_id])
+    @file = find_descendant(@asset, params[:file_id])
 
     # Store parent folder to redirect back to current location
     parent_folder_id = @file.parent_id
