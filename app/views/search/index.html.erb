@@ -1,6 +1,6 @@
 <% content_for :page_title, "SEARCH FILES" %>
 
-<div class="search-container">
+<div class="search-container" data-controller="share rename">
   <!-- Search Input Section -->
   <div class="search-input-section">
     <%= form_with url: search_path, method: :get, class: "search-form", id: "search-form", data: { controller: "search-filters" } do %>
@@ -147,6 +147,48 @@
                     </div>
                     <p><%= file.original_filename %></p>
                   <% end %>
+
+                  <%# Three-dot menu %>
+                  <div class="card-menu" data-controller="dropdown">
+                    <button class="menu-trigger" data-action="click->dropdown#toggle">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <circle cx="3" cy="8" r="1.5"/>
+                        <circle cx="8" cy="8" r="1.5"/>
+                        <circle cx="13" cy="8" r="1.5"/>
+                      </svg>
+                    </button>
+                    <div class="menu-dropdown" data-dropdown-target="menu">
+                      <div class="menu-item-with-submenu">
+                        <button class="menu-item menu-item-parent">
+                          <span>Share</span>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                          </svg>
+                        </button>
+                        <div class="submenu">
+                          <div class="submenu-inner">
+                            <button class="menu-item" data-action="click->share#open" data-asset-id="<%= file.id %>">
+                              Create a link
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <% if file.file.attached? %>
+                        <%= link_to "Download", download_file_asset_path(file.root_asset, file_id: file.id), class: "menu-item" %>
+                      <% end %>
+
+                      <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= file.root_asset.id %>" data-file-id="<%= file.id %>" data-asset-title="<%= file.original_filename %>">
+                        Rename
+                      </button>
+
+                      <div class="menu-divider"></div>
+
+                      <%= link_to "Delete", destroy_file_asset_path(file.root_asset, file_id: file.id),
+                          data: { turbo_method: :delete, turbo_confirm: "Delete '#{file.original_filename}'?" },
+                          class: "menu-item menu-item-danger" %>
+                    </div>
+                  </div>
                 </div>
               <% end %>
             </div>
@@ -195,6 +237,46 @@
                       <p><%= asset.title %></p>
                     <% end %>
                   <% end %>
+
+                  <%# Three-dot menu for root-level assets %>
+                  <div class="card-menu" data-controller="dropdown">
+                    <button class="menu-trigger" data-action="click->dropdown#toggle">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <circle cx="3" cy="8" r="1.5"/>
+                        <circle cx="8" cy="8" r="1.5"/>
+                        <circle cx="13" cy="8" r="1.5"/>
+                      </svg>
+                    </button>
+                    <div class="menu-dropdown" data-dropdown-target="menu">
+                      <div class="menu-item-with-submenu">
+                        <button class="menu-item menu-item-parent">
+                          <span>Share</span>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                          </svg>
+                        </button>
+                        <div class="submenu">
+                          <div class="submenu-inner">
+                            <button class="menu-item" data-action="click->share#open" data-asset-id="<%= asset.id %>">
+                              Create a link
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <%= link_to "Download", download_asset_path(asset), class: "menu-item" %>
+
+                      <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= asset.id %>" data-asset-title="<%= asset.title %>">
+                        Rename
+                      </button>
+
+                      <div class="menu-divider"></div>
+
+                      <%= link_to "Delete", asset_path(asset),
+                          data: { turbo_method: :delete, turbo_confirm: "Delete '#{asset.title}'? This cannot be undone." },
+                          class: "menu-item menu-item-danger" %>
+                    </div>
+                  </div>
                 </div>
               <% end %>
               <%# Child assets (audio files and folders within extracted ZIPs) %>
@@ -224,6 +306,50 @@
                       <p><%= file.original_filename %></p>
                     <% end %>
                   <% end %>
+
+                  <%# Three-dot menu for child assets %>
+                  <div class="card-menu" data-controller="dropdown">
+                    <button class="menu-trigger" data-action="click->dropdown#toggle">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <circle cx="3" cy="8" r="1.5"/>
+                        <circle cx="8" cy="8" r="1.5"/>
+                        <circle cx="13" cy="8" r="1.5"/>
+                      </svg>
+                    </button>
+                    <div class="menu-dropdown" data-dropdown-target="menu">
+                      <div class="menu-item-with-submenu">
+                        <button class="menu-item menu-item-parent">
+                          <span>Share</span>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                          </svg>
+                        </button>
+                        <div class="submenu">
+                          <div class="submenu-inner">
+                            <button class="menu-item" data-action="click->share#open" data-asset-id="<%= file.id %>">
+                              Create a link
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <% if file.is_directory %>
+                        <%= link_to "Download", download_folder_asset_path(file.root_asset, folder_id: file.id), class: "menu-item" %>
+                      <% elsif file.file.attached? %>
+                        <%= link_to "Download", download_file_asset_path(file.root_asset, file_id: file.id), class: "menu-item" %>
+                      <% end %>
+
+                      <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= file.root_asset.id %>" data-file-id="<%= file.id %>" data-asset-title="<%= file.original_filename %>">
+                        Rename
+                      </button>
+
+                      <div class="menu-divider"></div>
+
+                      <%= link_to "Delete", destroy_file_asset_path(file.root_asset, file_id: file.id),
+                          data: { turbo_method: :delete, turbo_confirm: "Delete '#{file.original_filename}'?#{file.is_directory? ? ' This will delete all contents inside.' : ''}" },
+                          class: "menu-item menu-item-danger" %>
+                    </div>
+                  </div>
                 </div>
               <% end %>
             </div>
@@ -249,4 +375,63 @@
       </div>
     <% end %>
   </div>
+
+<!-- Rename Modal -->
+<div id="rename-modal" class="modal-overlay" data-controller="rename">
+  <div class="modal-content">
+    <h3>Rename</h3>
+    <form id="rename-form" data-action="submit->rename#submit">
+      <input type="hidden" id="rename-asset-id" data-rename-target="assetId">
+      <input type="hidden" id="rename-file-id" data-rename-target="fileId">
+      <input type="text" name="title" placeholder="New name" class="folder-name-input" id="rename-input" data-rename-target="input" required>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" data-action="click->rename#close">Cancel</button>
+        <button type="submit" class="save-btn">Save</button>
+      </div>
+    </form>
+  </div>
 </div>
+
+<!-- Share Link Modal -->
+<div id="share-modal" class="modal-overlay" data-share-target="modal" data-action="click->share#clickOutside">
+  <div class="modal-content">
+    <h3>Share Link</h3>
+
+    <!-- Create Form -->
+    <div data-share-target="createForm">
+      <div class="share-form-field">
+        <label>Password (optional)</label>
+        <input type="password" placeholder="Leave blank for no password" class="folder-name-input" data-share-target="passwordField">
+      </div>
+
+      <div class="share-form-field">
+        <label>Expires (optional)</label>
+        <select class="folder-name-input" data-share-target="expiresField">
+          <option value="">Never</option>
+          <option value="1_hour">1 hour</option>
+          <option value="24_hours">24 hours</option>
+          <option value="7_days">7 days</option>
+          <option value="30_days">30 days</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" data-action="click->share#close">Cancel</button>
+        <button type="button" class="save-btn" data-action="click->share#createLink">Create Link</button>
+      </div>
+    </div>
+
+    <!-- Link Display (shown after creation) -->
+    <div data-share-target="linkDisplay" class="hidden">
+      <div class="share-link-display">
+        <input type="text" readonly class="share-link-input" data-share-target="url">
+        <button type="button" class="copy-btn" data-action="click->share#copyLink" data-share-target="copyBtn">Copy</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="save-btn" data-action="click->share#close" style="width: 100%;">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div> <!-- Close search-container with share/rename controllers -->
