@@ -62,7 +62,7 @@
             <% end %>
           <% elsif asset.file.attached? %>
             <% ext = File.extname(asset.file.filename.to_s).downcase.delete(".") %>
-            <% if %w[wav mp3 aif aiff flac].include?(ext) %>
+            <% if %w[wav mp3 aif aiff flac m4a].include?(ext) %>
               <%# Audio file - clickable to play %>
               <div class="project-card"
                    data-audio-url="<%= url_for(asset.file) %>"
