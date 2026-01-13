@@ -4,8 +4,17 @@
 <div data-controller="share">
 
 <div class="library-actions">
-  <div class="add-project-btn" id="add-project-btn">
-    + Add files
+  <div class="add-dropdown" data-controller="dropdown">
+    <div class="add-project-btn" id="add-project-btn" data-action="click->dropdown#toggle">
+      + Add
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="margin-left: 4px;">
+        <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+    <div class="menu-dropdown add-menu" data-dropdown-target="menu">
+      <button class="menu-item" id="add-files-btn">Select files</button>
+      <button class="menu-item" id="add-folder-btn-upload">Select folder</button>
+    </div>
   </div>
   <button class="add-folder-btn" id="add-folder-btn">
     + New folder
@@ -13,7 +22,8 @@
 </div>
 
 <%= form_with model: Asset.new, id: "upload-form" do |f| %>
-  <%= f.file_field :file, class: "file-input", id: "file-input", accept: ".als,.logicx,.wav,.mp3,.zip", direct_upload: true, multiple: true %>
+  <%= f.file_field :file, class: "file-input", id: "file-input", direct_upload: true, multiple: true %>
+  <input type="file" class="file-input" id="folder-input" webkitdirectory directory multiple data-direct-upload-url="<%= rails_direct_uploads_url %>">
 
   <div id="file-details" style="display: none;">
     <p id="selected-file-title" style="text-align: center; margin-bottom: 10px;"></p>
@@ -21,6 +31,7 @@
     <%= f.submit "Upload", class: "upload-btn" %>
   </div>
 <% end %>
+
 
 <div class="drop-zone" id="drop-zone" data-controller="file-drag" data-file-drag-move-url-value="<%= library_move_asset_path %>">
   <% if @assets.any? %>

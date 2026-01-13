@@ -14,10 +14,29 @@ document.addEventListener("turbo:load", function() {
   // Only run on library page (where titleInput exists)
   if (!addBtn || !titleInput) return;
 
-  // Click button to open file browser
-  addBtn.addEventListener("click", function() {
+// Add files button (in dropdown)
+const addFilesBtn = document.getElementById("add-files-btn");
+const addFolderUploadBtn = document.getElementById("add-folder-btn-upload");
+const folderInput = document.getElementById("folder-input");
+
+if (addFilesBtn) {
+  addFilesBtn.addEventListener("click", function() {
     fileInput.click();
   });
+}
+
+if (addFolderUploadBtn && folderInput) {
+  addFolderUploadBtn.addEventListener("click", function() {
+    folderInput.click();
+  });
+
+  folderInput.addEventListener("change", async function() {
+    if (folderInput.files.length > 0) {
+      await handleFolderInput(Array.from(folderInput.files));
+      folderInput.value = ""; // Reset for next selection
+    }
+  });
+}
 
   // Auto-submit when files selected
   fileInput.addEventListener("change", function() {
