@@ -35,7 +35,7 @@ class AssetsController < ApplicationController
     end
   end
 
-  # Handles file upload and triggers ZIP extraction
+# Handles file upload and triggers ZIP extraction
   def create
     @asset = current_user.assets.build(asset_params)
     @asset.original_filename = @asset.file&.filename&.to_s
@@ -44,9 +44,15 @@ class AssetsController < ApplicationController
       # Extract ZIP contents in background job (avoids Heroku 30s timeout)
       AssetExtractionJob.perform_later(@asset.id)
 
-      redirect_to root_path, notice: "Uploaded! Extraction in progress..."
+      respond_to do |format|
+        format.html { redirect_to root_path, notice: "Uploaded! Extraction in progress..." }
+        format.json { render json: { success: true, id: @asset.id, title: @asset.title } }
+      end
     else
-      redirect_to root_path, alert: "Upload failed: #{@asset.errors.full_messages.join(', ')}"
+      respond_to do |format|
+        format.html { redirect_to root_path, alert: "Upload failed: #{@asset.errors.full_messages.join(', ')}" }
+        format.json { render json: { success: false, errors: @asset.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 
