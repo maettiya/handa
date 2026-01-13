@@ -50,6 +50,17 @@ class AssetsController < ApplicationController
     end
   end
 
+  # Check extraction status for polling
+  def status
+    @asset = current_user.assets.find(params[:id])
+
+    render json: {
+      id: @asset.id,
+      extracted: @asset.extracted?,
+      title: @asset.title
+    }
+  end
+
   # Deletes an entire asset and all its children
   def destroy
     @asset = current_user.assets.find(params[:id])
