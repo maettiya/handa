@@ -13,6 +13,7 @@
     "@hotwired/turbo-rails": "^8.0.20",
     "@rails/activestorage": "^8.1.100",
     "@tailwindcss/cli": "^4.1.18",
+    "jszip": "^3.10.1",
     "tailwindcss": "^4.1.18",
     "wavesurfer.js": "^7.12.1"
   }
