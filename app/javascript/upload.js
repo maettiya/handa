@@ -14,29 +14,29 @@ document.addEventListener("turbo:load", function() {
   // Only run on library page (where titleInput exists)
   if (!addBtn || !titleInput) return;
 
-// Add files button (in dropdown)
-const addFilesBtn = document.getElementById("add-files-btn");
-const addFolderUploadBtn = document.getElementById("add-folder-btn-upload");
-const folderInput = document.getElementById("folder-input");
+  // Add files button (in dropdown)
+  const addFilesBtn = document.getElementById("add-files-btn");
+  const addFolderUploadBtn = document.getElementById("add-folder-btn-upload");
+  const folderInput = document.getElementById("folder-input");
 
-if (addFilesBtn) {
-  addFilesBtn.addEventListener("click", function() {
-    fileInput.click();
-  });
-}
+  if (addFilesBtn) {
+    addFilesBtn.addEventListener("click", function() {
+      fileInput.click();
+    });
+  }
 
-if (addFolderUploadBtn && folderInput) {
-  addFolderUploadBtn.addEventListener("click", function() {
-    folderInput.click();
-  });
+  if (addFolderUploadBtn && folderInput) {
+    addFolderUploadBtn.addEventListener("click", function() {
+      folderInput.click();
+    });
 
-  folderInput.addEventListener("change", async function() {
-    if (folderInput.files.length > 0) {
-      await handleFolderInput(Array.from(folderInput.files));
-      folderInput.value = ""; // Reset for next selection
-    }
-  });
-}
+    folderInput.addEventListener("change", async function() {
+      if (folderInput.files.length > 0) {
+        await handleFolderInput(Array.from(folderInput.files));
+        folderInput.value = ""; // Reset for next selection
+      }
+    });
+  }
 
   // Auto-submit when files selected
   fileInput.addEventListener("change", function() {
@@ -132,6 +132,87 @@ if (addFolderUploadBtn && folderInput) {
           if (activeUploads === 0) {
             progressContainer.classList.remove("active");
           }
+        }, 3000);
+      }
+    }
+  }
+
+  // Handle folder input (from file picker with webkitdirectory)
+  async function handleFolderInput(files) {
+    if (files.length === 0) return;
+
+    const prepareId = ++uploadIdCounter;
+    const progressItem = createProgressElement(prepareId, "folder");
+    const progressFill = progressItem.querySelector(".upload-progress-fill");
+    const progressFilename = progressItem.querySelector(".upload-filename");
+    const progressPercent = progressItem.querySelector(".upload-percent");
+
+    progressContainer.classList.add("active");
+
+    // Get folder name from first file's path
+    const folderName = files[0].webkitRelativePath.split('/')[0];
+    progressFilename.textContent = `Preparing "${folderName}" (${files.length} files)...`;
+    progressPercent.textContent = "";
+
+    try {
+      // Check total size
+      const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+      const MAX_SIZE = 1024 * 1024 * 1024; // 1GB
+
+      if (totalSize > MAX_SIZE) {
+        const sizeGB = (totalSize / (1024 * 1024 * 1024)).toFixed(2);
+        throw new FolderTooLargeError(
+          `Folder "${folderName}" is ${sizeGB}GB. Maximum folder size is 1GB.`
+        );
+      }
+
+      // Import JSZip
+      const JSZip = (await import("jszip")).default;
+      const zip = new JSZip();
+
+      // Add all files to ZIP with their relative paths
+      for (const file of files) {
+        zip.file(file.webkitRelativePath, file);
+      }
+
+      progressFilename.textContent = `Compressing "${folderName}"...`;
+
+      // Generate ZIP blob
+      const zipBlob = await zip.generateAsync({
+        type: "blob",
+        compression: "DEFLATE",
+        compressionOptions: { level: 6 }
+      }, (metadata) => {
+        progressFill.style.width = metadata.percent + "%";
+        progressPercent.textContent = Math.round(metadata.percent) + "%";
+      });
+
+      // Convert to File object
+      const zipFile = new File([zipBlob], `${folderName}.zip`, { type: "application/zip" });
+
+      // Remove preparation progress
+      progressItem.remove();
+
+      // Upload the ZIP
+      uploadMultipleFiles([zipFile]);
+
+    } catch (error) {
+      if (error instanceof FolderTooLargeError) {
+        progressFilename.textContent = error.message;
+        progressPercent.textContent = "";
+        progressItem.classList.add("upload-error");
+        setTimeout(() => {
+          progressItem.remove();
+          progressContainer.classList.remove("active");
+        }, 5000);
+      } else {
+        console.error("Folder processing error:", error);
+        progressFilename.textContent = "Failed to process folder";
+        progressPercent.textContent = "";
+        progressItem.classList.add("upload-error");
+        setTimeout(() => {
+          progressItem.remove();
+          progressContainer.classList.remove("active");
         }, 3000);
       }
     }

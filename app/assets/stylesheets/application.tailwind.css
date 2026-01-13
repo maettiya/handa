@@ -452,6 +452,20 @@ body {
   text-align: center;
   font-size: 14px;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.add-dropdown {
+  position: relative;
+}
+
+.add-dropdown .add-menu {
+  min-width: 140px;
+  left: 0;
+  right: auto;
 }
 
 .add-project-btn:hover,
@@ -501,6 +515,17 @@ body {
 .drop-zone.drag-over {
   border-color: #666;
 }
+
+.add-dropdown {
+  position: relative;
+}
+
+.add-dropdown .add-menu {
+  min-width: 140px;
+  left: 0;
+  right: auto;
+}
+
 
 /* ===================
    PROJECTS GRID
