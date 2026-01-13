@@ -1,10 +1,11 @@
 // Handles file uploads within an asset (adding files to existing asset/folder)
 // Supports drag & drop and file picker - parallel uploads with stacked progress bars
+// Now with folder support - folders are zipped client-side before upload
 
 import { Controller } from "@hotwired/stimulus"
 import { DirectUpload } from "@rails/activestorage"
-
 import * as Turbo from "@hotwired/turbo"
+import { containsFolders, processDroppedItems, FolderTooLargeError } from "./folder_zipper"
 
 export default class extends Controller {
   static targets = ["fileInput", "dropZone"]
@@ -44,20 +45,89 @@ export default class extends Controller {
     this.dropZoneTarget.classList.remove("drag-over")
   }
 
-  drop(event) {
+  async drop(event) {
     // If dropping on a card wrapper, let file-drag controller handle it
     if (event.target.closest('.project-card-wrapper')) {
       return
     }
+
     // Only handle external file drops, not internal card drags
-    const files = Array.from(event.dataTransfer.files)
-    if (files.length === 0) {
+    if (!event.dataTransfer.types.includes('Files')) {
       return
     }
 
     event.preventDefault()
     this.dropZoneTarget.classList.remove("drag-over")
-    this.uploadMultipleFiles(files)
+
+    // Check if drop contains folders
+    if (containsFolders(event.dataTransfer)) {
+      await this.handleFolderDrop(event.dataTransfer)
+    } else {
+      const files = Array.from(event.dataTransfer.files)
+      if (files.length > 0) {
+        this.uploadMultipleFiles(files)
+      }
+    }
+  }
+
+  async handleFolderDrop(dataTransfer) {
+    const prepareId = ++this.uploadIdCounter
+    const progressItem = this.createProgressElement(prepareId, "folder")
+    const progressFill = progressItem.querySelector(".upload-progress-fill")
+    const progressFilename = progressItem.querySelector(".upload-filename")
+    const progressPercent = progressItem.querySelector(".upload-percent")
+
+    this.progressContainer.classList.add("active")
+    progressFilename.textContent = "Scanning folder..."
+    progressPercent.textContent = ""
+
+    try {
+      const files = await processDroppedItems(dataTransfer, (progress) => {
+        if (progress.phase === "scanning") {
+          progressFilename.textContent = `Scanning "${progress.folderName}"...`
+        } else if (progress.phase === "zipping") {
+          progressFilename.textContent = `Preparing "${progress.folderName}" (${progress.fileCount} files)...`
+        } else if (progress.phase === "compressing") {
+          progressFilename.textContent = `Compressing "${progress.folderName}"...`
+          progressFill.style.width = progress.percent + "%"
+          progressPercent.textContent = progress.percent + "%"
+        }
+      })
+
+      // Remove the preparation progress item
+      progressItem.remove()
+
+      // Upload the resulting files (zipped folders + regular files)
+      if (files.length > 0) {
+        this.uploadMultipleFiles(files)
+      } else {
+        this.progressContainer.classList.remove("active")
+      }
+
+    } catch (error) {
+      if (error instanceof FolderTooLargeError) {
+        progressFilename.textContent = error.message
+        progressPercent.textContent = ""
+        progressItem.classList.add("upload-error")
+        setTimeout(() => {
+          progressItem.remove()
+          if (this.activeUploads === 0) {
+            this.progressContainer.classList.remove("active")
+          }
+        }, 5000)
+      } else {
+        console.error("Folder processing error:", error)
+        progressFilename.textContent = "Failed to process folder"
+        progressPercent.textContent = ""
+        progressItem.classList.add("upload-error")
+        setTimeout(() => {
+          progressItem.remove()
+          if (this.activeUploads === 0) {
+            this.progressContainer.classList.remove("active")
+          }
+        }, 3000)
+      }
+    }
   }
 
   uploadMultipleFiles(files) {
