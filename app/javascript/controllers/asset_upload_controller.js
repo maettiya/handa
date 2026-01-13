@@ -5,7 +5,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { DirectUpload } from "@rails/activestorage"
 import * as Turbo from "@hotwired/turbo"
-import { containsFolders, processDroppedItems, FolderTooLargeError } from "./folder_zipper"
+import { containsFolders, processDroppedItems, FolderTooLargeError } from "../folder_zipper"
 
 export default class extends Controller {
   static targets = ["fileInput", "dropZone"]
