@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     end
 
     member do
+      get :status
       # Downloads the original file
       get :download
       # Downloads an individual child file

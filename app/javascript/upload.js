@@ -52,9 +52,10 @@ document.addEventListener("turbo:load", function() {
     }
   });
 
-  // Track active uploads
+  // Track active uploads and pending extractions
   let activeUploads = 0;
   let uploadIdCounter = 0;
+  let pendingExtractions = [];
 
   // Handle folder drop - zip and upload
   async function handleFolderDrop(dataTransfer) {
@@ -152,6 +153,7 @@ document.addEventListener("turbo:load", function() {
 
   function uploadSingleFile(file, title, uploadId) {
     activeUploads++;
+    const isZip = file.name.toLowerCase().endsWith('.zip');
 
     const progressItem = createProgressElement(uploadId, file.name);
     const progressFill = progressItem.querySelector(".upload-progress-fill");
@@ -178,7 +180,7 @@ document.addEventListener("turbo:load", function() {
         progressFilename.textContent = "Upload failed: " + file.name;
         progressPercent.textContent = "";
         progressItem.classList.add("upload-error");
-        setTimeout(() => removeProgressItem(progressItem, uploadId), 3000);
+        setTimeout(() => removeProgressItem(progressItem, uploadId, null), 3000);
         return;
       }
 
@@ -193,17 +195,27 @@ document.addEventListener("turbo:load", function() {
 
       fetch("/items", {
         method: "POST",
-        headers: { "X-CSRF-Token": csrfToken, "Accept": "text/html" },
+        headers: { "X-CSRF-Token": csrfToken, "Accept": "application/json" },
         body: formData
       })
-      .then(response => {
-        if (response.ok || response.redirected) {
-          progressFilename.textContent = file.name;
-          progressPercent.textContent = "Done!";
-          progressItem.classList.add("upload-complete");
-          setTimeout(() => removeProgressItem(progressItem, uploadId), 1500);
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          if (isZip) {
+            // ZIP file - need to wait for extraction
+            progressFilename.textContent = `Extracting "${data.title}"...`;
+            progressPercent.textContent = "";
+            progressFill.style.width = "100%";
+            removeProgressItem(progressItem, uploadId, data.id);
+          } else {
+            // Regular file - no extraction needed
+            progressFilename.textContent = file.name;
+            progressPercent.textContent = "Done!";
+            progressItem.classList.add("upload-complete");
+            setTimeout(() => removeProgressItem(progressItem, uploadId, null), 1500);
+          }
         } else {
-          throw new Error("Form submission failed");
+          throw new Error(data.errors?.join(", ") || "Upload failed");
         }
       })
       .catch(err => {
@@ -211,18 +223,76 @@ document.addEventListener("turbo:load", function() {
         progressFilename.textContent = "Upload failed: " + file.name;
         progressPercent.textContent = "";
         progressItem.classList.add("upload-error");
-        setTimeout(() => removeProgressItem(progressItem, uploadId), 3000);
+        setTimeout(() => removeProgressItem(progressItem, uploadId, null), 3000);
       });
     });
   }
 
-  function removeProgressItem(progressItem, uploadId) {
+  function removeProgressItem(progressItem, uploadId, assetId) {
     progressItem.remove();
     activeUploads--;
 
-    if (activeUploads === 0) {
-      progressContainer.classList.remove("active");
-      Turbo.visit("/");
+    // If this was a ZIP, track it for extraction polling
+    if (assetId) {
+      pendingExtractions.push(assetId);
     }
+
+    if (activeUploads === 0) {
+      if (pendingExtractions.length > 0) {
+        // Wait for all extractions to complete before refreshing
+        pollExtractions();
+      } else {
+        progressContainer.classList.remove("active");
+        Turbo.visit("/");
+      }
+    }
+  }
+
+  // Poll for extraction completion
+  async function pollExtractions() {
+    const extractionProgressItem = createProgressElement(++uploadIdCounter, "extraction");
+    const progressFilename = extractionProgressItem.querySelector(".upload-filename");
+    const progressPercent = extractionProgressItem.querySelector(".upload-percent");
+
+    progressFilename.textContent = "Extracting files...";
+    progressPercent.textContent = "";
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    while (pendingExtractions.length > 0) {
+      // Check each pending extraction
+      const stillPending = [];
+
+      for (const assetId of pendingExtractions) {
+        try {
+          const response = await fetch(`/items/${assetId}/status`, {
+            headers: { "Accept": "application/json", "X-CSRF-Token": csrfToken }
+          });
+          const data = await response.json();
+
+          if (!data.extracted) {
+            stillPending.push(assetId);
+          }
+        } catch (err) {
+          console.error("Status check failed:", err);
+          stillPending.push(assetId);
+        }
+      }
+
+      pendingExtractions = stillPending;
+
+      if (pendingExtractions.length > 0) {
+        progressFilename.textContent = `Extracting files... (${pendingExtractions.length} remaining)`;
+        await sleep(1500); // Poll every 1.5 seconds
+      }
+    }
+
+    extractionProgressItem.remove();
+    progressContainer.classList.remove("active");
+    Turbo.visit("/");
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 });
