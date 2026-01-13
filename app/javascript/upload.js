@@ -1,6 +1,6 @@
 import * as Turbo from "@hotwired/turbo"
-
 import { DirectUpload } from "@rails/activestorage"
+import { containsFolders, processDroppedItems, FolderTooLargeError } from "./folder_zipper"
 
 document.addEventListener("turbo:load", function() {
   const addBtn = document.getElementById("add-project-btn");
@@ -36,19 +36,86 @@ document.addEventListener("turbo:load", function() {
     dropZone.classList.remove("drag-over");
   });
 
-  dropZone.addEventListener("drop", function(e) {
+  dropZone.addEventListener("drop", async function(e) {
     e.preventDefault();
     dropZone.classList.remove("drag-over");
 
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      uploadMultipleFiles(files);
+    // Check if drop contains folders
+    if (containsFolders(e.dataTransfer)) {
+      await handleFolderDrop(e.dataTransfer);
+    } else {
+      // Regular files - existing flow
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) {
+        uploadMultipleFiles(files);
+      }
     }
   });
 
   // Track active uploads
   let activeUploads = 0;
   let uploadIdCounter = 0;
+
+  // Handle folder drop - zip and upload
+  async function handleFolderDrop(dataTransfer) {
+    const prepareId = ++uploadIdCounter;
+    const progressItem = createProgressElement(prepareId, "folder");
+    const progressFill = progressItem.querySelector(".upload-progress-fill");
+    const progressFilename = progressItem.querySelector(".upload-filename");
+    const progressPercent = progressItem.querySelector(".upload-percent");
+
+    progressContainer.classList.add("active");
+    progressFilename.textContent = "Scanning folder...";
+    progressPercent.textContent = "";
+
+    try {
+      const files = await processDroppedItems(dataTransfer, (progress) => {
+        if (progress.phase === "scanning") {
+          progressFilename.textContent = `Scanning "${progress.folderName}"...`;
+        } else if (progress.phase === "zipping") {
+          progressFilename.textContent = `Preparing "${progress.folderName}" (${progress.fileCount} files)...`;
+        } else if (progress.phase === "compressing") {
+          progressFilename.textContent = `Compressing "${progress.folderName}"...`;
+          progressFill.style.width = progress.percent + "%";
+          progressPercent.textContent = progress.percent + "%";
+        }
+      });
+
+      // Remove the preparation progress item
+      progressItem.remove();
+
+      // Upload the resulting files (zipped folders + regular files)
+      if (files.length > 0) {
+        uploadMultipleFiles(files);
+      } else {
+        progressContainer.classList.remove("active");
+      }
+
+    } catch (error) {
+      if (error instanceof FolderTooLargeError) {
+        progressFilename.textContent = error.message;
+        progressPercent.textContent = "";
+        progressItem.classList.add("upload-error");
+        setTimeout(() => {
+          progressItem.remove();
+          if (activeUploads === 0) {
+            progressContainer.classList.remove("active");
+          }
+        }, 5000);
+      } else {
+        console.error("Folder processing error:", error);
+        progressFilename.textContent = "Failed to process folder";
+        progressPercent.textContent = "";
+        progressItem.classList.add("upload-error");
+        setTimeout(() => {
+          progressItem.remove();
+          if (activeUploads === 0) {
+            progressContainer.classList.remove("active");
+          }
+        }, 3000);
+      }
+    }
+  }
 
   function uploadMultipleFiles(files) {
     progressContainer.classList.add("active");
