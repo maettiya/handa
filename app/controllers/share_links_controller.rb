@@ -65,16 +65,12 @@ class ShareLinksController < ApplicationController
       return
     end
 
-    original_asset = @share_link.asset
+      original_asset = @share_link.asset
 
-    # Deep clone the asset (and all children) to current user's library
-    new_asset = original_asset.deep_clone_to_user(current_user, shared_from: original_asset.user)
+      # Kick off background job for deep cloning
+      SaveToLibraryJob.perform_later(original_asset.id, current_user.id, original_asset.user.id)
 
-    if new_asset.persisted?
-      redirect_to root_path, notice: "Saved to your library!"
-    else
-      redirect_to share_link_path(@share_link.token), alert: "Could not save to library"
-    end
+      redirect_to library_index_path, notice: "Saving to your library... This may take a moment for large files."
   end
 
   # GET /s/:token/download
