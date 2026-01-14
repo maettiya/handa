@@ -93,7 +93,15 @@ class ShareLinksController < ApplicationController
     @share_link.record_download!
     @asset = @share_link.asset
 
-    if @asset.file.attached?
+    if @asset.is_directory? && @asset.children.any?
+      # Folder with children - create ZIP on the fly
+      zip_data = create_asset_zip(@asset)
+      send_data zip_data,
+                filename: "#{@asset.title}.zip",
+                type: "application/zip",
+                disposition: "attachment"
+    elsif @asset.file.attached?
+      # Single file - direct download
       redirect_to rails_blob_path(@asset.file, disposition: "attachment")
     else
       redirect_to share_link_path(@share_link.token), alert: "File not available"
