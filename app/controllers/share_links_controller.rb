@@ -149,4 +149,36 @@ class ShareLinksController < ApplicationController
     session["share_link_#{@share_link.token}"] == true
   end
 
+  # Creates a ZIP of all asset children
+  def create_asset_zip(asset)
+    require 'zip'
+
+    stringio = Zip::OutputStream.write_buffer do |zio|
+      asset.children.visible.each do |child|
+        if child.is_directory?
+          add_folder_to_zip(zio, child, child.original_filename)
+        elsif child.file.attached?
+          zio.put_next_entry(child.original_filename)
+          zio.write(child.file.download)
+        end
+      end
+    end
+
+    stringio.rewind
+    stringio.read
+  end
+
+  # Recursively adds folder contents to ZIP
+  def add_folder_to_zip(zio, folder, path_prefix)
+    folder.children.visible.each do |child|
+      child_path = "#{path_prefix}/#{child.original_filename}"
+
+      if child.is_directory?
+        add_folder_to_zip(zio, child, child_path)
+      elsif child.file.attached?
+        zio.put_next_entry(child_path)
+        zio.write(child.file.download)
+      end
+    end
+  end
 end
