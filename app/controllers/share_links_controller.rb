@@ -94,12 +94,12 @@ class ShareLinksController < ApplicationController
     @asset = @share_link.asset
 
     if @asset.is_directory? && @asset.children.any?
-    # Folder with children - create ZIP using temp file (low memory)
-    tempfile = create_zip_tempfile(@asset)
-    send_file tempfile.path,
-              filename: "#{@asset.title}.zip",
-              type: "application/zip",
-              disposition: "attachment"
+      # Folder with children - create ZIP using temp file (low memory)
+      tempfile = create_zip_tempfile(@asset)
+      send_file tempfile.path,
+                filename: "#{@asset.title}.zip",
+                type: "application/zip",
+                disposition: "attachment"
     elsif @asset.file.attached?
       # Single file - direct download
       redirect_to rails_blob_path(@asset.file, disposition: "attachment")
