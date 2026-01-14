@@ -102,22 +102,19 @@ class AssetsController < ApplicationController
     @asset = current_user.assets.find(params[:id])
 
     if @asset.file.attached? && !@asset.is_directory?
-      # Has original file - download with the renamed filename
-      send_data @asset.file.download,
-        type: @asset.file.content_type,
-        disposition: 'attachment',
-        filename: @asset.download_filename
+      # Has original file - redirect to blob URL for direct download
+      redirect_to rails_blob_path(@asset.file, disposition: "attachment", filename: @asset.download_filename)
     elsif @asset.children.any?
-      # Has children - create a ZIP
-      zip_data = create_asset_zip(@asset)
-      send_data zip_data,
+      # Has children - create a ZIP using temp file (low memory)
+      tempfile = create_zip_tempfile(@asset)
+      send_file tempfile.path,
         type: 'application/zip',
         disposition: 'attachment',
         filename: "#{@asset.title}.zip"
     else
       # Empty folder - create empty ZIP
-      zip_data = create_empty_zip(@asset.title)
-      send_data zip_data,
+      tempfile = create_empty_zip_tempfile(@asset.title)
+      send_file tempfile.path,
         type: 'application/zip',
         disposition: 'attachment',
         filename: "#{@asset.title}.zip"
@@ -153,10 +150,10 @@ class AssetsController < ApplicationController
       return
     end
 
-    # Create ZIP in memory
-    zip_data = create_folder_zip(@folder)
+    # Create ZIP using temp file (low memory)
+    tempfile = create_folder_zip_tempfile(@folder)
 
-    send_data zip_data,
+    send_file tempfile.path,
       type: 'application/zip',
       disposition: 'attachment',
       filename: "#{@folder.original_filename}.zip"
@@ -553,62 +550,69 @@ class AssetsController < ApplicationController
     params.require(:asset).permit(:title, :file)
   end
 
-  # Collects all files in a folder and creates a ZIP
-  def create_folder_zip(folder)
+  # Creates ZIP of asset children using temp file (low memory for Heroku)
+  def create_zip_tempfile(asset)
     require 'zip'
+    require 'tempfile'
 
-    stringio = Zip::OutputStream.write_buffer do |zio|
-      add_folder_to_zip(zio, folder, "")
-    end
+    tempfile = Tempfile.new(['download', '.zip'])
+    tempfile.binmode
 
-    stringio.rewind
-    stringio.read
-  end
-
-  # Adds files and sub-folders to the ZIP
-  def add_folder_to_zip(zio, folder, path_prefix)
-    folder.children.visible.each do |child|
-      child_path = path_prefix.empty? ? child.original_filename : "#{path_prefix}/#{child.original_filename}"
-
-      if child.is_directory?
-        # Recurse into sub-folder
-        add_folder_to_zip(zio, child, child_path)
-      elsif child.file.attached?
-        # Add file to ZIP
-        zio.put_next_entry(child_path)
-        zio.write(child.file.download)
-      end
-    end
-  end
-
-  # Creates a ZIP of all asset children
-  def create_asset_zip(asset)
-    require 'zip'
-
-    stringio = Zip::OutputStream.write_buffer do |zio|
-      asset.children.visible.each do |file|
-        if file.is_directory?
-          add_folder_to_zip(zio, file, file.original_filename)
-        elsif file.file.attached?
-          zio.put_next_entry(file.original_filename)
-          zio.write(file.file.download)
+    Zip::OutputStream.open(tempfile.path) do |zio|
+      asset.children.visible.each do |child|
+        if child.is_directory?
+          add_children_to_zip(zio, child, child.original_filename)
+        elsif child.file.attached?
+          zio.put_next_entry(child.original_filename)
+          child.file.open { |file| zio.write(file.read) }
         end
       end
     end
 
-    stringio.rewind
-    stringio.read
+    tempfile
   end
 
-  # Creates an empty ZIP (for empty folders)
-  def create_empty_zip(folder_name)
+  # Creates ZIP of a folder using temp file (low memory for Heroku)
+  def create_folder_zip_tempfile(folder)
     require 'zip'
+    require 'tempfile'
 
-    stringio = Zip::OutputStream.write_buffer do |zio|
+    tempfile = Tempfile.new(['download', '.zip'])
+    tempfile.binmode
+
+    Zip::OutputStream.open(tempfile.path) do |zio|
+      add_children_to_zip(zio, folder, "")
+    end
+
+    tempfile
+  end
+
+  # Recursively adds folder contents to ZIP
+  def add_children_to_zip(zio, folder, path_prefix)
+    folder.children.visible.each do |child|
+      child_path = path_prefix.empty? ? child.original_filename : "#{path_prefix}/#{child.original_filename}"
+
+      if child.is_directory?
+        add_children_to_zip(zio, child, child_path)
+      elsif child.file.attached?
+        zio.put_next_entry(child_path)
+        child.file.open { |file| zio.write(file.read) }
+      end
+    end
+  end
+
+  # Creates an empty ZIP using temp file
+  def create_empty_zip_tempfile(folder_name)
+    require 'zip'
+    require 'tempfile'
+
+    tempfile = Tempfile.new(['download', '.zip'])
+    tempfile.binmode
+
+    Zip::OutputStream.open(tempfile.path) do |zio|
       zio.put_next_entry("#{folder_name}/")
     end
 
-    stringio.rewind
-    stringio.read
+    tempfile
   end
 end
