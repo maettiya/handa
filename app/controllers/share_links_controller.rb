@@ -65,12 +65,12 @@ class ShareLinksController < ApplicationController
       return
     end
 
-      original_asset = @share_link.asset
+    original_asset = @share_link.asset
 
-      # Kick off background job for deep cloning
-      SaveToLibraryJob.perform_later(original_asset.id, current_user.id, original_asset.user.id)
+    # Kick off background job for deep cloning
+    SaveToLibraryJob.perform_later(original_asset.id, current_user.id, original_asset.user.id)
 
-      redirect_to library_index_path, notice: "Saving to your library... This may take a moment for large files."
+    redirect_to library_index_path, notice: "Saving to your library... This may take a moment for large files."
   end
 
   # GET /s/:token/download
