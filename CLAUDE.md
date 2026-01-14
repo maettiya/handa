@@ -97,7 +97,7 @@ Asset (unified model - replaces Project/ProjectFile)
 ├── fields: title, original_filename, path, file_size, is_directory, hidden,
 │           file_type, asset_type, extracted, ephemeral, shared_from_user_id
 ├── scopes: root_level, library, ephemeral_shares, visible, directories, files
-├── methods: extension, all_descendants, should_hide?
+├── methods: extension, root_asset, deep_clone_to_user, should_hide?
 
 ShareLink
 ├── belongs_to :asset
@@ -193,6 +193,7 @@ end
 | Asset browser | `app/views/assets/show.html.erb` |
 | Search page | `app/views/search/index.html.erb` |
 | Main styling | `app/assets/stylesheets/application.tailwind.css` |
+| Share links controller | `app/controllers/share_links_controller.rb` |
 
 ## Asset Model Architecture
 
@@ -249,7 +250,8 @@ See `docs/ASSET_ARCHITECTURE.md` for full documentation.
 ### Sharing
 - **Share Links**: Password protection, expiry, download tracking
 - **Quick Shares**: Ephemeral uploads with auto-generated share link
-- **Save to Library**: Recipients can save shared files to their own library
+- **Save to Library**: Deep clones shared assets (including all children) to recipient's library
+- **Folder Downloads**: Folders with children are zipped on-the-fly for download
 - Public share pages at `/s/:token`
 
 ### Audio Player
