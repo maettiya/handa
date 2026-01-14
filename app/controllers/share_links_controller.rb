@@ -94,12 +94,12 @@ class ShareLinksController < ApplicationController
     @asset = @share_link.asset
 
     if @asset.is_directory? && @asset.children.any?
-      # Folder with children - create ZIP on the fly
-      zip_data = create_asset_zip(@asset)
-      send_data zip_data,
-                filename: "#{@asset.title}.zip",
-                type: "application/zip",
-                disposition: "attachment"
+    # Folder with children - create ZIP using temp file (low memory)
+    tempfile = create_zip_tempfile(@asset)
+    send_file tempfile.path,
+              filename: "#{@asset.title}.zip",
+              type: "application/zip",
+              disposition: "attachment"
     elsif @asset.file.attached?
       # Single file - direct download
       redirect_to rails_blob_path(@asset.file, disposition: "attachment")
@@ -149,35 +149,38 @@ class ShareLinksController < ApplicationController
     session["share_link_#{@share_link.token}"] == true
   end
 
-  # Creates a ZIP of all asset children
-  def create_asset_zip(asset)
+  # Creates ZIP using temp file (low memory usage for Heroku)
+  def create_zip_tempfile(asset)
     require 'zip'
+    require 'tempfile'
 
-    stringio = Zip::OutputStream.write_buffer do |zio|
+    tempfile = Tempfile.new(['download', '.zip'])
+    tempfile.binmode
+
+    Zip::OutputStream.open(tempfile.path) do |zio|
       asset.children.visible.each do |child|
         if child.is_directory?
-          add_folder_to_zip(zio, child, child.original_filename)
+          add_children_to_zip(zio, child, child.original_filename)
         elsif child.file.attached?
           zio.put_next_entry(child.original_filename)
-          zio.write(child.file.download)
+          child.file.open { |file| zio.write(file.read) }
         end
       end
     end
 
-    stringio.rewind
-    stringio.read
+    tempfile
   end
 
   # Recursively adds folder contents to ZIP
-  def add_folder_to_zip(zio, folder, path_prefix)
+  def add_children_to_zip(zio, folder, path_prefix)
     folder.children.visible.each do |child|
       child_path = "#{path_prefix}/#{child.original_filename}"
 
       if child.is_directory?
-        add_folder_to_zip(zio, child, child_path)
+        add_children_to_zip(zio, child, child_path)
       elsif child.file.attached?
         zio.put_next_entry(child_path)
-        zio.write(child.file.download)
+        child.file.open { |file| zio.write(file.read) }
       end
     end
   end
