@@ -569,6 +569,7 @@ body {
 .icon-image {
   width: 80px;
   height: 80px;
+  object-fit: contain;
 }
 
 /* ===================
@@ -2782,6 +2783,7 @@ body {
   .icon-image {
     width: 64px;
     height: 64px;
+    object-fit: contain;
   }
 
   /* ----- AUDIO PLAYER (centered like desktop, just smaller) ----- */

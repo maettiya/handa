@@ -14,7 +14,12 @@ module FileIconHelper
     # Folders containing .als files get asset_type='ableton' during extraction
     case asset.asset_type
     when "ableton"
-      return "icons/ableton.svg"
+      # Ableton project folder vs .als file
+      if asset.is_directory?
+        return "icons/ableton-folder.svg"
+      else
+        return "icons/ableton-als.svg"
+      end
     when "logic"
       return "icons/logic.svg"
     when "lossless_audio"
@@ -34,7 +39,7 @@ module FileIconHelper
     case extension
     # DAW Project Files
     when "als"
-      "icons/ableton.svg"
+      "icons/ableton-als.svg"
     when "logicx"
       "icons/logic.svg"
 

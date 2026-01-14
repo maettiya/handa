@@ -19,7 +19,7 @@ class AssetExtractionService
     download_and_extract(folder_map)
 
     detect_asset_type!
-    @asset.update!(extracted: true)
+    @asset.update!(extracted: true, is_directory: true)
   end
 
   private

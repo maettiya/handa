@@ -32,7 +32,6 @@
   </div>
 <% end %>
 
-
 <div class="drop-zone" id="drop-zone" data-controller="file-drag" data-file-drag-move-url-value="<%= library_move_asset_path %>">
   <% if @assets.any? %>
     <div class="projects-grid">
@@ -59,7 +58,7 @@
             <%# Empty folder - clickable to browse inside %>
             <%= link_to asset_path(asset), class: "project-card" do %>
               <div class="project-icon">
-                <%= image_tag "icons/folder.svg", class: "icon-image" %>
+                <%= image_tag asset_icon_for(asset), class: "icon-image" %>
               </div>
               <p><%= asset.title %></p>
             <% end %>

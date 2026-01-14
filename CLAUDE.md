@@ -315,3 +315,121 @@ yarn build:css             # Tailwind CSS
 2. Devise mailer not configured for password resets
 3. Zero test coverage
 4. No error handling UI for failed extractions
+
+---
+
+## Upcoming Features To-Do
+
+### 1. Background Download with Status Bar (Download to Device)
+
+**Goal**: Eliminate timeouts and provide great UX for downloading folders as ZIP files.
+
+**Current Problem**:
+- Downloading folders times out on Heroku (30s limit)
+- No visual feedback while ZIP is being created
+- Browser shows stuck progress (e.g., 61%)
+
+**Solution**: Background ZIP creation with persistent status bar
+
+**UI/UX Flow**:
+1. User clicks "Download" on a folder
+2. Bottom-left status bar appears: `↓ Preparing "My Folder"... 3/12`
+3. User can navigate freely while ZIP builds in background
+4. When complete: `✓ Download ready! [Download]`
+5. User clicks Download → instant save to device
+6. Status bar disappears after download
+
+**Implementation**:
+- [ ] Create `Download` model (tracks: status, progress, file_count, asset_id, user_id)
+  - States: `pending` → `processing` → `ready` → `downloaded`
+  - Has one attached `:zip_file`
+- [ ] Create `CreateZipJob` background job
+  - Creates ZIP using temp file approach (low memory)
+  - Updates Download record progress as files are added
+  - Uploads completed ZIP to R2, attaches to Download record
+- [ ] Create `DownloadsController`
+  - `create` - initiates download, returns download_id
+  - `status` - returns current progress (for polling)
+  - `serve` - serves the completed ZIP file
+- [ ] Create `download_status_controller.js` (Stimulus)
+  - Shows/hides status bar (turbo-permanent to survive navigation)
+  - Polls `/downloads/:id/status` every 2 seconds
+  - Updates progress display
+  - Shows "Download ready!" with button when complete
+- [ ] Add status bar HTML to `application.html.erb` layout
+- [ ] Update `share_links_controller#download` to use new system for folders
+- [ ] Update `assets_controller#download` and `#download_folder` to use new system
+- [ ] Add cleanup job to delete old ZIPs after 24 hours
+
+**Status Bar Design** (bottom-left, persistent):
+```
+┌─────────────────────────────────────┐
+│ ↓  Preparing "My Folder"...  3/12   │  ← processing
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ ✓  Download ready!     [Download]   │  ← ready
+└─────────────────────────────────────┘
+```
+
+---
+
+### 2. Save to Library with Placeholder UI
+
+**Goal**: Show visual progress when saving shared files to user's library.
+
+**Current Problem**:
+- User clicks "Save to Library" → redirected to library
+- Files appear one-by-one as they're cloned (requires manual refresh)
+- No indication that something is happening
+
+**Solution**: Placeholder asset that shows progress, then "materializes" when complete
+
+**UI/UX Flow**:
+1. User clicks "Save to Library" on shared asset
+2. Placeholder asset immediately appears in library (faded, with progress spinner)
+3. User can navigate freely while files clone in background
+4. Progress updates: `◐ 45%` overlay on the asset card
+5. When complete: asset becomes solid/clickable (normal appearance)
+
+**Implementation**:
+- [ ] Add `import_status` field to Asset model
+  - States: `nil` (normal), `importing`, `complete`
+- [ ] Add `import_progress` field to Asset (integer 0-100)
+- [ ] Add `total_import_files` field to Asset (for progress calculation)
+- [ ] Update `SaveToLibraryJob` to:
+  - Create placeholder asset immediately (import_status: 'importing')
+  - Update progress as each child is cloned
+  - Set import_status to nil when complete
+- [ ] Update `share_links_controller#save_to_library` to create placeholder first
+- [ ] Create `import_status_controller.js` (Stimulus)
+  - Polls for assets with import_status: 'importing'
+  - Updates progress overlay on asset cards
+  - Removes overlay when complete (or refreshes card via Turbo)
+- [ ] Add CSS for faded/disabled asset cards during import
+- [ ] Add progress spinner overlay component
+
+**Asset Card States**:
+```
+Importing:                          Complete:
+┌──────────────┐                   ┌──────────────┐
+│   [◐ 45%]   │  ← faded,         │              │  ← solid,
+│   📁        │    unclickable    │   📁        │    clickable
+│  My Folder   │                   │  My Folder   │
+└──────────────┘                   └──────────────┘
+```
+
+---
+
+### Bottom Bar Layout (Final Vision)
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ [Download Status]        [Audio Player]              [Upload Status]   │
+│   (left)                   (center)                    (right)         │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Left**: Download progress/ready status
+- **Center**: Audio player (existing, turbo-permanent)
+- **Right**: Upload progress (existing functionality, could be enhanced)

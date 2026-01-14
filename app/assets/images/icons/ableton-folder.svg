@@ -1,0 +1,23 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Folder tab -->
+  <rect x="8" y="20" width="40" height="16" rx="3" fill="#4A4A4A"/>
+
+  <!-- Folder body -->
+  <rect x="8" y="32" width="104" height="72" rx="4" fill="#2A2A2A"/>
+
+  <!-- Ableton-style clip bars -->
+  <!-- Yellow/orange clips (left column) -->
+  <rect x="28" y="50" width="22" height="8" rx="1" fill="#F5C542"/>
+  <rect x="28" y="62" width="30" height="8" rx="1" fill="#FFE4A0"/>
+  <rect x="28" y="74" width="30" height="8" rx="1" fill="#FFE4A0"/>
+
+  <!-- Green/teal clips (middle column) -->
+  <rect x="62" y="62" width="22" height="8" rx="1" fill="#3DD9A0"/>
+  <rect x="62" y="74" width="18" height="8" rx="1" fill="#A8EED8"/>
+  <rect x="62" y="86" width="14" height="6" rx="1" fill="#A8EED8"/>
+
+  <!-- Blue clips (right column) -->
+  <rect x="88" y="50" width="20" height="8" rx="1" fill="#5AC8E8"/>
+  <rect x="88" y="62" width="20" height="8" rx="1" fill="#5AC8E8"/>
+  <rect x="88" y="86" width="18" height="8" rx="1" fill="#6B7FD6"/>
+</svg>
