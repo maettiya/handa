@@ -98,6 +98,42 @@ class Asset < ApplicationRecord
     asset
   end
 
+  # Deep clone this asset (and all children) to another user's library
+  def deep_clone_to_user(new_owner, new_parent: nil, shared_from: nil)
+    cloned = new_owner.assets.build(
+      title: title,
+      original_filename: original_filename,
+      asset_type: asset_type,
+      is_directory: is_directory,
+      path: path,
+      file_size: file_size,
+      file_type: file_type,
+      extracted: extracted,
+      hidden: hidden,
+      ephemeral: false,
+      parent: new_parent,
+      shared_from_user: shared_from
+    )
+
+    # Copy file attachment if present
+    if file.attached?
+      cloned.file.attach(
+        io: StringIO.new(file.download),
+        filename: file.filename.to_s,
+        content_type: file.content_type
+      )
+    end
+
+    if cloned.save
+      # Recursively clone all children
+      children.each do |child|
+        child.deep_clone_to_user(new_owner, new_parent: cloned, shared_from: shared_from)
+      end
+    end
+
+    cloned
+  end
+
   private
 
   def detect_asset_type
