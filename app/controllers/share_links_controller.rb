@@ -67,31 +67,10 @@ class ShareLinksController < ApplicationController
 
     original_asset = @share_link.asset
 
-    # Clone the asset to current user's library
-    new_asset = current_user.assets.build(
-      title: original_asset.title,
-      original_filename: original_asset.original_filename,
-      asset_type: original_asset.asset_type,
-      is_directory: original_asset.is_directory?,
-      ephemeral: false,  # Save to permanent library
-      shared_from_user: original_asset.user  # Attribution
-    )
+    # Deep clone the asset (and all children) to current user's library
+    new_asset = original_asset.deep_clone_to_user(current_user, shared_from: original_asset.user)
 
-    # Copy the attached file
-    if original_asset.file.attached?
-      new_asset.file.attach(
-        io: StringIO.new(original_asset.file.download),
-        filename: original_asset.file.filename.to_s,
-        content_type: original_asset.file.content_type
-      )
-    end
-
-    if new_asset.save
-      # If original had children, trigger extraction for the copy
-      if original_asset.children.any?
-        AssetExtractionJob.perform_later(new_asset.id)
-      end
-
+    if new_asset.persisted?
       redirect_to root_path, notice: "Saved to your library!"
     else
       redirect_to share_link_path(@share_link.token), alert: "Could not save to library"
