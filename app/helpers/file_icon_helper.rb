@@ -96,13 +96,13 @@ module FileIconHelper
       available = max_length - actual_ext.length - 3  # 3 for "..."
       return display_name if available < 8  # Too short, let CSS handle it
 
-      beginning_length = (available * 0.6).to_i
+      beginning_length = (available * 0.75).to_i
       end_length = available - beginning_length
       name_without_ext = display_name.chomp(actual_ext)
 
       "#{name_without_ext[0, beginning_length]}...#{name_without_ext[-end_length, end_length]}#{actual_ext}"
     else
-      beginning_length = (max_length * 0.6).to_i - 2
+      beginning_length = (max_length * 0.75).to_i - 2
       end_length = max_length - beginning_length - 3
 
       "#{full_name[0, beginning_length]}...#{full_name[-end_length, end_length]}"
