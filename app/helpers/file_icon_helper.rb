@@ -72,4 +72,39 @@ module FileIconHelper
   def file_icon_for(project_file)
     asset_icon_for(project_file)
   end
+
+  # Smart truncate for asset display names
+  # Shows beginning...end.ext format for long names
+  def truncated_asset_name(asset, max_length: 28)
+    full_name = asset.title
+    extension = asset.file.attached? ? File.extname(asset.file.filename.to_s) : ""
+
+    # Build display name (with extension for files)
+    display_name = asset.is_directory? ? full_name : "#{full_name}#{extension}"
+    return display_name if display_name.length <= max_length
+
+    # For truncation, preserve the extension
+    if extension.present?
+      available = max_length - extension.length - 3  # 3 for "..."
+      return display_name if available < 8  # Too short, let CSS handle it
+
+      beginning_length = (available * 0.6).to_i
+      end_length = available - beginning_length
+      name_without_ext = full_name
+
+      "#{name_without_ext[0, beginning_length]}...#{name_without_ext[-end_length, end_length]}#{extension}"
+    else
+      beginning_length = (max_length * 0.6).to_i - 2
+      end_length = max_length - beginning_length - 3
+
+      "#{full_name[0, beginning_length]}...#{full_name[-end_length, end_length]}"
+    end
+  end
+
+  # Returns the full display name for tooltips
+  def full_asset_name(asset)
+    extension = asset.file.attached? ? File.extname(asset.file.filename.to_s) : ""
+    asset.is_directory? ? asset.title : "#{asset.title}#{extension}"
+  end
+
 end

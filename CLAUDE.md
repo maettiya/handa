@@ -374,50 +374,76 @@ yarn build:css             # Tailwind CSS
 
 ---
 
-### 2. Save to Library with Placeholder UI
+### 2. Asset Processing Status (Unified Placeholder UI)
 
-**Goal**: Show visual progress when saving shared files to user's library.
+**Goal**: Show visual progress when assets are being processed in the background (ZIP extraction after upload, or cloning from shared links).
 
-**Current Problem**:
-- User clicks "Save to Library" → redirected to library
-- Files appear one-by-one as they're cloned (requires manual refresh)
-- No indication that something is happening
+**Current Problems**:
+- **Upload + Extract**: User uploads ZIP → files appear one-by-one as extracted (confusing)
+- **Save to Library**: User clicks save → redirected to library, files appear gradually
+- No indication that background processing is happening
+- Assets are partially clickable/visible during processing
 
-**Solution**: Placeholder asset that shows progress, then "materializes" when complete
+**Solution**: Unified placeholder system that shows processing state with progress
+
+**Applies To**:
+1. **ZIP Extraction** - After uploading a ZIP file, show placeholder while extracting
+2. **Save to Library** - After saving shared asset, show placeholder while cloning
 
 **UI/UX Flow**:
-1. User clicks "Save to Library" on shared asset
-2. Placeholder asset immediately appears in library (faded, with progress spinner)
-3. User can navigate freely while files clone in background
-4. Progress updates: `◐ 45%` overlay on the asset card
+1. User triggers action (upload ZIP or save to library)
+2. Placeholder asset immediately appears in library (faded, with spinner)
+3. Progress indicator shows: `Extracting... 3/12` or `Saving... 45%`
+4. User can navigate freely while processing continues in background
 5. When complete: asset becomes solid/clickable (normal appearance)
 
 **Implementation**:
-- [ ] Add `import_status` field to Asset model
-  - States: `nil` (normal), `importing`, `complete`
-- [ ] Add `import_progress` field to Asset (integer 0-100)
-- [ ] Add `total_import_files` field to Asset (for progress calculation)
+
+**Database**:
+- [ ] Add `processing_status` field to Asset model
+  - Values: `nil` (normal), `extracting`, `importing`
+- [ ] Add `processing_progress` field to Asset (integer 0-100)
+- [ ] Add `processing_total` field to Asset (total files to process)
+
+**Backend**:
+- [ ] Update `AssetExtractionJob` to:
+  - Set `processing_status: 'extracting'` before starting
+  - Update `processing_progress` as each file is extracted
+  - Set `processing_status: nil` when complete
 - [ ] Update `SaveToLibraryJob` to:
-  - Create placeholder asset immediately (import_status: 'importing')
-  - Update progress as each child is cloned
-  - Set import_status to nil when complete
+  - Create placeholder asset with `processing_status: 'importing'`
+  - Update `processing_progress` as each child is cloned
+  - Set `processing_status: nil` when complete
 - [ ] Update `share_links_controller#save_to_library` to create placeholder first
-- [ ] Create `import_status_controller.js` (Stimulus)
-  - Polls for assets with import_status: 'importing'
-  - Updates progress overlay on asset cards
-  - Removes overlay when complete (or refreshes card via Turbo)
-- [ ] Add CSS for faded/disabled asset cards during import
-- [ ] Add progress spinner overlay component
+- [ ] Add `assets#processing_status` endpoint for polling
+
+**Frontend**:
+- [ ] Create `processing_status_controller.js` (Stimulus)
+  - Attached to asset cards with `processing_status` present
+  - Polls `/items/:id/processing_status` every 2 seconds
+  - Updates progress overlay on asset card
+  - Removes overlay and enables card when complete (or Turbo refresh)
+- [ ] Add CSS for processing state:
+  - Faded/grayed out card
+  - Unclickable (pointer-events: none or disabled link)
+  - Spinner overlay with progress text
+- [ ] Update `library/index.html.erb` to render processing state
+- [ ] Update `assets/show.html.erb` to handle processing children
 
 **Asset Card States**:
 ```
-Importing:                          Complete:
+Processing:                         Complete:
 ┌──────────────┐                   ┌──────────────┐
-│   [◐ 45%]   │  ← faded,         │              │  ← solid,
+│   ◐ 45%     │  ← faded,         │              │  ← solid,
 │   📁        │    unclickable    │   📁        │    clickable
 │  My Folder   │                   │  My Folder   │
+│ Extracting..│                   │              │
 └──────────────┘                   └──────────────┘
 ```
+
+**Status Text**:
+- Extracting: `Extracting... 3/12 files`
+- Importing: `Saving... 45%`
 
 ---
 
