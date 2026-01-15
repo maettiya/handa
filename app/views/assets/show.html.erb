@@ -60,19 +60,19 @@
             <%# Folder - clicking navigates into it %>
             <%= link_to asset_path(@asset, folder_id: file.id), class: "project-card" do %>
               <div class="project-icon">
-                <%= image_tag "icons/folder.svg", class: "icon-image" %>
+                <%= image_tag asset_icon_for(file), class: "icon-image" %>
               </div>
-              <p><%= file.original_filename %></p>
+              <p title="<%= full_asset_name(file, use_original: true) %>"><%= truncated_asset_name(file, use_original: true) %></p>
             <% end %>
           <% elsif file.file.attached? && %w[wav mp3 aif aiff flac m4a].include?(file.extension) %>
             <%# Audio file - clickable to play %>
             <div class="project-card"
                  data-audio-url="<%= url_for(file.file) %>"
-                 data-audio-title="<%= file.original_filename %>">
+                 data-audio-title="<%= full_asset_name(file, use_original: true) %>">
               <div class="project-icon">
                 <%= image_tag asset_icon_for(file), class: "icon-image" %>
               </div>
-              <p><%= file.original_filename %></p>
+              <p title="<%= full_asset_name(file, use_original: true) %>"><%= truncated_asset_name(file, use_original: true) %></p>
             </div>
           <% else %>
             <%# Other file - display with icon %>
@@ -80,7 +80,7 @@
               <div class="project-icon">
                 <%= image_tag asset_icon_for(file), class: "icon-image" %>
               </div>
-              <p><%= file.original_filename %></p>
+              <p title="<%= full_asset_name(file, use_original: true) %>"><%= truncated_asset_name(file, use_original: true) %></p>
             </div>
           <% end %>
 

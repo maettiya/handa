@@ -77,22 +77,30 @@ module FileIconHelper
   # Shows beginning...end.ext format for long names
   def truncated_asset_name(asset, max_length: 28, use_original: false)
     full_name = use_original && asset.original_filename.present? ? asset.original_filename : asset.title
-    extension = asset.file.attached? ? File.extname(asset.file.filename.to_s) : ""
 
-    # Build display name (with extension for files)
-    display_name = asset.is_directory? ? full_name : "#{full_name}#{extension}"
+    # Check if name already has the extension (e.g., original_filename = "kick.wav")
+    file_extension = asset.file.attached? ? File.extname(asset.file.filename.to_s).downcase : ""
+    name_has_extension = full_name.downcase.end_with?(file_extension.downcase) && file_extension.present?
+
+    # Only append extension if not already present and not a directory
+    extension = (!asset.is_directory? && !name_has_extension && file_extension.present?) ? file_extension : ""
+
+    # Build display name
+    display_name = "#{full_name}#{extension}"
     return display_name if display_name.length <= max_length
 
-    # For truncation, preserve the extension
-    if extension.present?
-      available = max_length - extension.length - 3  # 3 for "..."
+    # For truncation, figure out the actual extension in the display name
+    actual_ext = File.extname(display_name)
+
+    if actual_ext.present?
+      available = max_length - actual_ext.length - 3  # 3 for "..."
       return display_name if available < 8  # Too short, let CSS handle it
 
       beginning_length = (available * 0.6).to_i
       end_length = available - beginning_length
-      name_without_ext = full_name
+      name_without_ext = display_name.chomp(actual_ext)
 
-      "#{name_without_ext[0, beginning_length]}...#{name_without_ext[-end_length, end_length]}#{extension}"
+      "#{name_without_ext[0, beginning_length]}...#{name_without_ext[-end_length, end_length]}#{actual_ext}"
     else
       beginning_length = (max_length * 0.6).to_i - 2
       end_length = max_length - beginning_length - 3
@@ -104,8 +112,17 @@ module FileIconHelper
   # Returns the full display name for tooltips
   def full_asset_name(asset, use_original: false)
     full_name = use_original && asset.original_filename.present? ? asset.original_filename : asset.title
-    extension = asset.file.attached? ? File.extname(asset.file.filename.to_s) : ""
-    asset.is_directory? ? full_name : "#{full_name}#{extension}"
+
+    # Check if name already has the extension
+    file_extension = asset.file.attached? ? File.extname(asset.file.filename.to_s).downcase : ""
+    name_has_extension = full_name.downcase.end_with?(file_extension.downcase) && file_extension.present?
+
+    # Only append extension if not already present and not a directory
+    if asset.is_directory? || name_has_extension || file_extension.blank?
+      full_name
+    else
+      "#{full_name}#{file_extension}"
+    end
   end
 
 end
