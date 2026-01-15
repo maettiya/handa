@@ -60,7 +60,7 @@
               <div class="project-icon">
                 <%= image_tag asset_icon_for(asset), class: "icon-image" %>
               </div>
-              <p><%= asset.title %></p>
+              <p title="<%= full_asset_name(asset) %>"><%= truncated_asset_name(asset) %></p>
             <% end %>
           <% elsif asset.file.attached? && asset.children.any? %>
             <%# Asset has extracted contents - clickable to browse inside %>
@@ -68,7 +68,7 @@
               <div class="project-icon">
                 <%= image_tag asset_icon_for(asset), class: "icon-image" %>
               </div>
-              <p><%= asset.title %></p>
+              <p title="<%= full_asset_name(asset) %>"><%= truncated_asset_name(asset) %></p>
             <% end %>
           <% elsif asset.file.attached? %>
             <% ext = File.extname(asset.file.filename.to_s).downcase.delete(".") %>
@@ -76,11 +76,11 @@
               <%# Audio file - clickable to play %>
               <div class="project-card"
                    data-audio-url="<%= url_for(asset.file) %>"
-                   data-audio-title="<%= asset.title %>">
+                   data-audio-title="<%= full_asset_name(asset) %>">
                 <div class="project-icon">
                   <%= image_tag asset_icon_for(asset), class: "icon-image" %>
                 </div>
-                <p><%= asset.title %><%= File.extname(asset.file.filename.to_s) %></p>
+                <p title="<%= full_asset_name(asset) %>"><%= truncated_asset_name(asset) %></p>
               </div>
             <% else %>
               <%# Other single file - not clickable %>
@@ -88,7 +88,7 @@
                 <div class="project-icon">
                   <%= image_tag asset_icon_for(asset), class: "icon-image" %>
                 </div>
-                <p><%= asset.title %><%= File.extname(asset.file.filename.to_s) %></p>
+                <p title="<%= full_asset_name(asset) %>"><%= truncated_asset_name(asset) %></p>
               </div>
             <% end %>
           <% else %>
@@ -97,7 +97,7 @@
               <div class="project-icon">
                 <%= image_tag asset_icon_for(asset), class: "icon-image" %>
               </div>
-              <p><%= asset.title %></p>
+              <p title="<%= full_asset_name(asset) %>"><%= truncated_asset_name(asset) %></p>
             </div>
           <% end %>
 
