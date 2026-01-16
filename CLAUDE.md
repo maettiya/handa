@@ -311,10 +311,9 @@ yarn build:css             # Tailwind CSS
 
 ## Technical Debt / Known Issues
 
-1. Legacy `projects` and `project_files` tables still in database (can be dropped)
-2. Devise mailer not configured for password resets
-3. Zero test coverage
-4. No error handling UI for failed extractions
+1. Legacy `projects` and `project_files` tables still in database (can be dropped when confident)
+2. Zero test coverage
+3. No error handling UI for failed extractions
 
 ---
 
