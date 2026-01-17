@@ -48,12 +48,35 @@
           # Treat extracted ZIPs (files with children) as directories for drop purposes
           acts_as_directory = asset.is_directory? || asset.children.any?
         %>
-        <div class="project-card-wrapper"
-             draggable="true"
+                <div class="project-card-wrapper <%= 'processing' if asset.processing_status.present? %>"
+             draggable="<%= asset.processing_status.present? ? 'false' : 'true' %>"
              data-file-id="<%= asset.id %>"
              data-file-type="<%= file_type %>"
              data-is-directory="<%= acts_as_directory %>"
-             data-action="dragstart->file-drag#dragStart dragend->file-drag#dragEnd dragover->file-drag#dragOver dragleave->file-drag#dragLeave drop->file-drag#drop">
+             data-action="dragstart->file-drag#dragStart dragend->file-drag#dragEnd dragover->file-drag#dragOver dragleave->file-drag#dragLeave drop->file-drag#drop"
+             <% if asset.processing_status.present? %>
+             data-controller="processing-status"
+             data-processing-status-asset-id-value="<%= asset.id %>"
+             <% end %>>
+
+          <% if asset.processing_status.present? %>
+            <!-- Processing overlay -->
+            <div class="processing-overlay">
+              <div class="processing-spinner"></div>
+              <span class="processing-text" data-processing-text>
+                <% if asset.processing_status == 'extracting' %>
+                  Extracting... <%= asset.processing_progress %>/<%= asset.processing_total %>
+                <% else %>
+                  Saving... <%= asset.processing_progress %>/<%= asset.processing_total %>
+                <% end %>
+              </span>
+              <div class="processing-bar">
+                <% percent = asset.processing_total > 0 ? (asset.processing_progress.to_f / asset.processing_total * 100).round : 0 %>
+                <div class="processing-bar-fill" data-processing-bar style="width: <%= percent %>%"></div>
+              </div>
+            </div>
+          <% end %>
+
           <% if asset.folder? %>
             <%# Empty folder - clickable to browse inside %>
             <%= link_to asset_path(asset), class: "project-card" do %>
@@ -101,7 +124,8 @@
             </div>
           <% end %>
 
-          <%# Three-dot menu for actions - now on ALL items %>
+          <%# Three-dot menu for actions - hide during processing %>
+          <% unless asset.processing_status.present? %>
           <div class="card-menu" data-controller="dropdown">
             <button class="menu-trigger" data-action="click->dropdown#toggle">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -174,6 +198,7 @@
                   class: "menu-item menu-item-danger" %>
             </div>
           </div>
+          <% end %>
         </div>
       <% end %>
     </div>
