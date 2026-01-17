@@ -7,10 +7,19 @@ require 'zip'
 class AssetExtractionService
   def initialize(asset)
     @asset = asset
+    @processed_count = 0
   end
 
   def extract!
     return unless zip_file?
+
+    # Count total files first, then set processing status
+    total_files = count_extractable_files
+    @asset.update!(
+      processing_status: 'extracting',
+      processing_progress: 0,
+      processing_total: total_files
+    )
 
     # Track folders we create so we can set parent relationships
     folder_map = {}
@@ -19,7 +28,13 @@ class AssetExtractionService
     download_and_extract(folder_map)
 
     detect_asset_type!
-    @asset.update!(extracted: true, is_directory: true)
+    @asset.update!(
+      extracted: true,
+      is_directory: true,
+      processing_status: nil,
+      processing_progress: 0,
+      processing_total: 0
+    )
   end
 
   private
@@ -27,6 +42,22 @@ class AssetExtractionService
   def zip_file?
     @asset.file.attached? &&
       @asset.file.content_type == 'application/zip'
+  end
+
+  def count_extractable_files
+    count = 0
+    @asset.file.open do |tempfile|
+      Zip::File.open(tempfile.path) do |zip|
+        zip.each do |entry|
+          next if entry.name.end_with?('/')
+          parts = entry.name.split('/')
+          filename = parts.last
+          next if filename.start_with?('.')
+          count += 1
+        end
+      end
+    end
+    count
   end
 
   def download_and_extract(folder_map)
@@ -81,6 +112,10 @@ class AssetExtractionService
 
     # Track folders for parent relationships
     folder_map[entry.name] = child_asset if is_directory
+
+    # Update progress
+    @processed_count += 1
+    @asset.update_columns(processing_progress: @processed_count)
   end
 
   def ensure_folders_exist(folder_parts, folder_map)
