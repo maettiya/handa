@@ -253,7 +253,6 @@ document.addEventListener("turbo:load", function() {
 
   function uploadSingleFile(file, title, uploadId) {
     activeUploads++;
-    const isZip = file.name.toLowerCase().endsWith('.zip');
 
     const progressItem = createProgressElement(uploadId, file.name);
     const progressFill = progressItem.querySelector(".upload-progress-fill");
@@ -301,19 +300,12 @@ document.addEventListener("turbo:load", function() {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          if (isZip) {
-            // ZIP file - need to wait for extraction
-            progressFilename.textContent = `Extracting "${data.title}"...`;
-            progressPercent.textContent = "";
-            progressFill.style.width = "100%";
-            removeProgressItem(progressItem, uploadId, data.id);
-          } else {
-            // Regular file - no extraction needed
-            progressFilename.textContent = file.name;
-            progressPercent.textContent = "Done!";
-            progressItem.classList.add("upload-complete");
-            setTimeout(() => removeProgressItem(progressItem, uploadId, null), 1500);
-          }
+          // Both ZIP and regular files - show done and redirect
+          // ZIP extraction progress is now shown on the card itself via Stimulus controller
+          progressFilename.textContent = file.name;
+          progressPercent.textContent = "Done!";
+          progressItem.classList.add("upload-complete");
+          setTimeout(() => removeProgressItem(progressItem, uploadId, null), 1000);
         } else {
           throw new Error(data.errors?.join(", ") || "Upload failed");
         }
