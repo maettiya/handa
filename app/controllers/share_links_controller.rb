@@ -68,13 +68,15 @@ class ShareLinksController < ApplicationController
     original_asset = @share_link.asset
 
     # Create placeholder asset immediately so UI shows processing state
-    placeholder = current_user.assets.create!(
+    # Use new + save(validate: false) to skip file validation - the job will copy the file
+    placeholder = current_user.assets.new(
       title: original_asset.title,
       original_filename: original_asset.original_filename,
       processing_status: 'importing',
       processing_progress: 0,
       processing_total: 0
     )
+    placeholder.save(validate: false)
 
     # Kick off background job for deep cloning with placeholder
     SaveToLibraryJob.perform_later(original_asset.id, current_user.id, original_asset.user.id, placeholder.id)
