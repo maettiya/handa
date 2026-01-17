@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_01_115000) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_15_034512) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -58,6 +58,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_01_115000) do
     t.bigint "shared_from_user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "processing_status"
+    t.integer "processing_progress", default: 0
+    t.integer "processing_total", default: 0
     t.index ["parent_id"], name: "index_assets_on_parent_id"
     t.index ["shared_from_user_id"], name: "index_assets_on_shared_from_user_id"
     t.index ["user_id", "ephemeral"], name: "index_assets_on_user_id_and_ephemeral"
