@@ -22,7 +22,8 @@ class SaveToLibraryJob < ApplicationJob
   def clone_with_progress(source_asset, new_owner, shared_from, placeholder)
     # Count total items to clone
     total_count = count_descendants(source_asset) + 1
-    placeholder.update!(
+    # Use update_columns to skip validation (placeholder has no file yet)
+    placeholder.update_columns(
       processing_status: 'importing',
       processing_progress: 0,
       processing_total: total_count
@@ -39,7 +40,7 @@ class SaveToLibraryJob < ApplicationJob
     clone_children(source_asset, new_owner, placeholder, shared_from, placeholder)
 
     # Mark as complete
-    placeholder.update!(
+    placeholder.update_columns(
       processing_status: nil,
       processing_progress: 0,
       processing_total: 0
@@ -47,7 +48,17 @@ class SaveToLibraryJob < ApplicationJob
   end
 
   def update_placeholder_from_source(placeholder, source, shared_from)
-    placeholder.update!(
+    # Copy file attachment first if present
+    if source.file.attached?
+      placeholder.file.attach(
+        io: StringIO.new(source.file.download),
+        filename: source.file.filename.to_s,
+        content_type: source.file.content_type
+      )
+    end
+
+    # Update attributes - use update_columns for non-file fields to skip validation
+    placeholder.update_columns(
       title: source.title,
       original_filename: source.original_filename,
       asset_type: source.asset_type,
@@ -57,22 +68,14 @@ class SaveToLibraryJob < ApplicationJob
       file_type: source.file_type,
       extracted: source.extracted,
       hidden: source.hidden,
-      shared_from_user: shared_from
+      shared_from_user_id: shared_from&.id
     )
-
-    # Copy file attachment if present
-    if source.file.attached?
-      placeholder.file.attach(
-        io: StringIO.new(source.file.download),
-        filename: source.file.filename.to_s,
-        content_type: source.file.content_type
-      )
-    end
   end
 
   def clone_children(source_asset, new_owner, new_parent, shared_from, placeholder)
     source_asset.children.each do |child|
-      cloned_child = new_owner.assets.create!(
+      # Build the child asset
+      cloned_child = new_owner.assets.new(
         title: child.title,
         original_filename: child.original_filename,
         asset_type: child.asset_type,
@@ -87,13 +90,17 @@ class SaveToLibraryJob < ApplicationJob
         shared_from_user: shared_from
       )
 
-      # Copy file attachment if present
+      # Copy file attachment first if present
       if child.file.attached?
         cloned_child.file.attach(
           io: StringIO.new(child.file.download),
           filename: child.file.filename.to_s,
           content_type: child.file.content_type
         )
+        cloned_child.save!
+      else
+        # No file (directory) - skip validation
+        cloned_child.save(validate: false)
       end
 
       @progress += 1
