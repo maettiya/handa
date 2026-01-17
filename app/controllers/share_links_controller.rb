@@ -67,10 +67,19 @@ class ShareLinksController < ApplicationController
 
     original_asset = @share_link.asset
 
-    # Kick off background job for deep cloning
-    SaveToLibraryJob.perform_later(original_asset.id, current_user.id, original_asset.user.id)
+    # Create placeholder asset immediately so UI shows processing state
+    placeholder = current_user.assets.create!(
+      title: original_asset.title,
+      original_filename: original_asset.original_filename,
+      processing_status: 'importing',
+      processing_progress: 0,
+      processing_total: 0
+    )
 
-    redirect_to library_index_path, notice: "Saving to your library... This may take a moment for large files."
+    # Kick off background job for deep cloning with placeholder
+    SaveToLibraryJob.perform_later(original_asset.id, current_user.id, original_asset.user.id, placeholder.id)
+
+    redirect_to library_index_path, notice: "Saving to your library..."
   end
 
   # GET /s/:token/download
