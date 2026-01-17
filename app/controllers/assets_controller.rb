@@ -56,14 +56,17 @@ class AssetsController < ApplicationController
     end
   end
 
-  # Check extraction status for polling
+  # Check processing status for polling
   def status
     @asset = current_user.assets.find(params[:id])
 
     render json: {
       id: @asset.id,
       extracted: @asset.extracted?,
-      title: @asset.title
+      title: @asset.title,
+      processing_status: @asset.processing_status,
+      processing_progress: @asset.processing_progress,
+      processing_total: @asset.processing_total
     }
   end
 
