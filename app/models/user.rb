@@ -74,13 +74,15 @@ class User < ApplicationRecord
       other: 0
     }
 
-    # Process root-level assets
-    assets.root_level.find_each do |asset|
-      if asset.is_directory? || asset.children.exists?
-        # For directories/projects with children, categorize ALL descendant files
-        categorize_all_descendants(asset, breakdown)
-      elsif asset.file.attached?
-        # Standalone file - categorize by extension
+    # Process all non-root files (extracted content) using file_size column
+    assets.files.where.not(parent_id: nil).find_each do |file|
+      size = file.file_size || 0
+      categorize_by_extension(file.original_filename, size, breakdown)
+    end
+
+    # Process root-level files (standalone uploads) using attached file size
+    assets.root_level.includes(:children, file_attachment: :blob).find_each do |asset|
+      if asset.children.empty? && asset.file.attached?
         size = asset.file.byte_size || 0
         categorize_by_extension(asset.file.filename.to_s, size, breakdown)
       end
@@ -107,20 +109,6 @@ class User < ApplicationRecord
   end
 
   private
-
-  # Categorize ALL files under an asset (recursive via path query)
-  def categorize_all_descendants(asset, breakdown)
-    # For root-level assets, path may be nil - use title as the path prefix
-    path_prefix = asset.path.presence || asset.title
-
-    # Get all file descendants (not directories) at any depth using path prefix
-    all_files = assets.files.where("path LIKE ?", "#{path_prefix}/%")
-
-    all_files.find_each do |file|
-      size = file.file_size || 0
-      categorize_by_extension(file.original_filename, size, breakdown)
-    end
-  end
 
   # Categorize a single file by its extension
   def categorize_by_extension(filename, size, breakdown)
