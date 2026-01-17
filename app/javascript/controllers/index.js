@@ -39,3 +39,6 @@ application.register("rename", RenameController)
 
 import FolderSearchController from "./folder_search_controller"
 application.register("folder-search", FolderSearchController)
+
+import ProcessingStatusController from "./processing_status_controller"
+application.register("processing-status", ProcessingStatusController)

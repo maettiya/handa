@@ -9,6 +9,7 @@ export default class extends Controller {
   }
 
   connect() {
+    console.log("ProcessingStatusController connected for asset:", this.assetIdValue)
     this.startPolling()
   }
 
@@ -37,6 +38,7 @@ export default class extends Controller {
       if (!response.ok) return
 
       const data = await response.json()
+      console.log("Poll response:", data)
 
       if (data.processing_status) {
         this.updateProgress(data)
