@@ -41,6 +41,12 @@ class AssetsController < ApplicationController
     @asset.original_filename = @asset.file&.filename&.to_s
 
     if @asset.save
+      # For ZIP files, set processing status immediately so UI shows spinner
+      # before the background job even starts
+      if @asset.file.attached? && @asset.file.content_type == 'application/zip'
+        @asset.update_columns(processing_status: 'extracting', processing_progress: 0, processing_total: 0)
+      end
+
       # Extract ZIP contents in background job (avoids Heroku 30s timeout)
       AssetExtractionJob.perform_later(@asset.id)
 

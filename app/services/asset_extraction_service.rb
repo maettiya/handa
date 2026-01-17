@@ -13,13 +13,9 @@ class AssetExtractionService
   def extract!
     return unless zip_file?
 
-    # Count total files first, then set processing status
+    # Count total files first, then update the total (status already set by controller)
     total_files = count_extractable_files
-    @asset.update!(
-      processing_status: 'extracting',
-      processing_progress: 0,
-      processing_total: total_files
-    )
+    @asset.update_columns(processing_total: total_files)
 
     # Track folders we create so we can set parent relationships
     folder_map = {}
