@@ -2792,36 +2792,71 @@ body {
   50% { opacity: 0.4; }
 }
 
-.download-status-text {
-  color: #ccc;
+.download-status-label {
+  color: #888;
   font-size: 14px;
   white-space: nowrap;
-  max-width: 200px;
+  margin-right: 4px;
+}
+
+.download-filename-wrapper {
+  max-width: 140px;
   overflow: hidden;
-  display: inline-block;
+  flex-shrink: 1;
 }
 
-/* Scrolling marquee effect during processing */
-.download-status-content[data-status="processing"] .download-status-text {
-  animation: marquee 8s linear infinite;
+/* Wider container for ready/failed states */
+.download-status-content[data-status="ready"] .download-filename-wrapper,
+.download-status-content[data-status="failed"] .download-filename-wrapper {
+  max-width: 200px;
 }
 
-.download-status-content[data-status="processing"] .download-status-text:hover {
-  animation-play-state: paused;
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  10% { transform: translateX(0); }
-  45% { transform: translateX(calc(-100% + 200px)); }
-  55% { transform: translateX(calc(-100% + 200px)); }
-  90% { transform: translateX(0); }
-  100% { transform: translateX(0); }
+.download-filename-track {
+  display: flex;
+  white-space: nowrap;
 }
 
 .download-filename {
   color: #fff;
   font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.download-filename-clone {
+  padding-left: 40px; /* gap between the two copies */
+}
+
+/* Scrolling marquee effect during processing - animate the track */
+.download-status-content[data-status="processing"] .download-filename-track {
+  animation: marquee-loop 7s linear infinite;
+}
+
+@keyframes marquee-loop {
+  0% { transform: translateX(0%); }
+  25% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Ready/failed state: truncate with ellipsis, hide clone */
+.download-status-content[data-status="ready"] .download-filename,
+.download-status-content[data-status="failed"] .download-filename {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.download-status-suffix {
+  color: #22c55e;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+
+.download-status-content[data-status="failed"] .download-status-suffix {
+  color: #ef4444;
 }
 
 .download-status-progress {

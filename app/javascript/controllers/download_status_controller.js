@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["container", "text", "progress", "bar", "barFill", "downloadBtn", "closeBtn"]
+  static targets = ["container", "label", "filename", "filenameClone", "track", "suffix", "progress", "bar", "barFill", "downloadBtn", "closeBtn"]
   static values = {
     downloadId: Number,
     pollInterval: { type: Number, default: 2000 }
@@ -125,17 +125,31 @@ export default class extends Controller {
     const percent = total > 0 ? Math.round((progress / total) * 100) : 0
 
     if (status === 'ready') {
-      this.textTarget.innerHTML = `<span class="download-filename">${filename}</span> ready!`
+      this.labelTarget.textContent = ''
+      this.filenameTarget.textContent = filename
+      this.filenameCloneTarget.textContent = ''
+      this.filenameCloneTarget.classList.add('hidden')
+      this.suffixTarget.textContent = 'ready!'
+      this.suffixTarget.classList.remove('hidden')
       this.progressTarget.classList.add('hidden')
       this.barTarget.classList.add('hidden')
       this.downloadBtnTarget.classList.remove('hidden')
     } else if (status === 'failed') {
-      this.textTarget.innerHTML = `<span class="download-filename">${filename}</span> failed`
+      this.labelTarget.textContent = ''
+      this.filenameTarget.textContent = filename
+      this.filenameCloneTarget.textContent = ''
+      this.filenameCloneTarget.classList.add('hidden')
+      this.suffixTarget.textContent = 'failed'
+      this.suffixTarget.classList.remove('hidden')
       this.progressTarget.classList.add('hidden')
       this.barTarget.classList.add('hidden')
       this.downloadBtnTarget.classList.add('hidden')
     } else {
-      this.textTarget.innerHTML = `Preparing <span class="download-filename">${filename}</span>...`
+      this.labelTarget.textContent = 'Preparing'
+      this.filenameTarget.textContent = filename
+      this.filenameCloneTarget.textContent = filename
+      this.filenameCloneTarget.classList.remove('hidden')
+      this.suffixTarget.classList.add('hidden')
       this.progressTarget.textContent = total > 0 ? `${progress}/${total}` : 'Preparing...'
       this.progressTarget.classList.remove('hidden')
       this.barTarget.classList.remove('hidden')
