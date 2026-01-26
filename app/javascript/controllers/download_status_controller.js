@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["container", "text", "progress", "downloadBtn", "closeBtn"]
+  static targets = ["container", "text", "progress", "bar", "barFill", "downloadBtn", "closeBtn"]
   static values = {
     downloadId: Number,
     pollInterval: { type: Number, default: 2000 }
@@ -44,7 +44,7 @@ export default class extends Controller {
       const data = await response.json()
       this.downloadIdValue = data.id
 
-      this.showStatus('processing', filename, 'Preparing...')
+      this.showStatus('processing', filename, 0, 0)
       this.startPolling()
     } catch (error) {
       console.error('Download error:', error)
@@ -61,9 +61,9 @@ export default class extends Controller {
         this.downloadIdValue = data.id
 
         if (data.status === 'ready') {
-          this.showStatus('ready', data.filename, 'Ready!')
+          this.showStatus('ready', data.filename, data.total, data.total)
         } else if (data.status === 'processing' || data.status === 'pending') {
-          this.showStatus('processing', data.filename, data.progress_text)
+          this.showStatus('processing', data.filename, data.progress, data.total)
           this.startPolling()
         }
       }
@@ -94,15 +94,15 @@ export default class extends Controller {
       switch (data.status) {
         case 'pending':
         case 'processing':
-          this.showStatus('processing', data.filename, data.progress_text)
+          this.showStatus('processing', data.filename, data.progress, data.total)
           break
         case 'ready':
           this.stopPolling()
-          this.showStatus('ready', data.filename, 'Ready!')
+          this.showStatus('ready', data.filename, data.total, data.total)
           break
         case 'failed':
           this.stopPolling()
-          this.showStatus('failed', data.filename, data.error_message || 'Failed')
+          this.showStatus('failed', data.filename, 0, 0, data.error_message)
           break
         case 'downloaded':
           this.stopPolling()
@@ -114,25 +114,32 @@ export default class extends Controller {
     }
   }
 
-  showStatus(status, filename, progressText) {
+  showStatus(status, filename, progress, total, errorMessage = null) {
     this.element.classList.remove('hidden')
     this.containerTarget.dataset.status = status
 
     // Always show close button so user can dismiss at any time
     this.closeBtnTarget.classList.remove('hidden')
 
+    // Calculate progress percentage
+    const percent = total > 0 ? Math.round((progress / total) * 100) : 0
+
     if (status === 'ready') {
       this.textTarget.innerHTML = `<span class="download-filename">${filename}</span> ready!`
       this.progressTarget.classList.add('hidden')
+      this.barTarget.classList.add('hidden')
       this.downloadBtnTarget.classList.remove('hidden')
     } else if (status === 'failed') {
       this.textTarget.innerHTML = `<span class="download-filename">${filename}</span> failed`
       this.progressTarget.classList.add('hidden')
+      this.barTarget.classList.add('hidden')
       this.downloadBtnTarget.classList.add('hidden')
     } else {
       this.textTarget.innerHTML = `Preparing <span class="download-filename">${filename}</span>...`
-      this.progressTarget.textContent = progressText
+      this.progressTarget.textContent = total > 0 ? `${progress}/${total}` : 'Preparing...'
       this.progressTarget.classList.remove('hidden')
+      this.barTarget.classList.remove('hidden')
+      this.barFillTarget.style.width = `${percent}%`
       this.downloadBtnTarget.classList.add('hidden')
     }
   }
