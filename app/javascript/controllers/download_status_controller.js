@@ -10,19 +10,25 @@ export default class extends Controller {
   connect() {
     // Check for any active downloads on page load
     this.checkActiveDownloads()
+
+    // Listen for download requests from anywhere in the app
+    this.boundStartDownload = this.handleStartDownload.bind(this)
+    document.addEventListener('handa:start-download', this.boundStartDownload)
   }
 
   disconnect() {
     this.stopPolling()
+    document.removeEventListener('handa:start-download', this.boundStartDownload)
   }
 
-  // Called when user clicks "Download" on a folder
-  async startDownload(event) {
-    event.preventDefault()
+  // Handle custom event from download buttons
+  handleStartDownload(event) {
+    const { assetId, filename } = event.detail
+    this.initiateDownload(assetId, filename)
+  }
 
-    const assetId = event.currentTarget.dataset.assetId
-    const filename = event.currentTarget.dataset.filename || "Download"
-
+  // Called when user clicks "Download" on a folder (via custom event)
+  async initiateDownload(assetId, filename) {
     try {
       const response = await fetch('/downloads', {
         method: 'POST',
@@ -67,7 +73,7 @@ export default class extends Controller {
   }
 
   startPolling() {
-    this.stopPolling() // Clear any existing interval
+    this.stopPolling()
     this.pollTimer = setInterval(() => this.pollStatus(), this.pollIntervalValue)
   }
 
@@ -109,7 +115,7 @@ export default class extends Controller {
   }
 
   showStatus(status, filename, progressText) {
-    this.containerTarget.classList.remove('hidden')
+    this.element.classList.remove('hidden')
     this.containerTarget.dataset.status = status
 
     if (status === 'ready') {
@@ -134,15 +140,13 @@ export default class extends Controller {
   async downloadFile() {
     if (!this.downloadIdValue) return
 
-    // Trigger the actual download
     window.location.href = `/downloads/${this.downloadIdValue}/file`
 
-    // Hide the status bar after a short delay
     setTimeout(() => this.hide(), 1000)
   }
 
   hide() {
-    this.containerTarget.classList.add('hidden')
+    this.element.classList.add('hidden')
     this.downloadIdValue = 0
   }
 

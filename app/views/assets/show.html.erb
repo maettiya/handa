@@ -113,9 +113,7 @@
 
               <% if file.is_directory? || file.children.any? %>
                 <button class="menu-item"
-                        data-action="click->download-status#startDownload"
-                        data-asset-id="<%= file.id %>"
-                        data-filename="<%= file.original_filename || file.title %>">
+                        onclick="document.dispatchEvent(new CustomEvent('handa:start-download', { detail: { assetId: <%= file.id %>, filename: '<%= j(file.original_filename || file.title) %>' } }))">
                   Download
                 </button>
               <% elsif file.file.attached? %>

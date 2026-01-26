@@ -154,9 +154,7 @@
 
               <% if asset.is_directory? || asset.children.any? %>
                 <button class="menu-item"
-                        data-action="click->download-status#startDownload"
-                        data-asset-id="<%= asset.id %>"
-                        data-filename="<%= asset.title %>">
+                        onclick="document.dispatchEvent(new CustomEvent('handa:start-download', { detail: { assetId: <%= asset.id %>, filename: '<%= j(asset.title) %>' } }))">
                   Download
                 </button>
               <% else %>
