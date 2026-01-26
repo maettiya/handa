@@ -13,22 +13,31 @@ export default class extends Controller {
 
     // Listen for download requests from anywhere in the app
     this.boundStartDownload = this.handleStartDownload.bind(this)
+    this.boundStartShareDownload = this.handleStartShareDownload.bind(this)
     document.addEventListener('handa:start-download', this.boundStartDownload)
+    document.addEventListener('handa:start-share-download', this.boundStartShareDownload)
   }
 
   disconnect() {
     this.stopPolling()
     document.removeEventListener('handa:start-download', this.boundStartDownload)
+    document.removeEventListener('handa:start-share-download', this.boundStartShareDownload)
   }
 
-  // Handle custom event from download buttons
+  // Handle custom event from download buttons (library assets)
   handleStartDownload(event) {
     const { assetId, filename } = event.detail
-    this.initiateDownload(assetId, filename)
+    this.initiateDownload({ asset_id: assetId }, filename)
+  }
+
+  // Handle custom event from share link download buttons
+  handleStartShareDownload(event) {
+    const { token, filename } = event.detail
+    this.initiateDownload({ share_link_token: token }, filename)
   }
 
   // Called when user clicks "Download" on a folder (via custom event)
-  async initiateDownload(assetId, filename) {
+  async initiateDownload(params, filename) {
     try {
       const response = await fetch('/downloads', {
         method: 'POST',
@@ -36,7 +45,7 @@ export default class extends Controller {
           'Content-Type': 'application/json',
           'X-CSRF-Token': this.csrfToken
         },
-        body: JSON.stringify({ asset_id: assetId })
+        body: JSON.stringify(params)
       })
 
       if (!response.ok) throw new Error('Failed to start download')

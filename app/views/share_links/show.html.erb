@@ -24,7 +24,16 @@
         <% end %>
       </div>
     <% else %>
-      <%= link_to "Download", share_link_download_path(@share_link.token), class: "share-download-btn" %>
+      <% if @asset.is_directory? || @asset.children.any? %>
+        <%# Folder download - use background job (works for all users) %>
+        <button class="share-download-btn"
+                onclick="document.dispatchEvent(new CustomEvent('handa:start-share-download', { detail: { token: '<%= @share_link.token %>', filename: '<%= j(@asset.title) %>' } }))">
+          Download
+        </button>
+      <% else %>
+        <%# Single file - direct download %>
+        <%= link_to "Download", share_link_download_path(@share_link.token), class: "share-download-btn" %>
+      <% end %>
 
       <% if user_signed_in? %>
         <%= button_to "Save to Library", share_link_save_path(@share_link.token), method: :post, class: "share-save-btn" %>

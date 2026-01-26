@@ -106,44 +106,43 @@
     </main>
 
     <!-- Download Status Bar (bottom-left, persists across Turbo navigation) -->
-    <% if user_signed_in? %>
-      <div id="download-status"
-          class="download-status hidden"
-          data-controller="download-status"
-          data-turbo-permanent>
-        <div class="download-status-content" data-download-status-target="container">
-          <div class="download-status-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-          </div>
-          <span class="download-status-label" data-download-status-target="label">Preparing</span>
-          <div class="download-filename-wrapper">
-            <div class="download-filename-track" data-download-status-target="track">
-              <span class="download-filename" data-download-status-target="filename">...</span>
-              <span class="download-filename download-filename-clone" data-download-status-target="filenameClone">...</span>
-            </div>
-          </div>
-          <span class="download-status-suffix hidden" data-download-status-target="suffix"></span>
-          <div class="download-status-bar" data-download-status-target="bar">
-            <div class="download-status-bar-fill" data-download-status-target="barFill"></div>
-          </div>
-          <span class="download-status-progress" data-download-status-target="progress">0/0</span>
-          <button class="download-status-btn hidden"
-                  data-download-status-target="downloadBtn"
-                  data-action="click->download-status#downloadFile">
-            Download
-          </button>
-          <button class="download-status-close hidden"
-                  data-download-status-target="closeBtn"
-                  data-action="click->download-status#hide">
-            &times;
-          </button>
+    <!-- Available for all users (anonymous share link downloads + authenticated) -->
+    <div id="download-status"
+        class="download-status hidden"
+        data-controller="download-status"
+        data-turbo-permanent>
+      <div class="download-status-content" data-download-status-target="container">
+        <div class="download-status-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
         </div>
+        <span class="download-status-label" data-download-status-target="label">Preparing</span>
+        <div class="download-filename-wrapper">
+          <div class="download-filename-track" data-download-status-target="track">
+            <span class="download-filename" data-download-status-target="filename">...</span>
+            <span class="download-filename download-filename-clone" data-download-status-target="filenameClone">...</span>
+          </div>
+        </div>
+        <span class="download-status-suffix hidden" data-download-status-target="suffix"></span>
+        <div class="download-status-bar" data-download-status-target="bar">
+          <div class="download-status-bar-fill" data-download-status-target="barFill"></div>
+        </div>
+        <span class="download-status-progress" data-download-status-target="progress">0/0</span>
+        <button class="download-status-btn hidden"
+                data-download-status-target="downloadBtn"
+                data-action="click->download-status#downloadFile">
+          Download
+        </button>
+        <button class="download-status-close hidden"
+                data-download-status-target="closeBtn"
+                data-action="click->download-status#hide">
+          &times;
+        </button>
       </div>
-    <% end %>
+    </div>
 
     <!-- Audio Player Bar (hidden by default, persists across Turbo navigation) -->
     <div id="audio-player" class="audio-player" data-controller="audio-player" data-turbo-permanent>

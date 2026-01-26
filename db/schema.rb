@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_26_024242) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_26_051040) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -79,7 +79,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_26_024242) do
   end
 
   create_table "downloads", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.bigint "asset_id", null: false
     t.string "status", default: "pending", null: false
     t.integer "progress", default: 0

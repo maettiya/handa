@@ -1,5 +1,5 @@
 class Download < ApplicationRecord
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :asset
 
   has_one_attached :zip_file
