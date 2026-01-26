@@ -6,6 +6,65 @@
 
 **Current Status**: Core functionality complete - Upload, download, extraction, browsing, search, sharing, and audio playback all working. Landing page live.
 
+---
+
+## Product Vision
+
+**The Ultimate Goal**: Handa is not "Dropbox for music" - it's the **missing infrastructure for seamless remote music collaboration**.
+
+### The Dream Workflow
+
+1. Producer opens Ableton and starts a song
+2. Clicks "Save As" → saves directly to Handa folder
+3. Auto-syncs to Handa cloud instantly
+4. Creates share link, sends to collaborator via iMessage
+5. Collaborator clicks "Save to Library"
+6. The EXACT project appears in their Handa
+7. They open Ableton → everything is there, ready to continue
+
+**No exporting stems. No manual ZIP. No uploading/downloading. No "Collect All and Save" issues. No missing samples. Just ONE link - Handa handles the rest.**
+
+### Two-Product Architecture
+
+**Browser Handa** (Current Focus)
+- The "home base" where all music files live
+- Beautiful, organized library (not generic like Dropbox)
+- Share links, collaborator management, version history
+- Audio playback, comments, project overview
+- Works without any DAW or native app installed
+
+**Native Handa** (Future - macOS App)
+- The invisible sync engine
+- Watches a "Handa Projects" folder
+- Detects saves via FSEvents
+- Packages project + samples correctly (solves "Collect All and Save")
+- Uploads to Handa cloud instantly
+- Pushes notifications to collaborators
+- Downloads and unpacks on their end automatically
+
+### Fast Iteration Sync
+
+When both collaborators have a project open:
+1. One producer saves
+2. Handa detects the save instantly
+3. Syncs to cloud
+4. Collaborator gets notification: "New version available - reload?"
+5. They click reload → Ableton loads the updated project
+
+This isn't Google Docs-level real-time, but it's **dramatically faster** than the current export→upload→download→import loop.
+
+### Why This Matters
+
+Every producer collaborates remotely. The current workflow is painful:
+- Create → Export → Upload → Send link → Download → Import → Repeat
+
+Handa collapses this into:
+- Create → It's there
+
+The browser version we're building now is the foundation. The API, storage, user accounts, share links, collaborator system - all gets reused by the native app. Current work isn't throwaway; it's building toward this vision.
+
+---
+
 ## Tech Stack
 
 - **Framework**: Ruby on Rails 7.1.6
