@@ -926,6 +926,19 @@ body {
   margin: 8px 0;
 }
 
+/* Share with submenu - scrollable list */
+.share-with-submenu {
+  max-height: 280px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.share-with-list {
+  overflow-y: auto;
+  max-height: 240px;
+}
+
 /* Share recipient styles */
 .share-recipient {
   position: relative;

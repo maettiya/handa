@@ -9,7 +9,7 @@ class DirectShare < ApplicationRecord
     User.where(id:
       where(user: user)
         .group(:recipient_id)
-        .order('COUNT(*) DESC')
+        .order(Arel.sql('COUNT(*) DESC'))
         .limit(limit)
         .select(:recipient_id)
     )

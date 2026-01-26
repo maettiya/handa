@@ -1,4 +1,4 @@
-<%# Share with submenu - quick share with frequent collaborators %>
+<%# Share with submenu - quick share with collaborators (scrollable) %>
 <div class="menu-item-with-submenu" data-controller="direct-share" data-direct-share-asset-id-value="<%= asset.id %>">
   <button class="menu-item menu-item-parent" data-action="mouseenter->direct-share#loadRecipients">
     <span>Share with</span>
@@ -7,32 +7,19 @@
     </svg>
   </button>
   <div class="submenu" data-direct-share-target="menu">
-    <div class="submenu-inner access-submenu">
+    <div class="submenu-inner access-submenu share-with-submenu">
       <%# Loading state %>
       <div class="access-submenu-loading" data-direct-share-target="loading">
         <span>Loading...</span>
       </div>
 
-      <%# Recipients list (populated by JS) %>
-      <div data-direct-share-target="list"></div>
+      <%# Recipients list (populated by JS, scrollable) %>
+      <div class="share-with-list" data-direct-share-target="list"></div>
 
       <%# Empty state %>
       <div class="access-submenu-empty hidden" data-direct-share-target="empty">
         <span>No collaborators yet</span>
       </div>
-
-      <div class="submenu-divider"></div>
-
-      <%# View all collaborators link %>
-      <%= link_to collaborators_path, class: "access-submenu-item view-all" do %>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-        <span>View all</span>
-      <% end %>
     </div>
   </div>
 </div>

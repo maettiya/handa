@@ -38,14 +38,18 @@ class DirectSharesController < ApplicationController
   end
 
   # GET /direct_shares/frequent_recipients
-  # Get current user's top 5 most frequent share recipients
+  # Get all collaborators, with frequent recipients at the top
   def frequent_recipients
-    recipients = DirectShare.top_recipients_for(current_user, limit: 5)
+    frequent_ids = DirectShare.top_recipients_for(current_user, limit: 5).pluck(:id)
+    all_collaborators = current_user.collaborators.to_a
 
-    # If user has no share history, fall back to their collaborators
-    if recipients.empty?
-      recipients = current_user.collaborators.limit(5)
-    end
+    # Sort: frequent ones first (in order), then the rest alphabetically
+    frequent = all_collaborators.select { |u| frequent_ids.include?(u.id) }
+                                .sort_by { |u| frequent_ids.index(u.id) }
+    others = all_collaborators.reject { |u| frequent_ids.include?(u.id) }
+                              .sort_by { |u| u.username.downcase }
+
+    recipients = frequent + others
 
     render json: recipients.map { |u|
       {
