@@ -52,23 +52,29 @@
             <div class="notification-dropdown" data-notification-dropdown-target="menu">
               <div class="notification-dropdown-header">Activity</div>
               <div class="notification-dropdown-list">
-                <% notifications = current_user.notifications.recent.includes(:actor).limit(20) %>
+                <% notifications = current_user.notifications.recent.includes(:actor, :notifiable).limit(20) %>
                 <% if notifications.any? %>
                   <% notifications.each do |notification| %>
                     <div class="notification-dropdown-item">
                       <div class="notification-avatar">
-                        <% if notification.actor.avatar.attached? %>
+                        <% if notification.actor&.avatar&.attached? %>
                           <%= image_tag notification.actor.avatar, class: "avatar-image" %>
-                        <% else %>
+                        <% elsif notification.actor %>
                           <span class="avatar-placeholder"><%= notification.actor.username[0].upcase %></span>
+                        <% else %>
+                          <span class="avatar-placeholder">?</span>
                         <% end %>
                       </div>
                       <div class="notification-content">
                         <span class="notification-text">
-                          <strong><%= notification.actor.username %></strong>
+                          <strong><%= notification.actor_display_name %></strong>
                           <% case notification.notification_type %>
                           <% when 'collaborator_added' %>
                             added you as a collaborator
+                          <% when 'share_link_download' %>
+                            downloaded <strong><%= notification.notifiable&.asset&.title || 'a file' %></strong>
+                          <% when 'share_link_save' %>
+                            saved <strong><%= notification.notifiable&.title || 'a file' %></strong> to their library
                           <% end %>
                         </span>
                         <span class="notification-time"><%= time_ago_in_words(notification.created_at) %> ago</span>

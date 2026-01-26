@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_26_051040) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_26_052149) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -88,14 +88,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_26_051040) do
     t.string "error_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "share_link_id"
     t.index ["asset_id"], name: "index_downloads_on_asset_id"
+    t.index ["share_link_id"], name: "index_downloads_on_share_link_id"
     t.index ["user_id", "status"], name: "index_downloads_on_user_id_and_status"
     t.index ["user_id"], name: "index_downloads_on_user_id"
   end
 
   create_table "notifications", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "actor_id", null: false
+    t.bigint "actor_id"
     t.string "notification_type", null: false
     t.string "notifiable_type"
     t.bigint "notifiable_id"
@@ -169,6 +171,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_26_051040) do
   add_foreign_key "collaborations", "users"
   add_foreign_key "collaborations", "users", column: "collaborator_id"
   add_foreign_key "downloads", "assets"
+  add_foreign_key "downloads", "share_links"
   add_foreign_key "downloads", "users"
   add_foreign_key "notifications", "users"
   add_foreign_key "notifications", "users", column: "actor_id"

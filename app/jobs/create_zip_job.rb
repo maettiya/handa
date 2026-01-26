@@ -26,6 +26,9 @@ class CreateZipJob < ApplicationJob
       )
 
       download.update!(status: 'ready')
+
+      # Notify share link owner if this was a share link download
+      notify_share_link_owner(download)
     rescue => e
       download.update!(status: 'failed', error_message: e.message)
       Rails.logger.error "CreateZipJob failed: #{e.message}\n#{e.backtrace.join("\n")}"
@@ -91,5 +94,22 @@ class CreateZipJob < ApplicationJob
 
     # Update progress
     download.increment!(:progress)
+  end
+
+  def notify_share_link_owner(download)
+    return unless download.share_link.present?
+
+    share_link = download.share_link
+    owner = share_link.asset.user
+
+    # Don't notify if owner is downloading their own file
+    return if download.user == owner
+
+    Notification.create!(
+      user: owner,
+      actor: download.user, # nil for anonymous downloads
+      notification_type: 'share_link_download',
+      notifiable: download
+    )
   end
 end

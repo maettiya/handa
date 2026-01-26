@@ -21,6 +21,7 @@ class DownloadsController < ApplicationController
       download = Download.create!(
         user: current_user, # nil for anonymous
         asset: asset,
+        share_link: share_link,
         filename: asset.title,
         status: 'pending'
       )
