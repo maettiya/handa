@@ -152,7 +152,16 @@
                 </div>
               </div>
 
-              <%= link_to "Download", download_asset_path(asset), class: "menu-item" %>
+              <% if asset.is_directory? || asset.children.any? %>
+                <button class="menu-item"
+                        data-action="click->download-status#startDownload"
+                        data-asset-id="<%= asset.id %>"
+                        data-filename="<%= asset.title %>">
+                  Download
+                </button>
+              <% else %>
+                <%= link_to "Download", download_asset_path(asset), class: "menu-item" %>
+              <% end %>
 
               <%= button_to "Duplicate", duplicate_asset_path(asset), method: :post, class: "menu-item", form: { data: { turbo: false } } %>
 

@@ -111,8 +111,13 @@
                 </div>
               </div>
 
-              <% if file.is_directory? %>
-                <%= link_to "Download", download_folder_asset_path(@asset, folder_id: file.id), class: "menu-item" %>
+              <% if file.is_directory? || file.children.any? %>
+                <button class="menu-item"
+                        data-action="click->download-status#startDownload"
+                        data-asset-id="<%= file.id %>"
+                        data-filename="<%= file.original_filename || file.title %>">
+                  Download
+                </button>
               <% elsif file.file.attached? %>
                 <%= link_to "Download", download_file_asset_path(@asset, file_id: file.id), class: "menu-item" %>
               <% end %>
