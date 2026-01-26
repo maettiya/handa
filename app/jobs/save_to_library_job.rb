@@ -45,6 +45,21 @@ class SaveToLibraryJob < ApplicationJob
       processing_progress: 0,
       processing_total: 0
     )
+
+    # Notify the original owner that someone saved their asset
+    notify_asset_owner(shared_from, new_owner, placeholder)
+  end
+
+  def notify_asset_owner(owner, actor, saved_asset)
+    # Don't notify if user is saving their own asset
+    return if owner == actor
+
+    Notification.create!(
+      user: owner,
+      actor: actor,
+      notification_type: 'share_link_save',
+      notifiable: saved_asset
+    )
   end
 
   def update_placeholder_from_source(placeholder, source, shared_from)
