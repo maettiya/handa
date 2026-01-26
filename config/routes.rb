@@ -75,6 +75,17 @@ Rails.application.routes.draw do
     end
   end
 
+  # Downloads
+  resources :downloads, only: [:create] do
+    member do
+      get :status
+      get :file
+    end
+    collection do
+      get :active
+    end
+  end
+
   # Search
   get 'search', to: 'search#index', as: :search
 
