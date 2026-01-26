@@ -164,6 +164,11 @@ class ShareLinksController < ApplicationController
     # Don't notify if owner is downloading their own file
     return if downloader == owner
 
+    # Prevent duplicate notifications - check if we already notified in this session
+    session_key = "notified_download_#{share_link.id}"
+    return if session[session_key]
+    session[session_key] = true
+
     Notification.create!(
       user: owner,
       actor: downloader, # nil for anonymous downloads
