@@ -105,6 +105,36 @@
       <%= yield %>
     </main>
 
+    <!-- Download Status Bar (bottom-left, persists across Turbo navigation) -->
+    <% if user_signed_in? %>
+      <div id="download-status"
+          class="download-status hidden"
+          data-controller="download-status"
+          data-turbo-permanent>
+        <div class="download-status-content" data-download-status-target="container">
+          <div class="download-status-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </div>
+          <span class="download-status-text" data-download-status-target="text">Preparing...</span>
+          <span class="download-status-progress" data-download-status-target="progress">0/0</span>
+          <button class="download-status-btn hidden"
+                  data-download-status-target="downloadBtn"
+                  data-action="click->download-status#downloadFile">
+            Download
+          </button>
+          <button class="download-status-close hidden"
+                  data-download-status-target="closeBtn"
+                  data-action="click->download-status#hide">
+            &times;
+          </button>
+        </div>
+      </div>
+    <% end %>
+
     <!-- Audio Player Bar (hidden by default, persists across Turbo navigation) -->
     <div id="audio-player" class="audio-player" data-controller="audio-player" data-turbo-permanent>
       <div class="audio-player-title-row">
