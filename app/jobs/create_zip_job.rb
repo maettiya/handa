@@ -57,7 +57,7 @@ class CreateZipJob < ApplicationJob
   def build_zip(zip_path, asset, download)
     require 'zip'
 
-    ::Zip::File.open(zip_path, ::Zip::File::CREATE) do |zipfile|
+    Zip::File.open(zip_path, create: true) do |zipfile|
       if asset.is_directory?
         add_folder_to_zip(zipfile, asset, asset.title, download)
       else
