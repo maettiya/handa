@@ -2796,6 +2796,27 @@ body {
   color: #ccc;
   font-size: 14px;
   white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  display: inline-block;
+}
+
+/* Scrolling marquee effect during processing */
+.download-status-content[data-status="processing"] .download-status-text {
+  animation: marquee 8s linear infinite;
+}
+
+.download-status-content[data-status="processing"] .download-status-text:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  10% { transform: translateX(0); }
+  45% { transform: translateX(calc(-100% + 200px)); }
+  55% { transform: translateX(calc(-100% + 200px)); }
+  90% { transform: translateX(0); }
+  100% { transform: translateX(0); }
 }
 
 .download-filename {
