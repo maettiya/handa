@@ -118,22 +118,22 @@ export default class extends Controller {
     this.element.classList.remove('hidden')
     this.containerTarget.dataset.status = status
 
+    // Always show close button so user can dismiss at any time
+    this.closeBtnTarget.classList.remove('hidden')
+
     if (status === 'ready') {
       this.textTarget.innerHTML = `<span class="download-filename">${filename}</span> ready!`
       this.progressTarget.classList.add('hidden')
       this.downloadBtnTarget.classList.remove('hidden')
-      this.closeBtnTarget.classList.add('hidden')
     } else if (status === 'failed') {
       this.textTarget.innerHTML = `<span class="download-filename">${filename}</span> failed`
       this.progressTarget.classList.add('hidden')
       this.downloadBtnTarget.classList.add('hidden')
-      this.closeBtnTarget.classList.remove('hidden')
     } else {
       this.textTarget.innerHTML = `Preparing <span class="download-filename">${filename}</span>...`
       this.progressTarget.textContent = progressText
       this.progressTarget.classList.remove('hidden')
       this.downloadBtnTarget.classList.add('hidden')
-      this.closeBtnTarget.classList.add('hidden')
     }
   }
 
@@ -145,7 +145,22 @@ export default class extends Controller {
     setTimeout(() => this.hide(), 1000)
   }
 
-  hide() {
+  async hide() {
+    // Tell backend to dismiss this download so it doesn't reappear on reload
+    if (this.downloadIdValue) {
+      try {
+        await fetch(`/downloads/${this.downloadIdValue}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-Token': this.csrfToken
+          }
+        })
+      } catch (error) {
+        console.error('Error dismissing download:', error)
+      }
+    }
+
+    this.stopPolling()
     this.element.classList.add('hidden')
     this.downloadIdValue = 0
   }

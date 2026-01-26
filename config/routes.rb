@@ -76,7 +76,7 @@ Rails.application.routes.draw do
   end
 
   # Downloads
-  resources :downloads, only: [:create] do
+  resources :downloads, only: [:create, :destroy] do
     member do
       get :status
       get :file

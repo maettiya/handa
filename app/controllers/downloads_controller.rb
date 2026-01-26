@@ -56,6 +56,14 @@ class DownloadsController < ApplicationController
                 allow_other_host: true
   end
 
+  # DELETE /downloads/:id
+  # Dismisses/cancels a download
+  def destroy
+    download = current_user.downloads.find(params[:id])
+    download.update!(status: 'downloaded')  # Reuse 'downloaded' to remove from active
+    head :ok
+  end
+
   # GET /downloads/active
   # Returns any active downloads for the current user (for page load)
   def active
