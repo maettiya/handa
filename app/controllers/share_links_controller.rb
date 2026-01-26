@@ -109,6 +109,7 @@ class ShareLinksController < ApplicationController
                 disposition: "attachment"
     elsif @asset.file.attached?
       # Single file - direct download
+      notify_download(@share_link, current_user)
       redirect_to rails_blob_path(@asset.file, disposition: "attachment")
     else
       redirect_to share_link_path(@share_link.token), alert: "File not available"
@@ -154,6 +155,21 @@ class ShareLinksController < ApplicationController
 
   def session_authenticated?
     session["share_link_#{@share_link.token}"] == true
+  end
+
+  # Notify asset owner of a download (for single file direct downloads)
+  def notify_download(share_link, downloader)
+    owner = share_link.asset.user
+
+    # Don't notify if owner is downloading their own file
+    return if downloader == owner
+
+    Notification.create!(
+      user: owner,
+      actor: downloader, # nil for anonymous downloads
+      notification_type: 'share_link_download',
+      notifiable: share_link.asset
+    )
   end
 
   # Creates ZIP using temp file (low memory usage for Heroku)

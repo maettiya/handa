@@ -72,7 +72,8 @@
                           <% when 'collaborator_added' %>
                             added you as a collaborator
                           <% when 'share_link_download' %>
-                            downloaded <strong><%= notification.notifiable&.asset&.title || 'a file' %></strong>
+                            <% download_title = notification.notifiable.is_a?(Download) ? notification.notifiable.asset&.title : notification.notifiable&.title %>
+                            downloaded <strong><%= download_title || 'a file' %></strong>
                           <% when 'share_link_save' %>
                             saved <strong><%= notification.notifiable&.title || 'a file' %></strong> to their library
                           <% end %>
