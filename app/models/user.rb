@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :collaborations, dependent: :destroy
   has_many :inverse_collaborations, class_name: 'Collaboration', foreign_key: 'collaborator_id', dependent: :destroy
   has_many :notifications
+  has_many :downloads, dependent: :destroy
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
