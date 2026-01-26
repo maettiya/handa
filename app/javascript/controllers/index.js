@@ -42,3 +42,6 @@ application.register("folder-search", FolderSearchController)
 
 import ProcessingStatusController from "./processing_status_controller"
 application.register("processing-status", ProcessingStatusController)
+
+import DownloadStatusController from "./download_status_controller"
+application.register("download-status", DownloadStatusController)
