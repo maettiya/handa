@@ -45,3 +45,6 @@ application.register("processing-status", ProcessingStatusController)
 
 import DownloadStatusController from "./download_status_controller"
 application.register("download-status", DownloadStatusController)
+
+import DirectShareController from "./direct_share_controller"
+application.register("direct-share", DirectShareController)
