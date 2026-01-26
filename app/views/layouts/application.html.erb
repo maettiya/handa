@@ -55,32 +55,60 @@
                 <% notifications = current_user.notifications.recent.includes(:actor, :notifiable).limit(20) %>
                 <% if notifications.any? %>
                   <% notifications.each do |notification| %>
-                    <div class="notification-dropdown-item">
-                      <div class="notification-avatar">
-                        <% if notification.actor&.avatar&.attached? %>
-                          <%= image_tag notification.actor.avatar, class: "avatar-image" %>
-                        <% elsif notification.actor %>
-                          <span class="avatar-placeholder"><%= notification.actor.username[0].upcase %></span>
-                        <% else %>
-                          <span class="avatar-placeholder">?</span>
-                        <% end %>
-                      </div>
-                      <div class="notification-content">
-                        <span class="notification-text">
-                          <strong><%= notification.actor_display_name %></strong>
-                          <% case notification.notification_type %>
-                          <% when 'collaborator_added' %>
-                            added you as a collaborator
-                          <% when 'share_link_download' %>
-                            <% download_title = notification.notifiable.is_a?(Download) ? notification.notifiable.asset&.title : notification.notifiable&.title %>
-                            downloaded <strong><%= download_title || 'a file' %></strong>
-                          <% when 'share_link_save' %>
-                            saved <strong><%= notification.notifiable&.title || 'a file' %></strong> to their library
+                    <%
+                      # Determine if notification should be clickable and where it links to
+                      notification_url = nil
+                      if notification.notification_type == 'direct_share' && notification.notifiable&.share_link
+                        notification_url = share_link_path(notification.notifiable.share_link.token)
+                      end
+                    %>
+                    <% if notification_url %>
+                      <%= link_to notification_url, class: "notification-dropdown-item notification-dropdown-item-link" do %>
+                        <div class="notification-avatar">
+                          <% if notification.actor&.avatar&.attached? %>
+                            <%= image_tag notification.actor.avatar, class: "avatar-image" %>
+                          <% elsif notification.actor %>
+                            <span class="avatar-placeholder"><%= notification.actor.username[0].upcase %></span>
+                          <% else %>
+                            <span class="avatar-placeholder">?</span>
                           <% end %>
-                        </span>
-                        <span class="notification-time"><%= time_ago_in_words(notification.created_at) %> ago</span>
+                        </div>
+                        <div class="notification-content">
+                          <span class="notification-text">
+                            <strong><%= notification.actor_display_name %></strong>
+                            shared <strong><%= notification.notifiable&.asset&.title || 'a file' %></strong> with you
+                          </span>
+                          <span class="notification-time"><%= time_ago_in_words(notification.created_at) %> ago</span>
+                        </div>
+                      <% end %>
+                    <% else %>
+                      <div class="notification-dropdown-item">
+                        <div class="notification-avatar">
+                          <% if notification.actor&.avatar&.attached? %>
+                            <%= image_tag notification.actor.avatar, class: "avatar-image" %>
+                          <% elsif notification.actor %>
+                            <span class="avatar-placeholder"><%= notification.actor.username[0].upcase %></span>
+                          <% else %>
+                            <span class="avatar-placeholder">?</span>
+                          <% end %>
+                        </div>
+                        <div class="notification-content">
+                          <span class="notification-text">
+                            <strong><%= notification.actor_display_name %></strong>
+                            <% case notification.notification_type %>
+                            <% when 'collaborator_added' %>
+                              added you as a collaborator
+                            <% when 'share_link_download' %>
+                              <% download_title = notification.notifiable.is_a?(Download) ? notification.notifiable.asset&.title : notification.notifiable&.title %>
+                              downloaded <strong><%= download_title || 'a file' %></strong>
+                            <% when 'share_link_save' %>
+                              saved <strong><%= notification.notifiable&.title || 'a file' %></strong> to their library
+                            <% end %>
+                          </span>
+                          <span class="notification-time"><%= time_ago_in_words(notification.created_at) %> ago</span>
+                        </div>
                       </div>
-                    </div>
+                    <% end %>
                   <% end %>
                 <% else %>
                   <div class="notification-dropdown-empty">No activity yet</div>

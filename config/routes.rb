@@ -86,6 +86,13 @@ Rails.application.routes.draw do
     end
   end
 
+  # Direct shares (quick share with collaborators)
+  resources :direct_shares, only: [:create] do
+    collection do
+      get :frequent_recipients
+    end
+  end
+
   # Search
   get 'search', to: 'search#index', as: :search
 

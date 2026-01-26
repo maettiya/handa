@@ -184,6 +184,12 @@ body {
   background: #3a3a3a;
 }
 
+.notification-dropdown-item-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
 .notification-avatar {
   width: 40px;
   height: 40px;
@@ -918,6 +924,46 @@ body {
   height: 1px;
   background: #3a3a3a;
   margin: 8px 0;
+}
+
+/* Share recipient styles */
+.share-recipient {
+  position: relative;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.share-recipient:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.share-recipient.shared {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.share-check {
+  margin-left: auto;
+}
+
+.access-submenu-loading,
+.access-submenu-empty {
+  padding: 12px 10px;
+  color: #888;
+  font-size: 13px;
+  text-align: center;
+}
+
+.access-submenu-item.view-all {
+  color: #6366f1;
+  justify-content: center;
+}
+
+.access-submenu-item.view-all:hover {
+  color: #818cf8;
 }
 
 /* ===================

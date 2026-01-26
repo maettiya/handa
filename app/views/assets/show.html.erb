@@ -124,6 +124,9 @@
                 Rename
               </button>
 
+              <!-- Share with submenu -->
+              <%= render 'shared/share_with_submenu', asset: file %>
+
               <div class="menu-divider"></div>
               <%= link_to "Delete", destroy_file_asset_path(@asset, file_id: file.id),
                   data: { turbo_method: :delete, turbo_confirm: "Delete '#{file.original_filename}'?#{file.is_directory? ? ' This will delete all contents inside.' : ''}" },

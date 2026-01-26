@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_26_052149) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_26_070928) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -76,6 +76,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_26_052149) do
     t.index ["collaborator_id"], name: "index_collaborations_on_collaborator_id"
     t.index ["user_id", "collaborator_id"], name: "index_collaborations_on_user_id_and_collaborator_id", unique: true
     t.index ["user_id"], name: "index_collaborations_on_user_id"
+  end
+
+  create_table "direct_shares", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "recipient_id", null: false
+    t.bigint "asset_id", null: false
+    t.bigint "share_link_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asset_id"], name: "index_direct_shares_on_asset_id"
+    t.index ["recipient_id"], name: "index_direct_shares_on_recipient_id"
+    t.index ["share_link_id"], name: "index_direct_shares_on_share_link_id"
+    t.index ["user_id", "recipient_id"], name: "index_direct_shares_on_user_id_and_recipient_id"
+    t.index ["user_id"], name: "index_direct_shares_on_user_id"
   end
 
   create_table "downloads", force: :cascade do |t|
@@ -170,6 +184,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_26_052149) do
   add_foreign_key "assets", "users", column: "shared_from_user_id"
   add_foreign_key "collaborations", "users"
   add_foreign_key "collaborations", "users", column: "collaborator_id"
+  add_foreign_key "direct_shares", "assets"
+  add_foreign_key "direct_shares", "share_links"
+  add_foreign_key "direct_shares", "users"
+  add_foreign_key "direct_shares", "users", column: "recipient_id"
   add_foreign_key "downloads", "assets"
   add_foreign_key "downloads", "share_links"
   add_foreign_key "downloads", "users"

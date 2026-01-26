@@ -182,6 +182,9 @@
                         Rename
                       </button>
 
+                      <!-- Share with submenu -->
+                      <%= render 'shared/share_with_submenu', asset: file %>
+
                       <div class="menu-divider"></div>
 
                       <%= link_to "Delete", destroy_file_asset_path(file.root_asset, file_id: file.id),
@@ -270,6 +273,9 @@
                         Rename
                       </button>
 
+                      <!-- Share with submenu -->
+                      <%= render 'shared/share_with_submenu', asset: asset %>
+
                       <div class="menu-divider"></div>
 
                       <%= link_to "Delete", asset_path(asset),
@@ -342,6 +348,9 @@
                       <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= file.root_asset.id %>" data-file-id="<%= file.id %>" data-asset-title="<%= file.original_filename %>">
                         Rename
                       </button>
+
+                      <!-- Share with submenu -->
+                      <%= render 'shared/share_with_submenu', asset: file %>
 
                       <div class="menu-divider"></div>
 

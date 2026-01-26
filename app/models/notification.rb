@@ -7,7 +7,8 @@ class Notification < ApplicationRecord
   # - collaborator_added: Someone added you as a collaborator
   # - share_link_download: Someone downloaded your shared file
   # - share_link_save: Someone saved your shared file to their library
-  TYPES = %w[collaborator_added share_link_download share_link_save].freeze
+  # - direct_share: Someone shared a file directly with you
+  TYPES = %w[collaborator_added share_link_download share_link_save direct_share].freeze
 
   scope :unread, -> { where(read: false) }
   scope :recent, -> { order(created_at: :desc) }
