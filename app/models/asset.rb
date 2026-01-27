@@ -116,13 +116,10 @@ class Asset < ApplicationRecord
       shared_from_user: shared_from
     )
 
-    # Copy file attachment if present
+    # Reference the same blob (no file transfer - instant!)
+    # Active Storage keeps the blob alive until all references are deleted
     if file.attached?
-      cloned.file.attach(
-        io: StringIO.new(file.download),
-        filename: file.filename.to_s,
-        content_type: file.content_type
-      )
+      cloned.file.attach(file.blob)
     end
 
     if cloned.save
