@@ -63,13 +63,9 @@ class SaveToLibraryJob < ApplicationJob
   end
 
   def update_placeholder_from_source(placeholder, source, shared_from)
-    # Copy file attachment first if present
+    # Reference the same blob (no file transfer - instant!)
     if source.file.attached?
-      placeholder.file.attach(
-        io: StringIO.new(source.file.download),
-        filename: source.file.filename.to_s,
-        content_type: source.file.content_type
-      )
+      placeholder.file.attach(source.file.blob)
     end
 
     # Update attributes - use update_columns for non-file fields to skip validation
@@ -105,13 +101,9 @@ class SaveToLibraryJob < ApplicationJob
         shared_from_user: shared_from
       )
 
-      # Copy file attachment first if present
+      # Reference the same blob (no file transfer - instant!)
       if child.file.attached?
-        cloned_child.file.attach(
-          io: StringIO.new(child.file.download),
-          filename: child.file.filename.to_s,
-          content_type: child.file.content_type
-        )
+        cloned_child.file.attach(child.file.blob)
         cloned_child.save!
       else
         # No file (directory) - skip validation
