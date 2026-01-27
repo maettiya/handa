@@ -3,7 +3,7 @@
   <head>
     <title><%= content_for?(:page_title) ? "#{yield(:page_title)} - handa" : "handa" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : "The missing infrastructure for seamless remote music collaboration" %>">
+    <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : "File sharing, built for music." %>">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -32,7 +32,7 @@
       "@type": "WebApplication",
       "name": "handa",
       "url": "https://handa.app",
-      "description": "The missing infrastructure for seamless remote music collaboration",
+      "description": "File sharing, built for music.",
       "applicationCategory": "MultimediaApplication",
       "operatingSystem": "Web",
       "offers": {
