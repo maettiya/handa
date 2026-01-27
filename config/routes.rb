@@ -43,6 +43,7 @@ Rails.application.routes.draw do
   # Public share link routes (short URLs)
   get 's/:token', to: 'share_links#show', as: :share_link
   get 's/:token/download', to: 'share_links#download', as: :share_link_download
+  get 's/:token/download/:file_id', to: 'share_links#download_file', as: :share_link_download_file
   post 's/:token/verify', to: 'share_links#verify_password', as: :share_link_verify
 
   # Quick share routes

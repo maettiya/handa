@@ -131,17 +131,63 @@ class ShareLinksController < ApplicationController
     @share_link.record_download!
     @asset = @share_link.asset
 
-    if @asset.is_directory? && @asset.children.any?
-      # Folder with children - create ZIP using temp file (low memory)
-      tempfile = create_zip_tempfile(@asset)
-      send_file tempfile.path,
-                filename: "#{@asset.title}.zip",
-                type: "application/zip",
-                disposition: "attachment"
+    if @asset.is_directory? || @asset.children.any?
+      # Folder with children - use background download
+      download = Download.create!(
+        user: current_user,
+        asset: @asset,
+        share_link: @share_link,
+        status: 'pending',
+        file_count: 0
+      )
+      CreateZipJob.perform_later(download.id)
+      render json: { download_id: download.id }
     elsif @asset.file.attached?
       # Single file - direct download
       notify_download(@share_link, current_user)
       redirect_to rails_blob_path(@asset.file, disposition: "attachment")
+    else
+      redirect_to share_link_path(@share_link.token), alert: "File not available"
+    end
+  end
+
+  # GET /s/:token/download/:file_id
+  # Download an individual file or folder from within the shared asset
+  def download_file
+    @share_link = ShareLink.find_by!(token: params[:token])
+
+    if @share_link.expired?
+      redirect_to share_link_path(@share_link.token), alert: "This link has expired"
+      return
+    end
+
+    if @share_link.password_required? && !session_authenticated?
+      redirect_to share_link_path(@share_link.token)
+      return
+    end
+
+    @asset = @share_link.asset
+    @file = find_child_folder(params[:file_id])
+
+    unless @file
+      redirect_to share_link_path(@share_link.token), alert: "File not found"
+      return
+    end
+
+    if @file.is_directory? || @file.children.any?
+      # Folder - use background download
+      download = Download.create!(
+        user: current_user,
+        asset: @file,
+        share_link: @share_link,
+        status: 'pending',
+        file_count: 0
+      )
+      CreateZipJob.perform_later(download.id)
+      render json: { download_id: download.id }
+    elsif @file.file.attached?
+      # Single file - direct download
+      redirect_to rails_blob_path(@file.file, disposition: "attachment")
     else
       redirect_to share_link_path(@share_link.token), alert: "File not available"
     end

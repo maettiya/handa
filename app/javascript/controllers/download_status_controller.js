@@ -32,8 +32,10 @@ export default class extends Controller {
 
   // Handle custom event from share link download buttons
   handleStartShareDownload(event) {
-    const { token, filename } = event.detail
-    this.initiateDownload({ share_link_token: token }, filename)
+    const { token, fileId, filename } = event.detail
+    const params = { share_link_token: token }
+    if (fileId) params.file_id = fileId
+    this.initiateDownload(params, filename)
   }
 
   // Called when user clicks "Download" on a folder (via custom event)

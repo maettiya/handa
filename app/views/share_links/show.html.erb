@@ -79,38 +79,63 @@
       <%# File grid %>
       <div class="share-files-grid">
         <% @files.each do |file| %>
-          <% if file.is_directory? %>
-            <%# Folder - click to navigate %>
-            <%= link_to share_link_path(@share_link.token, folder_id: file.id), class: "share-file-card" do %>
-              <div class="share-file-icon">
-                <%= image_tag asset_icon_for(file), class: "icon-image" %>
+          <div class="project-card-wrapper">
+            <% if file.is_directory? %>
+              <%# Folder - click to navigate %>
+              <%= link_to share_link_path(@share_link.token, folder_id: file.id), class: "share-file-card" do %>
+                <div class="share-file-icon">
+                  <%= image_tag asset_icon_for(file), class: "icon-image" %>
+                </div>
+                <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
+              <% end %>
+            <% elsif file.file.attached? && %w[wav mp3 aif aiff flac m4a].include?(file.extension) %>
+              <%# Audio file - clickable to play %>
+              <div class="share-file-card share-file-audio"
+                   data-audio-url="<%= url_for(file.file) %>"
+                   data-audio-title="<%= file.original_filename || file.title %>">
+                <div class="share-file-icon">
+                  <%= image_tag asset_icon_for(file), class: "icon-image" %>
+                </div>
+                <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
+                <div class="share-file-play-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
               </div>
-              <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
+            <% else %>
+              <%# Other file - display with icon %>
+              <div class="share-file-card">
+                <div class="share-file-icon">
+                  <%= image_tag asset_icon_for(file), class: "icon-image" %>
+                </div>
+                <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
+              </div>
             <% end %>
-          <% elsif file.file.attached? && %w[wav mp3 aif aiff flac m4a].include?(file.extension) %>
-            <%# Audio file - clickable to play %>
-            <div class="share-file-card share-file-audio"
-                 data-audio-url="<%= url_for(file.file) %>"
-                 data-audio-title="<%= file.original_filename || file.title %>">
-              <div class="share-file-icon">
-                <%= image_tag asset_icon_for(file), class: "icon-image" %>
+
+            <%# Three-dot menu with Download option %>
+            <% if file.is_directory? || file.file.attached? %>
+              <div class="card-menu" data-controller="dropdown">
+                <button class="menu-trigger" data-action="click->dropdown#toggle">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <circle cx="3" cy="8" r="1.5"/>
+                    <circle cx="8" cy="8" r="1.5"/>
+                    <circle cx="13" cy="8" r="1.5"/>
+                  </svg>
+                </button>
+                <div class="menu-dropdown" data-dropdown-target="menu">
+                  <% if file.is_directory? || file.children.any? %>
+                    <button class="menu-item"
+                            onclick="document.dispatchEvent(new CustomEvent('handa:start-share-download', { detail: { token: '<%= @share_link.token %>', fileId: '<%= file.id %>', filename: '<%= j(file.original_filename || file.title) %>' } }))">
+                      Download
+                    </button>
+                  <% elsif file.file.attached? %>
+                    <%= link_to "Download", share_link_download_file_path(@share_link.token, file.id), class: "menu-item" %>
+                  <% end %>
+                </div>
               </div>
-              <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
-              <div class="share-file-play-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              </div>
-            </div>
-          <% else %>
-            <%# Other file - display only %>
-            <div class="share-file-card">
-              <div class="share-file-icon">
-                <%= image_tag asset_icon_for(file), class: "icon-image" %>
-              </div>
-              <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
-            </div>
-          <% end %>
+            <% end %>
+          </div>
         <% end %>
       </div>
 

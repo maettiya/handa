@@ -2626,20 +2626,19 @@ body {
 }
 
 .share-file-card {
-  background: #2a2a2a;
-  border: 1px solid #3a3a3a;
+  background: transparent;
+  border: none;
   border-radius: 12px;
   padding: 16px;
   text-align: center;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.15s, background 0.15s;
+  transition: opacity 0.15s;
   position: relative;
 }
 
 .share-file-card:hover {
-  border-color: #555;
-  background: #333;
+  opacity: 0.8;
 }
 
 .share-file-audio {
@@ -2653,8 +2652,8 @@ body {
 }
 
 .share-file-icon .icon-image {
-  width: 48px;
-  height: 48px;
+  width: 80px;
+  height: 80px;
 }
 
 .share-file-name {

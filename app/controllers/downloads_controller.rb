@@ -14,7 +14,14 @@ class DownloadsController < ApplicationController
         return render json: { error: 'Share link has expired' }, status: :unprocessable_entity
       end
 
-      asset = share_link.asset
+      # If file_id is provided, download that specific file/folder
+      if params[:file_id].present?
+        asset = find_child_within_share(share_link.asset, params[:file_id])
+        return render json: { error: 'File not found' }, status: :not_found unless asset
+      else
+        asset = share_link.asset
+      end
+
       share_link.record_download!
 
       # Create download record (anonymous or authenticated)
@@ -22,7 +29,7 @@ class DownloadsController < ApplicationController
         user: current_user, # nil for anonymous
         asset: asset,
         share_link: share_link,
-        filename: asset.title,
+        filename: asset.original_filename || asset.title,
         status: 'pending'
       )
 
@@ -144,5 +151,20 @@ class DownloadsController < ApplicationController
   def require_auth_or_share_link
     return if params[:share_link_token].present?
     authenticate_user!
+  end
+
+  # Find a file/folder within a shared asset's tree
+  def find_child_within_share(root_asset, file_id)
+    file = Asset.find_by(id: file_id)
+    return nil unless file
+
+    # Walk up the tree to verify this file belongs to the shared asset
+    current = file
+    while current
+      return file if current.id == root_asset.id
+      current = current.parent
+    end
+
+    nil
   end
 end
