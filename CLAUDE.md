@@ -74,7 +74,7 @@ The browser version we're building now is the foundation. The API, storage, user
 - **Frontend**: Hotwire (Turbo + Stimulus), Tailwind CSS v4
 - **File Storage**: Active Storage (local dev, Cloudflare R2 in production)
 - **JavaScript Bundler**: esbuild
-- **Key Gems**: `devise`, `rubyzip`, `aws-sdk-s3`, `pg`, `turbo-rails`, `stimulus-rails`
+- **Key Gems**: `devise`, `rubyzip`, `zipline`, `aws-sdk-s3`, `pg`, `turbo-rails`, `stimulus-rails`
 
 ## Project Structure
 
@@ -90,17 +90,22 @@ app/
 │   ├── quick_shares_controller.rb     # Ephemeral quick shares
 │   ├── profile_controller.rb          # User profile page
 │   ├── collaborators_controller.rb    # Manage collaborators
-│   └── notifications_controller.rb    # Notification management
+│   ├── notifications_controller.rb    # Notification management
+│   ├── downloads_controller.rb        # Streaming ZIP downloads
+│   └── direct_shares_controller.rb    # Share directly with collaborators
 ├── helpers/
 │   └── file_icon_helper.rb            # Icon selection for assets
 ├── jobs/
-│   └── asset_extraction_job.rb        # Background ZIP extraction
+│   ├── asset_extraction_job.rb        # Background ZIP extraction
+│   ├── save_to_library_job.rb         # Clone shared assets to user's library
+│   └── create_zip_job.rb              # Background ZIP creation (legacy)
 ├── models/
 │   ├── user.rb                        # Devise user, has_many :assets
 │   ├── asset.rb                       # Unified model for files/folders
 │   ├── collaboration.rb               # User-to-user collaboration
 │   ├── notification.rb                # User notifications
-│   └── share_link.rb                  # Shareable links with password/expiry
+│   ├── share_link.rb                  # Shareable links with password/expiry
+│   └── download.rb                    # Track download progress/status
 ├── services/
 │   └── asset_extraction_service.rb    # ZIP extraction logic
 ├── views/
@@ -131,7 +136,8 @@ app/
         ├── audio_player_controller.js          # Audio playback + waveform
         ├── search_filters_controller.js        # Search filter controls
         ├── rename_controller.js                # Inline rename modal
-        └── access_controller.js                # Share link password modal
+        ├── access_controller.js                # Share link password modal
+        └── download_status_controller.js       # Download progress tracking
 ```
 
 ## Key Models & Relationships
@@ -152,17 +158,29 @@ Asset (unified model - replaces Project/ProjectFile)
 ├── belongs_to :shared_from_user (optional, for saved shares)
 ├── has_many :children, dependent: :destroy
 ├── has_many :share_links, dependent: :destroy
+├── has_many :downloads, dependent: :destroy
 ├── has_one_attached :file
 ├── fields: title, original_filename, path, file_size, is_directory, hidden,
-│           file_type, asset_type, extracted, ephemeral, shared_from_user_id
+│           file_type, asset_type, extracted, ephemeral, shared_from_user_id,
+│           processing_status, processing_progress, processing_total
 ├── scopes: root_level, library, ephemeral_shares, visible, directories, files
 ├── methods: extension, root_asset, deep_clone_to_user, should_hide?
 
 ShareLink
 ├── belongs_to :asset
+├── has_many :downloads, dependent: :destroy
 ├── has_secure_password (optional)
 ├── fields: token, expires_at, download_count, password_digest
 ├── methods: expired?, password_required?
+
+Download
+├── belongs_to :user (optional - nil for anonymous)
+├── belongs_to :asset
+├── belongs_to :share_link (optional)
+├── has_one_attached :zip_file
+├── fields: status, progress, total, filename, error_message
+├── States: pending → processing → ready → downloaded → failed
+├── scopes: active
 
 Collaboration
 ├── belongs_to :user
@@ -230,6 +248,17 @@ end
 resources :notifications, only: [] do
   collection { post :mark_read }
 end
+
+# Downloads (streaming ZIP)
+resources :downloads, only: [:create, :destroy] do
+  member { get :status; get :file }
+  collection { get :active; get :stream }
+end
+
+# Direct shares (share with collaborators)
+resources :direct_shares, only: [:create] do
+  collection { get :frequent_recipients }
+end
 ```
 
 ## Key Files to Know
@@ -253,6 +282,9 @@ end
 | Search page | `app/views/search/index.html.erb` |
 | Main styling | `app/assets/stylesheets/application.tailwind.css` |
 | Share links controller | `app/controllers/share_links_controller.rb` |
+| Downloads controller | `app/controllers/downloads_controller.rb` |
+| Save to library job | `app/jobs/save_to_library_job.rb` |
+| Download status JS | `app/javascript/controllers/download_status_controller.js` |
 
 ## Asset Model Architecture
 
@@ -309,9 +341,15 @@ See `docs/ASSET_ARCHITECTURE.md` for full documentation.
 ### Sharing
 - **Share Links**: Password protection, expiry, download tracking
 - **Quick Shares**: Ephemeral uploads with auto-generated share link
-- **Save to Library**: Deep clones shared assets (including all children) to recipient's library
-- **Folder Downloads**: Folders with children are zipped on-the-fly for download
+- **Save to Library**: Instant clone using blob references (no file re-upload)
+- **Direct Shares**: Share directly with collaborators (sends notification)
 - Public share pages at `/s/:token`
+
+### Downloads
+- **Streaming ZIP downloads**: Uses `zipline` gem to stream directly from R2
+- **Single file downloads**: Redirects directly to R2 signed URL
+- **Folder downloads**: Streams ZIP on-the-fly (no timeout issues)
+- **Anonymous downloads**: Session-based tracking for share link downloads
 
 ### Audio Player
 - Persistent audio player bar (bottom of screen)
@@ -376,136 +414,84 @@ yarn build:css             # Tailwind CSS
 
 ---
 
+## Architecture Notes
+
+### Streaming Downloads (Zipline)
+
+Downloads use the `zipline` gem to stream ZIPs directly from R2 to the browser:
+
+```
+User clicks Download → DownloadsController#stream → Zipline streams from R2 → Browser
+```
+
+- **Single files**: Redirect directly to R2 signed URL (instant)
+- **Folders**: Stream ZIP on-the-fly using zipline (no server memory/timeout issues)
+- **No background jobs**: Files stream directly, avoiding Heroku's 30s timeout
+
+Key file: `app/controllers/downloads_controller.rb`
+
+### Reference-Based Save to Library
+
+When a user saves a shared asset to their library, we use **blob references** instead of re-downloading/re-uploading files:
+
+```ruby
+# OLD (slow) - downloaded and re-uploaded every file
+cloned.file.attach(
+  io: StringIO.new(file.download),
+  filename: file.filename.to_s,
+  content_type: file.content_type
+)
+
+# NEW (instant) - just references the same blob
+cloned.file.attach(file.blob)
+```
+
+**How it works:**
+- Active Storage blobs are reference-counted
+- Multiple Asset records can point to the same blob
+- Blob is only deleted when ALL references are removed
+- User A deletes → User B's copy unaffected (and vice versa)
+
+Key files: `app/models/asset.rb` (`deep_clone_to_user`), `app/jobs/save_to_library_job.rb`
+
+### Direct Uploads
+
+File uploads go directly from browser to R2, bypassing Rails:
+
+```
+Browser → R2 (direct) → Rails receives blob key
+```
+
+Uses Active Storage's `direct_upload: true` option. No server-side file handling for uploads.
+
+---
+
 ## Upcoming Features To-Do
 
-### 1. Background Download with Status Bar (Download to Device)
+### 1. Real-time Collaboration
 
-**Goal**: Eliminate timeouts and provide great UX for downloading folders as ZIP files.
+**Goal**: Allow multiple users to collaborate on the same project in real-time.
 
-**Current Problem**:
-- Downloading folders times out on Heroku (30s limit)
-- No visual feedback while ZIP is being created
-- Browser shows stuck progress (e.g., 61%)
+**Difference from Save to Library:**
+- **Save to Library**: Creates independent copy (blob references, but separate Asset records)
+- **Collaborate**: Shared access to the SAME Asset record (both users see same version)
 
-**Solution**: Background ZIP creation with persistent status bar
+### 2. Native macOS App
 
-**UI/UX Flow**:
-1. User clicks "Download" on a folder
-2. Bottom-left status bar appears: `↓ Preparing "My Folder"... 3/12`
-3. User can navigate freely while ZIP builds in background
-4. When complete: `✓ Download ready! [Download]`
-5. User clicks Download → instant save to device
-6. Status bar disappears after download
+**Goal**: Invisible sync engine that watches a "Handa Projects" folder.
 
-**Implementation**:
-- [ ] Create `Download` model (tracks: status, progress, file_count, asset_id, user_id)
-  - States: `pending` → `processing` → `ready` → `downloaded`
-  - Has one attached `:zip_file`
-- [ ] Create `CreateZipJob` background job
-  - Creates ZIP using temp file approach (low memory)
-  - Updates Download record progress as files are added
-  - Uploads completed ZIP to R2, attaches to Download record
-- [ ] Create `DownloadsController`
-  - `create` - initiates download, returns download_id
-  - `status` - returns current progress (for polling)
-  - `serve` - serves the completed ZIP file
-- [ ] Create `download_status_controller.js` (Stimulus)
-  - Shows/hides status bar (turbo-permanent to survive navigation)
-  - Polls `/downloads/:id/status` every 2 seconds
-  - Updates progress display
-  - Shows "Download ready!" with button when complete
-- [ ] Add status bar HTML to `application.html.erb` layout
-- [ ] Update `share_links_controller#download` to use new system for folders
-- [ ] Update `assets_controller#download` and `#download_folder` to use new system
-- [ ] Add cleanup job to delete old ZIPs after 24 hours
+- Detects saves via FSEvents
+- Packages project + samples correctly
+- Uploads to Handa cloud instantly
+- Delta sync (only upload changed bytes)
 
-**Status Bar Design** (bottom-left, persistent):
-```
-┌─────────────────────────────────────┐
-│ ↓  Preparing "My Folder"...  3/12   │  ← processing
-└─────────────────────────────────────┘
+### 3. Version History
 
-┌─────────────────────────────────────┐
-│ ✓  Download ready!     [Download]   │  ← ready
-└─────────────────────────────────────┘
-```
+**Goal**: Track versions of files over time, allow rollback.
 
 ---
 
-### 2. Asset Processing Status (Unified Placeholder UI)
-
-**Goal**: Show visual progress when assets are being processed in the background (ZIP extraction after upload, or cloning from shared links).
-
-**Current Problems**:
-- **Upload + Extract**: User uploads ZIP → files appear one-by-one as extracted (confusing)
-- **Save to Library**: User clicks save → redirected to library, files appear gradually
-- No indication that background processing is happening
-- Assets are partially clickable/visible during processing
-
-**Solution**: Unified placeholder system that shows processing state with progress
-
-**Applies To**:
-1. **ZIP Extraction** - After uploading a ZIP file, show placeholder while extracting
-2. **Save to Library** - After saving shared asset, show placeholder while cloning
-
-**UI/UX Flow**:
-1. User triggers action (upload ZIP or save to library)
-2. Placeholder asset immediately appears in library (faded, with spinner)
-3. Progress indicator shows: `Extracting... 3/12` or `Saving... 45%`
-4. User can navigate freely while processing continues in background
-5. When complete: asset becomes solid/clickable (normal appearance)
-
-**Implementation**:
-
-**Database**:
-- [ ] Add `processing_status` field to Asset model
-  - Values: `nil` (normal), `extracting`, `importing`
-- [ ] Add `processing_progress` field to Asset (integer 0-100)
-- [ ] Add `processing_total` field to Asset (total files to process)
-
-**Backend**:
-- [ ] Update `AssetExtractionJob` to:
-  - Set `processing_status: 'extracting'` before starting
-  - Update `processing_progress` as each file is extracted
-  - Set `processing_status: nil` when complete
-- [ ] Update `SaveToLibraryJob` to:
-  - Create placeholder asset with `processing_status: 'importing'`
-  - Update `processing_progress` as each child is cloned
-  - Set `processing_status: nil` when complete
-- [ ] Update `share_links_controller#save_to_library` to create placeholder first
-- [ ] Add `assets#processing_status` endpoint for polling
-
-**Frontend**:
-- [ ] Create `processing_status_controller.js` (Stimulus)
-  - Attached to asset cards with `processing_status` present
-  - Polls `/items/:id/processing_status` every 2 seconds
-  - Updates progress overlay on asset card
-  - Removes overlay and enables card when complete (or Turbo refresh)
-- [ ] Add CSS for processing state:
-  - Faded/grayed out card
-  - Unclickable (pointer-events: none or disabled link)
-  - Spinner overlay with progress text
-- [ ] Update `library/index.html.erb` to render processing state
-- [ ] Update `assets/show.html.erb` to handle processing children
-
-**Asset Card States**:
-```
-Processing:                         Complete:
-┌──────────────┐                   ┌──────────────┐
-│   ◐ 45%     │  ← faded,         │              │  ← solid,
-│   📁        │    unclickable    │   📁        │    clickable
-│  My Folder   │                   │  My Folder   │
-│ Extracting..│                   │              │
-└──────────────┘                   └──────────────┘
-```
-
-**Status Text**:
-- Extracting: `Extracting... 3/12 files`
-- Importing: `Saving... 45%`
-
----
-
-### Bottom Bar Layout (Final Vision)
+### Bottom Bar Layout (Current)
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -514,6 +500,6 @@ Processing:                         Complete:
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Left**: Download progress/ready status
+- **Left**: Download progress/ready status (turbo-permanent)
 - **Center**: Audio player (existing, turbo-permanent)
-- **Right**: Upload progress (existing functionality, could be enhanced)
+- **Right**: Upload progress (existing functionality)
