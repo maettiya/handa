@@ -57,10 +57,11 @@
       <div class="share-breadcrumbs">
         <%= link_to @asset.title, share_link_path(@share_link.token), class: "share-breadcrumb #{'share-breadcrumb-current' unless @current_folder}" %>
         <% if @current_folder %>
-          <%# Build breadcrumb path from current folder back to root %>
+          <%# Build breadcrumb path from current folder back to root, skipping the auto-skipped root folder %>
           <% breadcrumb_path = [] %>
           <% folder = @current_folder %>
-          <% while folder && folder.id != @asset.id %>
+          <% stop_ids = [@asset.id, @skipped_root_folder&.id].compact %>
+          <% while folder && !stop_ids.include?(folder.id) %>
             <% breadcrumb_path.unshift(folder) %>
             <% folder = folder.parent %>
           <% end %>

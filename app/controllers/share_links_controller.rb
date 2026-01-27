@@ -31,14 +31,29 @@ class ShareLinksController < ApplicationController
 
     # Load children for preview (if not password protected or already authenticated)
     unless @require_password
+      # Check if we should auto-skip a single root folder
+      # (e.g., "SERENADE Project.zip" containing only "SERENADE Project/" folder)
+      root_files = @asset.children.visible.order(is_directory: :desc, title: :asc)
+      if root_files.count == 1 && root_files.first.is_directory?
+        @skipped_root_folder = root_files.first
+      else
+        @skipped_root_folder = nil
+      end
+
       if params[:folder_id].present?
         # Navigate into a subfolder
         @current_folder = find_child_folder(params[:folder_id])
         @files = @current_folder&.children&.visible&.order(is_directory: :desc, title: :asc) || []
       elsif @asset.is_directory? || @asset.children.any?
         # Root of shared folder/project
-        @current_folder = nil
-        @files = @asset.children.visible.order(is_directory: :desc, title: :asc)
+        if @skipped_root_folder
+          # Skip into the single root folder automatically
+          @current_folder = nil
+          @files = @skipped_root_folder.children.visible.order(is_directory: :desc, title: :asc)
+        else
+          @current_folder = nil
+          @files = root_files
+        end
       else
         # Single file share
         @files = []
