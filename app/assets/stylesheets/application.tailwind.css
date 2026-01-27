@@ -3354,12 +3354,12 @@ body {
   }
 
   .nav-tabs {
-    gap: 16px;
+    gap: 12px;
   }
 
   .nav-tab {
-    font-size: 12px;
-    letter-spacing: 1px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
   }
 
   .user-actions {
@@ -3559,8 +3559,8 @@ body {
     margin: 40px auto 0 auto;
   }
 
-  /* ----- DROPDOWN MENUS ----- */
-  .menu-dropdown {
+  /* ----- CARD MENU (three-dot) - Bottom sheet on mobile ----- */
+  .card-menu .menu-dropdown {
     min-width: 140px;
     position: fixed;
     top: auto;
@@ -3576,7 +3576,7 @@ body {
   }
 
   /* Pull indicator for bottom sheet */
-  .menu-dropdown::after {
+  .card-menu .menu-dropdown::after {
     content: "";
     position: sticky;
     top: 0;
@@ -3590,20 +3590,20 @@ body {
     margin: 8px auto 4px;
   }
 
-  /* Touch-friendly tap targets */
-  .menu-item,
-  .menu-item-parent {
+  /* Touch-friendly tap targets for card menu */
+  .card-menu .menu-item,
+  .card-menu .menu-item-parent {
     padding: 14px 20px;
     min-height: 48px;
     font-size: 15px;
   }
 
-  .menu-divider {
+  .card-menu .menu-divider {
     margin: 8px 16px;
   }
 
   /* ----- SUBMENUS (stacked below parent on mobile) ----- */
-  .submenu {
+  .card-menu .submenu {
     position: static;
     display: none;
     margin: 0;
@@ -3611,19 +3611,19 @@ body {
     width: 100%;
   }
 
-  .menu-item-with-submenu:hover .submenu {
+  .card-menu .menu-item-with-submenu:hover .submenu {
     display: none; /* Disable hover on mobile */
   }
 
-  .menu-item-with-submenu.submenu-open .submenu {
+  .card-menu .menu-item-with-submenu.submenu-open .submenu {
     display: block; /* Use JS toggle instead */
   }
 
-  .submenu::before {
+  .card-menu .submenu::before {
     display: none;
   }
 
-  .submenu-inner {
+  .card-menu .submenu-inner {
     border: none;
     border-radius: 0;
     box-shadow: none;
@@ -3672,8 +3672,8 @@ body {
     font-size: 12px;
   }
 
-  /* Menu item with arrow indicator */
-  .menu-item-parent::after {
+  /* Menu item with arrow indicator (card menu only) */
+  .card-menu .menu-item-parent::after {
     content: "";
     width: 8px;
     height: 8px;
@@ -3683,12 +3683,12 @@ body {
     transition: transform 0.2s ease;
   }
 
-  .menu-item-with-submenu.submenu-open .menu-item-parent::after {
+  .card-menu .menu-item-with-submenu.submenu-open .menu-item-parent::after {
     transform: rotate(-135deg);
   }
 
-  /* Hide the SVG arrow on mobile, use CSS arrow */
-  .menu-item-parent svg {
+  /* Hide the SVG arrow on mobile, use CSS arrow (card menu only) */
+  .card-menu .menu-item-parent svg {
     display: none;
   }
 
@@ -3780,5 +3780,14 @@ body {
 
   .nav-title {
     display: none;
+  }
+
+  .nav-tabs {
+    gap: 8px;
+  }
+
+  .nav-tab {
+    font-size: 10px;
+    letter-spacing: 0;
   }
 }

@@ -55,11 +55,12 @@
           <div class="nav-tabs">
             <%= link_to "LIBRARY", root_path, class: "nav-tab #{'active' if controller_name == 'library'}" %>
             <% if controller_name == 'search' %>
-              <%= link_to "SEARCH FILES", search_path, class: "nav-tab active" %>
+              <%= link_to "SEARCH", search_path, class: "nav-tab active" %>
             <% elsif controller_name == 'profile' %>
               <%= link_to "PROFILE", profile_path, class: "nav-tab active" %>
+            <% else %>
+              <%= link_to "SHARE", quick_shares_path, class: "nav-tab #{'active' if controller_name == 'quick_shares'}" %>
             <% end %>
-            <%= link_to "SHARE", quick_shares_path, class: "nav-tab #{'active' if controller_name == 'quick_shares'}" %>
           </div>
         <% else %>
           <h1 class="nav-title"><%= yield :page_title %></h1>

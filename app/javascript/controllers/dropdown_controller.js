@@ -80,8 +80,9 @@ export default class extends Controller {
     const isOpening = !this.menuTarget.classList.contains("open")
     this.menuTarget.classList.toggle("open")
 
-    // Show/hide backdrop on mobile
-    if (this.isMobile) {
+    // Show/hide backdrop on mobile - only for card menus (three-dot menus)
+    const isCardMenu = this.element.classList.contains("card-menu")
+    if (this.isMobile && isCardMenu) {
       if (isOpening) {
         this.showBackdrop()
       } else {
