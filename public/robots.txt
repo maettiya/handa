@@ -1,1 +1,19 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+# Handa - Music collaboration platform
+# https://handa.app
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://handa.app/sitemap.xml
+
+# Block authenticated/private areas from indexing
+Disallow: /library/
+Disallow: /items/
+Disallow: /profile
+Disallow: /collaborators
+Disallow: /notifications
+Disallow: /downloads
+Disallow: /search
+Disallow: /share
+Disallow: /users/
