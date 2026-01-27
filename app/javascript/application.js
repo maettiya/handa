@@ -1,10 +1,14 @@
 // Entry point for the build script in your package.json
 import "@hotwired/turbo-rails"
+import * as Turbo from "@hotwired/turbo"
 import * as ActiveStorage from "@rails/activestorage"
 import "./controllers"
 import "./upload"
 
 ActiveStorage.start()
+
+// Only show progress bar for slow requests (> 800ms)
+Turbo.setProgressBarDelay(800)
 
 // Auto-submit avatar form when file is selected
 document.addEventListener("turbo:load", () => {
