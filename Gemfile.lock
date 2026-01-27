@@ -121,6 +121,7 @@ GEM
     cgi (0.5.1)
     concurrent-ruby (1.3.5)
     connection_pool (3.0.2)
+    content_disposition (1.0.0)
     crass (1.0.6)
     cssbundling-rails (1.4.3)
       railties (>= 6.0.0)
@@ -305,6 +306,11 @@ GEM
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.7.3)
+    zip_kit (6.3.4)
+    zipline (2.2.0)
+      actionpack (>= 6.0, < 8.2)
+      content_disposition (~> 1.0)
+      zip_kit (~> 6, >= 6.2.0, < 7)
 
 PLATFORMS
   aarch64-linux
@@ -337,6 +343,7 @@ DEPENDENCIES
   turbo-rails
   tzinfo-data
   web-console
+  zipline
 
 RUBY VERSION
    ruby 3.3.5p100

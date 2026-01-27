@@ -13,6 +13,9 @@ gem "devise"
 # RubyZIP for zipping/unzipping files
 gem "rubyzip"
 
+# Zipline for streaming ZIP downloads
+gem "zipline"
+
 # Use Cloudfare R2 for storage
 gem "aws-sdk-s3", require: false
 
