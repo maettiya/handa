@@ -67,9 +67,7 @@ export default class extends Controller {
               data-action="click->direct-share#share"
               data-recipient-id="${recipient.id}"
               data-recipient-name="${recipient.username}">
-        <div class="access-mini-avatar" style="background: ${this.avatarColor(recipient.username)};">
-          ${recipient.username[0].toUpperCase()}
-        </div>
+        ${this.avatarHtml(recipient)}
         <span>${recipient.username}</span>
         <svg class="share-check hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3">
           <polyline points="20 6 9 17 4 12"></polyline>
@@ -78,6 +76,13 @@ export default class extends Controller {
     `).join('')
 
     this.listTarget.innerHTML = html
+  }
+
+  avatarHtml(recipient) {
+    if (recipient.avatar_url) {
+      return `<img src="${recipient.avatar_url}" class="access-mini-avatar" alt="${recipient.username}" />`
+    }
+    return `<div class="access-mini-avatar" style="background: ${this.avatarColor(recipient.username)};">${recipient.username[0].toUpperCase()}</div>`
   }
 
   avatarColor(name) {
