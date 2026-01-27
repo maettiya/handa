@@ -1,16 +1,13 @@
 <div class="share-page">
-  <div class="share-card">
-    <div class="share-icon">
-      <%= image_tag asset_icon_for(@asset), class: "icon-image" %>
-    </div>
+  <% if @require_password %>
+    <%# Password protected - show unlock form %>
+    <div class="share-card">
+      <div class="share-icon">
+        <%= image_tag asset_icon_for(@asset), class: "icon-image" %>
+      </div>
 
-    <h1 class="share-title"><%= @asset.title %></h1>
+      <h1 class="share-title"><%= @asset.title %></h1>
 
-    <% if @asset.file.attached? %>
-      <p class="share-meta"><%= number_to_human_size(@asset.file.byte_size) %></p>
-    <% end %>
-
-    <% if @require_password %>
       <div class="share-password-form">
         <p class="share-password-label">This file is password protected</p>
 
@@ -23,17 +20,130 @@
           <%= f.submit "Unlock", class: "share-download-btn" %>
         <% end %>
       </div>
-    <% else %>
-      <% if @asset.is_directory? || @asset.children.any? %>
-        <%# Folder download - use background job (works for all users) %>
-        <button class="share-download-btn"
-                onclick="document.dispatchEvent(new CustomEvent('handa:start-share-download', { detail: { token: '<%= @share_link.token %>', filename: '<%= j(@asset.title) %>' } }))">
-          Download
-        </button>
-      <% else %>
-        <%# Single file - direct download %>
-        <%= link_to "Download", share_link_download_path(@share_link.token), class: "share-download-btn" %>
+
+      <p class="share-footer">
+        Shared by @<%= @asset.user.username %> via Handa
+      </p>
+    </div>
+
+  <% elsif @files.any? || @asset.is_directory? || @asset.children.any? %>
+    <%# Folder/project share - show browsable file grid %>
+    <div class="share-preview">
+      <%# Header with title and actions %>
+      <div class="share-preview-header">
+        <div class="share-preview-info">
+          <div class="share-preview-icon">
+            <%= image_tag asset_icon_for(@asset), class: "icon-image" %>
+          </div>
+          <div class="share-preview-title-wrap">
+            <h1 class="share-preview-title"><%= @asset.title %></h1>
+            <p class="share-preview-meta">Shared by @<%= @asset.user.username %></p>
+          </div>
+        </div>
+        <div class="share-preview-actions">
+          <button class="share-download-btn"
+                  onclick="document.dispatchEvent(new CustomEvent('handa:start-share-download', { detail: { token: '<%= @share_link.token %>', filename: '<%= j(@asset.title) %>' } }))">
+            Download All
+          </button>
+          <% if user_signed_in? %>
+            <%= button_to "Save to Library", share_link_save_path(@share_link.token), method: :post, class: "share-save-btn" %>
+          <% else %>
+            <%= link_to "Sign in to Save", new_user_session_path, class: "share-save-btn share-save-btn-secondary" %>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Breadcrumb navigation %>
+      <div class="share-breadcrumbs">
+        <%= link_to @asset.title, share_link_path(@share_link.token), class: "share-breadcrumb #{'share-breadcrumb-current' unless @current_folder}" %>
+        <% if @current_folder %>
+          <%# Build breadcrumb path from current folder back to root %>
+          <% breadcrumb_path = [] %>
+          <% folder = @current_folder %>
+          <% while folder && folder.id != @asset.id %>
+            <% breadcrumb_path.unshift(folder) %>
+            <% folder = folder.parent %>
+          <% end %>
+          <% breadcrumb_path.each_with_index do |crumb, index| %>
+            <span class="share-breadcrumb-separator">/</span>
+            <% if index == breadcrumb_path.length - 1 %>
+              <span class="share-breadcrumb share-breadcrumb-current"><%= crumb.title %></span>
+            <% else %>
+              <%= link_to crumb.title, share_link_path(@share_link.token, folder_id: crumb.id), class: "share-breadcrumb" %>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <%# File grid %>
+      <div class="share-files-grid">
+        <% @files.each do |file| %>
+          <% if file.is_directory? %>
+            <%# Folder - click to navigate %>
+            <%= link_to share_link_path(@share_link.token, folder_id: file.id), class: "share-file-card" do %>
+              <div class="share-file-icon">
+                <%= image_tag asset_icon_for(file), class: "icon-image" %>
+              </div>
+              <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
+            <% end %>
+          <% elsif file.file.attached? && %w[wav mp3 aif aiff flac m4a].include?(file.extension) %>
+            <%# Audio file - clickable to play %>
+            <div class="share-file-card share-file-audio"
+                 data-audio-url="<%= url_for(file.file) %>"
+                 data-audio-title="<%= file.original_filename || file.title %>">
+              <div class="share-file-icon">
+                <%= image_tag asset_icon_for(file), class: "icon-image" %>
+              </div>
+              <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
+              <div class="share-file-play-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            </div>
+          <% else %>
+            <%# Other file - display only %>
+            <div class="share-file-card">
+              <div class="share-file-icon">
+                <%= image_tag asset_icon_for(file), class: "icon-image" %>
+              </div>
+              <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @files.empty? %>
+        <p class="share-empty">This folder is empty</p>
       <% end %>
+    </div>
+
+  <% else %>
+    <%# Single file share - show card with play button for audio %>
+    <div class="share-card">
+      <div class="share-icon">
+        <%= image_tag asset_icon_for(@asset), class: "icon-image" %>
+      </div>
+
+      <h1 class="share-title"><%= @asset.title %></h1>
+
+      <% if @asset.file.attached? %>
+        <p class="share-meta"><%= number_to_human_size(@asset.file.byte_size) %></p>
+
+        <% if %w[wav mp3 aif aiff flac m4a].include?(@asset.extension) %>
+          <%# Audio file - show play button %>
+          <button class="share-play-btn"
+                  data-audio-url="<%= url_for(@asset.file) %>"
+                  data-audio-title="<%= @asset.title %>">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            Play
+          </button>
+        <% end %>
+      <% end %>
+
+      <%= link_to "Download", share_link_download_path(@share_link.token), class: "share-download-btn" %>
 
       <% if user_signed_in? %>
         <%= button_to "Save to Library", share_link_save_path(@share_link.token), method: :post, class: "share-save-btn" %>
@@ -42,10 +152,10 @@
           <%= link_to "Sign in", new_user_session_path %> to save to your library
         </p>
       <% end %>
-    <% end %>
 
-    <p class="share-footer">
-      Shared by @<%= @asset.user.username %> via Handa
-    </p>
-  </div>
+      <p class="share-footer">
+        Shared by @<%= @asset.user.username %> via Handa
+      </p>
+    </div>
+  <% end %>
 </div>

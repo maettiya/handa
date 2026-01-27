@@ -28,6 +28,22 @@ class ShareLinksController < ApplicationController
 
     @asset = @share_link.asset
     @require_password = @share_link.password_required? && !session_authenticated?
+
+    # Load children for preview (if not password protected or already authenticated)
+    unless @require_password
+      if params[:folder_id].present?
+        # Navigate into a subfolder
+        @current_folder = find_child_folder(params[:folder_id])
+        @files = @current_folder&.children&.visible&.order(is_directory: :desc, title: :asc) || []
+      elsif @asset.is_directory? || @asset.children.any?
+        # Root of shared folder/project
+        @current_folder = nil
+        @files = @asset.children.visible.order(is_directory: :desc, title: :asc)
+      else
+        # Single file share
+        @files = []
+      end
+    end
   end
 
   # POST /s/:token/verify_password
@@ -155,6 +171,22 @@ class ShareLinksController < ApplicationController
 
   def session_authenticated?
     session["share_link_#{@share_link.token}"] == true
+  end
+
+  # Find a folder within the shared asset's tree (security: only allows access to descendants)
+  def find_child_folder(folder_id)
+    # Find the folder and verify it's a descendant of the shared asset
+    folder = Asset.find_by(id: folder_id)
+    return nil unless folder
+
+    # Walk up the tree to verify this folder belongs to the shared asset
+    current = folder
+    while current
+      return folder if current.id == @asset.id
+      current = current.parent
+    end
+
+    nil # Folder is not within the shared asset
   end
 
   # Notify asset owner of a download (for single file direct downloads)
