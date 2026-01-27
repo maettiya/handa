@@ -1,5 +1,6 @@
 class ShareLink < ApplicationRecord
   belongs_to :asset
+  has_many :downloads, dependent: :destroy
 
   has_secure_password validations: false
 

@@ -13,6 +13,7 @@ class Asset < ApplicationRecord
 
   # Sharing
   has_many :share_links, dependent: :destroy
+  has_many :downloads, dependent: :destroy
 
   # File attachment
   has_one_attached :file
