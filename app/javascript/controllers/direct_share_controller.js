@@ -25,6 +25,9 @@ export default class extends Controller {
 
   // Load frequent recipients when submenu opens
   async loadRecipients() {
+    // Always reset search state when menu opens
+    this.resetSearch()
+
     if (this.loadedValue) return
 
     this.showLoading()
@@ -108,6 +111,18 @@ export default class extends Controller {
     )
 
     this.renderRecipients(filtered, true)
+  }
+
+  resetSearch() {
+    // Clear search input
+    if (this.hasSearchInputTarget) {
+      this.searchInputTarget.value = ''
+    }
+
+    // Re-render full list if already loaded
+    if (this.allRecipients) {
+      this.renderRecipients(this.allRecipients, true)
+    }
   }
 
   avatarHtml(recipient) {

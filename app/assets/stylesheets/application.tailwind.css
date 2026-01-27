@@ -953,6 +953,7 @@ body {
 
 /* Share with submenu - scrollable list */
 .share-with-submenu {
+  min-width: 200px;
   max-height: 320px;
   overflow: hidden;
   display: flex;
