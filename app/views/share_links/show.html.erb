@@ -93,15 +93,15 @@
               <div class="share-file-card share-file-audio"
                    data-audio-url="<%= url_for(file.file) %>"
                    data-audio-title="<%= file.original_filename || file.title %>">
-                <div class="share-file-icon">
+                <div class="share-file-icon project-icon-playable">
                   <%= image_tag asset_icon_for(file), class: "icon-image" %>
+                  <div class="project-icon-play-overlay">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
                 </div>
                 <p class="share-file-name" title="<%= file.original_filename || file.title %>"><%= truncate(file.original_filename || file.title, length: 24) %></p>
-                <div class="share-file-play-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                </div>
               </div>
             <% else %>
               <%# Other file - display with icon %>

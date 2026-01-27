@@ -646,6 +646,30 @@ body {
   object-fit: contain;
 }
 
+/* Playable audio icon overlay */
+.project-icon-playable {
+  position: relative;
+  cursor: pointer;
+}
+
+.project-icon-play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0.9;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.project-icon-playable:hover .project-icon-play-overlay {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
 /* ===================
    BREADCRUMB NAVIGATION (File-path style)
    =================== */
