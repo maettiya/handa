@@ -84,6 +84,7 @@ Rails.application.routes.draw do
     end
     collection do
       get :active
+      get :stream
     end
   end
 
