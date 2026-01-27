@@ -2408,6 +2408,11 @@ body {
   width: 100%;
 }
 
+.share-card-single {
+  background: transparent;
+  border: none;
+}
+
 .share-icon {
   margin-bottom: 20px;
   display: flex;
@@ -2417,6 +2422,41 @@ body {
 .share-icon .icon-image {
   width: 80px;
   height: 80px;
+}
+
+.share-icon-playable {
+  position: relative;
+  cursor: pointer;
+}
+
+.share-icon-play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0.9;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.share-icon-playable:hover .share-icon-play-overlay {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.share-single-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.share-single-actions .share-download-btn,
+.share-single-actions .share-save-btn {
+  flex: 1;
+  margin: 0;
 }
 
 .share-expired-icon {

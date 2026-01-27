@@ -145,39 +145,41 @@
     </div>
 
   <% else %>
-    <%# Single file share - show card with play button for audio %>
-    <div class="share-card">
-      <div class="share-icon">
-        <%= image_tag asset_icon_for(@asset), class: "icon-image" %>
-      </div>
+    <%# Single file share - floating card style %>
+    <div class="share-card share-card-single">
+      <% if @asset.file.attached? && %w[wav mp3 aif aiff flac m4a].include?(@asset.extension) %>
+        <%# Audio file - icon with play overlay %>
+        <div class="share-icon share-icon-playable"
+             data-audio-url="<%= url_for(@asset.file) %>"
+             data-audio-title="<%= @asset.title %>">
+          <%= image_tag asset_icon_for(@asset), class: "icon-image" %>
+          <div class="share-icon-play-overlay">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </div>
+        </div>
+      <% else %>
+        <div class="share-icon">
+          <%= image_tag asset_icon_for(@asset), class: "icon-image" %>
+        </div>
+      <% end %>
 
       <h1 class="share-title"><%= @asset.title %></h1>
 
       <% if @asset.file.attached? %>
         <p class="share-meta"><%= number_to_human_size(@asset.file.byte_size) %></p>
+      <% end %>
 
-        <% if %w[wav mp3 aif aiff flac m4a].include?(@asset.extension) %>
-          <%# Audio file - show play button %>
-          <button class="share-play-btn"
-                  data-audio-url="<%= url_for(@asset.file) %>"
-                  data-audio-title="<%= @asset.title %>">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-            Play
-          </button>
+      <div class="share-single-actions">
+        <%= link_to "Download", share_link_download_path(@share_link.token), class: "share-download-btn" %>
+
+        <% if user_signed_in? %>
+          <%= button_to "Save to Library", share_link_save_path(@share_link.token), method: :post, class: "share-save-btn" %>
+        <% else %>
+          <%= link_to "Sign in to Save", new_user_session_path, class: "share-save-btn share-save-btn-secondary" %>
         <% end %>
-      <% end %>
-
-      <%= link_to "Download", share_link_download_path(@share_link.token), class: "share-download-btn" %>
-
-      <% if user_signed_in? %>
-        <%= button_to "Save to Library", share_link_save_path(@share_link.token), method: :post, class: "share-save-btn" %>
-      <% else %>
-        <p class="share-save-prompt">
-          <%= link_to "Sign in", new_user_session_path %> to save to your library
-        </p>
-      <% end %>
+      </div>
 
       <p class="share-footer">
         Shared by @<%= @asset.user.username %> via Handa
