@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["menu", "list", "loading", "empty"]
+  static targets = ["menu", "list", "loading", "empty", "searchContainer", "searchInput"]
   static values = {
     assetId: Number,
     loaded: { type: Boolean, default: false }
@@ -52,11 +52,26 @@ export default class extends Controller {
     if (this.hasEmptyTarget) this.emptyTarget.classList.remove('hidden')
   }
 
-  renderRecipients(recipients) {
+  renderRecipients(recipients, isFiltered = false) {
     if (this.hasLoadingTarget) this.loadingTarget.classList.add('hidden')
 
+    // Store full list on initial load
+    if (!isFiltered) {
+      this.allRecipients = recipients
+      // Show search if there are 3+ collaborators
+      if (this.hasSearchContainerTarget && recipients.length >= 3) {
+        this.searchContainerTarget.classList.remove('hidden')
+      }
+    }
+
     if (recipients.length === 0) {
-      this.showEmpty()
+      if (isFiltered) {
+        // Show "no matches" when filtering
+        this.listTarget.innerHTML = '<div class="access-submenu-empty">No matches</div>'
+        if (this.hasEmptyTarget) this.emptyTarget.classList.add('hidden')
+      } else {
+        this.showEmpty()
+      }
       return
     }
 
@@ -76,6 +91,23 @@ export default class extends Controller {
     `).join('')
 
     this.listTarget.innerHTML = html
+  }
+
+  filterRecipients() {
+    if (!this.allRecipients) return
+
+    const query = this.searchInputTarget.value.toLowerCase().trim()
+
+    if (query === '') {
+      this.renderRecipients(this.allRecipients, true)
+      return
+    }
+
+    const filtered = this.allRecipients.filter(recipient =>
+      recipient.username.toLowerCase().includes(query)
+    )
+
+    this.renderRecipients(filtered, true)
   }
 
   avatarHtml(recipient) {

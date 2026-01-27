@@ -953,10 +953,35 @@ body {
 
 /* Share with submenu - scrollable list */
 .share-with-submenu {
-  max-height: 280px;
+  max-height: 320px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.share-with-search {
+  padding: 8px;
+  border-bottom: 1px solid #3a3a3a;
+  flex-shrink: 0;
+}
+
+.share-with-search-input {
+  width: 100%;
+  padding: 6px 10px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+}
+
+.share-with-search-input:focus {
+  border-color: #555;
+}
+
+.share-with-search-input::placeholder {
+  color: #666;
 }
 
 .share-with-list {

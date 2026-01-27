@@ -8,6 +8,15 @@
   </button>
   <div class="submenu" data-direct-share-target="menu">
     <div class="submenu-inner access-submenu share-with-submenu">
+      <%# Search input %>
+      <div class="share-with-search hidden" data-direct-share-target="searchContainer">
+        <input type="text"
+               placeholder="Search collaborators..."
+               class="share-with-search-input"
+               data-direct-share-target="searchInput"
+               data-action="input->direct-share#filterRecipients">
+      </div>
+
       <%# Loading state %>
       <div class="access-submenu-loading" data-direct-share-target="loading">
         <span>Loading...</span>
