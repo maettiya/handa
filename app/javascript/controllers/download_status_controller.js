@@ -26,41 +26,18 @@ export default class extends Controller {
 
   // Handle custom event from download buttons (library assets)
   handleStartDownload(event) {
-    const { assetId, filename } = event.detail
-    this.initiateDownload({ asset_id: assetId }, filename)
+    const { assetId } = event.detail
+    // Use streaming download - redirect directly to stream endpoint
+    window.location.href = `/downloads/stream?asset_id=${assetId}`
   }
 
   // Handle custom event from share link download buttons
   handleStartShareDownload(event) {
-    const { token, fileId, filename } = event.detail
-    const params = { share_link_token: token }
-    if (fileId) params.file_id = fileId
-    this.initiateDownload(params, filename)
-  }
-
-  // Called when user clicks "Download" on a folder (via custom event)
-  async initiateDownload(params, filename) {
-    try {
-      const response = await fetch('/downloads', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': this.csrfToken
-        },
-        body: JSON.stringify(params)
-      })
-
-      if (!response.ok) throw new Error('Failed to start download')
-
-      const data = await response.json()
-      this.downloadIdValue = data.id
-
-      this.showStatus('processing', filename, 0, 0)
-      this.startPolling()
-    } catch (error) {
-      console.error('Download error:', error)
-      alert('Failed to start download. Please try again.')
-    }
+    const { token, fileId } = event.detail
+    // Use streaming download - redirect directly to stream endpoint
+    let url = `/downloads/stream?share_link_token=${token}`
+    if (fileId) url += `&file_id=${fileId}`
+    window.location.href = url
   }
 
   async checkActiveDownloads() {
