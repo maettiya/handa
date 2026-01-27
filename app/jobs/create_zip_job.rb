@@ -8,6 +8,48 @@ class CreateZipJob < ApplicationJob
     # Mark as processing
     download.update!(status: 'processing')
 
+    begin
+      # Check if this is a single file (not a directory and no children)
+      if single_file?(asset)
+        handle_single_file(asset, download)
+      else
+        handle_folder_or_multiple(asset, download)
+      end
+
+      download.update!(status: 'ready')
+
+      # Notify share link owner if this was a share link download
+      notify_share_link_owner(download)
+    rescue => e
+      download.update!(status: 'failed', error_message: e.message)
+      Rails.logger.error "CreateZipJob failed: #{e.message}\n#{e.backtrace.join("\n")}"
+    end
+  end
+
+  private
+
+  def single_file?(asset)
+    !asset.is_directory? && asset.children.empty? && asset.file.attached?
+  end
+
+  def handle_single_file(asset, download)
+    download.update!(total: 1, progress: 0)
+
+    # Get the original filename with extension
+    filename = asset.original_filename || asset.file.filename.to_s
+
+    # Download and re-attach the file directly (no ZIP)
+    file_content = asset.file.download
+    download.zip_file.attach(
+      io: StringIO.new(file_content),
+      filename: filename,
+      content_type: asset.file.content_type
+    )
+
+    download.update!(progress: 1)
+  end
+
+  def handle_folder_or_multiple(asset, download)
     # Count all files we need to zip
     file_count = count_files(asset)
     download.update!(total: file_count, progress: 0)
@@ -24,21 +66,11 @@ class CreateZipJob < ApplicationJob
         filename: "#{download.filename}.zip",
         content_type: 'application/zip'
       )
-
-      download.update!(status: 'ready')
-
-      # Notify share link owner if this was a share link download
-      notify_share_link_owner(download)
-    rescue => e
-      download.update!(status: 'failed', error_message: e.message)
-      Rails.logger.error "CreateZipJob failed: #{e.message}\n#{e.backtrace.join("\n")}"
     ensure
       temp_file.close
       temp_file.unlink
     end
   end
-
-  private
 
   def count_files(asset)
     return 1 unless asset.is_directory?

@@ -175,7 +175,10 @@
                       </div>
 
                       <% if file.file.attached? %>
-                        <%= link_to "Download", download_file_asset_path(file.root_asset, file_id: file.id), class: "menu-item" %>
+                        <button class="menu-item"
+                                onclick="document.dispatchEvent(new CustomEvent('handa:start-download', { detail: { assetId: <%= file.id %>, filename: '<%= j(file.original_filename) %>' } }))">
+                          Download
+                        </button>
                       <% end %>
 
                       <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= file.root_asset.id %>" data-file-id="<%= file.id %>" data-asset-title="<%= file.original_filename %>">
@@ -272,7 +275,10 @@
                         </div>
                       </div>
 
-                      <%= link_to "Download", download_asset_path(asset), class: "menu-item" %>
+                      <button class="menu-item"
+                              onclick="document.dispatchEvent(new CustomEvent('handa:start-download', { detail: { assetId: <%= asset.id %>, filename: '<%= j(asset.title) %>' } }))">
+                        Download
+                      </button>
 
                       <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= asset.id %>" data-asset-title="<%= asset.title %>">
                         Rename
@@ -349,10 +355,11 @@
                         </div>
                       </div>
 
-                      <% if file.is_directory %>
-                        <%= link_to "Download", download_folder_asset_path(file.root_asset, folder_id: file.id), class: "menu-item" %>
-                      <% elsif file.file.attached? %>
-                        <%= link_to "Download", download_file_asset_path(file.root_asset, file_id: file.id), class: "menu-item" %>
+                      <% if file.is_directory || file.file.attached? %>
+                        <button class="menu-item"
+                                onclick="document.dispatchEvent(new CustomEvent('handa:start-download', { detail: { assetId: <%= file.id %>, filename: '<%= j(file.original_filename) %>' } }))">
+                          Download
+                        </button>
                       <% end %>
 
                       <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= file.root_asset.id %>" data-file-id="<%= file.id %>" data-asset-title="<%= file.original_filename %>">

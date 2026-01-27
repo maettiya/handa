@@ -124,14 +124,10 @@
                   </svg>
                 </button>
                 <div class="menu-dropdown" data-dropdown-target="menu">
-                  <% if file.is_directory? || file.children.any? %>
-                    <button class="menu-item"
-                            onclick="document.dispatchEvent(new CustomEvent('handa:start-share-download', { detail: { token: '<%= @share_link.token %>', fileId: '<%= file.id %>', filename: '<%= j(file.original_filename || file.title) %>' } }))">
-                      Download
-                    </button>
-                  <% elsif file.file.attached? %>
-                    <%= link_to "Download", share_link_download_file_path(@share_link.token, file.id), class: "menu-item" %>
-                  <% end %>
+                  <button class="menu-item"
+                          onclick="document.dispatchEvent(new CustomEvent('handa:start-share-download', { detail: { token: '<%= @share_link.token %>', fileId: '<%= file.id %>', filename: '<%= j(file.original_filename || file.title) %>' } }))">
+                    Download
+                  </button>
                 </div>
               </div>
             <% end %>
@@ -172,7 +168,10 @@
       <% end %>
 
       <div class="share-single-actions">
-        <%= link_to "Download", share_link_download_path(@share_link.token), class: "share-download-btn" %>
+        <button class="share-download-btn"
+                onclick="document.dispatchEvent(new CustomEvent('handa:start-share-download', { detail: { token: '<%= @share_link.token %>', filename: '<%= j(@asset.title) %>' } }))">
+          Download
+        </button>
 
         <% if user_signed_in? %>
           <%= button_to "Save to Library", share_link_save_path(@share_link.token), method: :post, class: "share-save-btn" %>

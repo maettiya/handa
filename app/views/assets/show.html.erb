@@ -116,13 +116,11 @@
                 </div>
               </div>
 
-              <% if file.is_directory? || file.children.any? %>
+              <% if file.is_directory? || file.children.any? || file.file.attached? %>
                 <button class="menu-item"
                         onclick="document.dispatchEvent(new CustomEvent('handa:start-download', { detail: { assetId: <%= file.id %>, filename: '<%= j(file.original_filename || file.title) %>' } }))">
                   Download
                 </button>
-              <% elsif file.file.attached? %>
-                <%= link_to "Download", download_file_asset_path(@asset, file_id: file.id), class: "menu-item" %>
               <% end %>
 
               <button class="menu-item" data-action="click->rename#open" data-asset-id="<%= @asset.id %>" data-file-id="<%= file.id %>" data-asset-title="<%= file.original_filename %>">

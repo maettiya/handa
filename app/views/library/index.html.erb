@@ -157,14 +157,10 @@
                 </div>
               </div>
 
-              <% if asset.is_directory? || asset.children.any? %>
-                <button class="menu-item"
-                        onclick="document.dispatchEvent(new CustomEvent('handa:start-download', { detail: { assetId: <%= asset.id %>, filename: '<%= j(asset.title) %>' } }))">
-                  Download
-                </button>
-              <% else %>
-                <%= link_to "Download", download_asset_path(asset), class: "menu-item" %>
-              <% end %>
+              <button class="menu-item"
+                      onclick="document.dispatchEvent(new CustomEvent('handa:start-download', { detail: { assetId: <%= asset.id %>, filename: '<%= j(asset.title) %>' } }))">
+                Download
+              </button>
 
               <%= button_to "Duplicate", duplicate_asset_path(asset), method: :post, class: "menu-item", form: { data: { turbo: false } } %>
 
