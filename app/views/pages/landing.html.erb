@@ -6,65 +6,405 @@
   <%= link_to "ENTER HANDA", new_user_session_path, class: "enter-app-btn" %>
 </header>
 
-<!-- Hero Section -->
-<section class="section">
-  <h1 class="hero-heading typing-text">File sharing. Built for music.</h1>
+<!-- Hero Section: File Icons Grid -->
+<section class="section hero-section">
+  <div class="files-grid">
+    <% # Row 1 - 6 icons with staggered delays %>
+    <div class="file-card file-drop" style="--delay: 0.1s">
+      <%= image_tag "icons/ableton-folder.svg", class: "file-icon" %>
+      <span class="file-name">SERENADE Project</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 0.2s">
+      <%= image_tag "icons/audio.svg", class: "file-icon" %>
+      <span class="file-name">vocals_take3.wav</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 0.3s">
+      <%= image_tag "icons/mp3.svg", class: "file-icon" %>
+      <span class="file-name">demo_v2.mp3</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 0.4s">
+      <%= image_tag "icons/folder.svg", class: "file-icon" %>
+      <span class="file-name">Samples</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 0.5s">
+      <%= image_tag "icons/logic.svg", class: "file-icon" %>
+      <span class="file-name">Summer Beat.logicx</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 0.6s">
+      <%= image_tag "icons/audio.svg", class: "file-icon" %>
+      <span class="file-name">kick_808.wav</span>
+    </div>
+
+    <% # Row 2 - 6 icons %>
+    <div class="file-card file-drop" style="--delay: 0.7s">
+      <%= image_tag "icons/ableton-als.svg", class: "file-icon" %>
+      <span class="file-name">midnight.als</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 0.8s">
+      <%= image_tag "icons/folder.svg", class: "file-icon" %>
+      <span class="file-name">Drums</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 0.9s">
+      <%= image_tag "icons/audio.svg", class: "file-icon" %>
+      <span class="file-name">synth_lead.wav</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 1.0s">
+      <%= image_tag "icons/mp3.svg", class: "file-icon" %>
+      <span class="file-name">reference.mp3</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 1.1s">
+      <%= image_tag "icons/ableton-folder.svg", class: "file-icon" %>
+      <span class="file-name">Collab w/ Alex</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 1.2s">
+      <%= image_tag "icons/file.svg", class: "file-icon" %>
+      <span class="file-name">notes.txt</span>
+    </div>
+
+    <% # Row 3 - 6 icons %>
+    <div class="file-card file-drop" style="--delay: 1.3s">
+      <%= image_tag "icons/audio.svg", class: "file-icon" %>
+      <span class="file-name">bass_loop.wav</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 1.4s">
+      <%= image_tag "icons/logic.svg", class: "file-icon" %>
+      <span class="file-name">Remix Draft.logicx</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 1.5s">
+      <%= image_tag "icons/folder.svg", class: "file-icon" %>
+      <span class="file-name">Vocals</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 1.6s">
+      <%= image_tag "icons/mp3.svg", class: "file-icon" %>
+      <span class="file-name">final_master.mp3</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 1.7s">
+      <%= image_tag "icons/ableton-als.svg", class: "file-icon" %>
+      <span class="file-name">drop_edit.als</span>
+    </div>
+    <div class="file-card file-drop" style="--delay: 1.8s">
+      <%= image_tag "icons/audio.svg", class: "file-icon" %>
+      <span class="file-name">guitar_riff.wav</span>
+    </div>
+  </div>
+
+  <!-- Tagline -->
+  <h1 class="hero-tagline fade-in" style="--delay: 2.2s">File sharing, built for music.</h1>
+  <p class="hero-subtitle fade-in" style="--delay: 2.5s">Store, organize, and share your music projects. No more messy folders or broken links.</p>
 </section>
 
-<!-- Glitchy H Logos Row -->
-<section class="section">
-  <div class="h-logos-row">
-    <% 4.times do %>
-      <%= image_tag "landing/h-glitch.png", class: "h-logo" %>
-    <% end %>
+<!-- Audio Player Section -->
+<section class="section player-section scroll-reveal">
+  <div class="demo-player">
+    <div class="demo-player-title-row">
+      <span class="demo-player-title">SERENADE [79.92 bpm].wav</span>
+    </div>
+    <div class="demo-player-controls">
+      <span class="demo-player-time">1:24</span>
+      <div class="demo-player-waveform">
+        <div class="waveform-bars">
+          <% 60.times do |i| %>
+            <div class="waveform-bar" style="--bar-index: <%= i %>"></div>
+          <% end %>
+        </div>
+        <div class="waveform-progress"></div>
+      </div>
+      <span class="demo-player-time">3:42</span>
+      <button class="demo-player-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+        </svg>
+      </button>
+      <button class="demo-player-btn demo-player-play">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
+        </svg>
+      </button>
+      <button class="demo-player-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Listen instantly. No downloads required.</h2>
+  <p class="section-text">Preview any audio file with our built-in player. Waveform visualization, playback controls, and volume - all in your browser.</p>
+</section>
+
+<!-- Share Feature Section -->
+<section class="section feature-section scroll-reveal">
+  <div class="feature-content">
+    <div class="feature-demo share-demo">
+      <div class="share-modal-demo">
+        <div class="share-modal-header">Share Link</div>
+        <div class="share-modal-link">
+          <span class="share-link-text">handa.app/s/xK9mP2</span>
+          <button class="share-copy-btn">Copy</button>
+        </div>
+        <div class="share-modal-options">
+          <label class="share-option">
+            <span class="option-icon">🔒</span>
+            <span>Password protect</span>
+          </label>
+          <label class="share-option">
+            <span class="option-icon">⏰</span>
+            <span>Set expiry</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="feature-text">
+      <h2 class="section-heading">Share with a link. Track everything.</h2>
+      <p class="section-text">Generate shareable links instantly. Add password protection, set expiry dates, and get notified when someone downloads your files.</p>
+    </div>
   </div>
 </section>
 
-<!-- Screenshots Row 1 -->
-<section class="section">
-  <div class="screenshots-row">
-    <div class="screenshot-block">
-      <%= image_tag "landing/screenshot-project.png", class: "screenshot" %>
-      <p class="screenshot-title">View your projects like real music files.</p>
-      <p class="screenshot-subtitle">View projects as real DAW session files, listen, edit, and organise.</p>
+<!-- Notifications Section -->
+<section class="section feature-section scroll-reveal">
+  <div class="feature-content reverse">
+    <div class="feature-demo notifications-demo">
+      <div class="notification-item-demo">
+        <div class="notification-avatar">A</div>
+        <div class="notification-content-demo">
+          <span><strong>alex_producer</strong> downloaded <strong>SERENADE Project</strong></span>
+          <span class="notification-time-demo">2 minutes ago</span>
+        </div>
+      </div>
+      <div class="notification-item-demo">
+        <div class="notification-avatar">M</div>
+        <div class="notification-content-demo">
+          <span><strong>maya_beats</strong> saved <strong>vocals_take3.wav</strong> to their library</span>
+          <span class="notification-time-demo">15 minutes ago</span>
+        </div>
+      </div>
+      <div class="notification-item-demo">
+        <div class="notification-avatar">J</div>
+        <div class="notification-content-demo">
+          <span><strong>jake_music</strong> shared <strong>Collab Draft</strong> with you</span>
+          <span class="notification-time-demo">1 hour ago</span>
+        </div>
+      </div>
     </div>
-
-    <div class="screenshot-block">
-      <%= image_tag "landing/screenshot-search.png", class: "screenshot" %>
-      <p class="screenshot-title">Search built for musicians.</p>
-      <p class="screenshot-subtitle">Search with bpm, key, title, genre to easily find what you're looking for.</p>
-    </div>
-  </div>
-</section>
-
-<!-- Second Header -->
-<section class="section">
-  <%= image_tag "handa-logo.png", class: "center-logo" %>
-</section>
-
-<!-- Screenshots Row 2 -->
-<section class="section">
-  <div class="screenshots-row">
-    <div class="screenshot-block">
-      <%= image_tag "landing/screenshot-share.png", class: "screenshot" %>
-      <p class="screenshot-title">Share files effortlessly</p>
-      <p class="screenshot-subtitle">Share music files effortlessly. Drop a link to anyone to listen, download or save to their account.</p>
-    </div>
-
-    <div class="screenshot-block">
-      <%= image_tag "landing/screenshot-share-modal.png", class: "screenshot" %>
-      <p class="screenshot-title">Protected for creators.</p>
-      <p class="screenshot-subtitle">Set password security, expiry time & track everything with real-time notifications.</p>
+    <div class="feature-text">
+      <h2 class="section-heading">Stay in the loop.</h2>
+      <p class="section-text">Real-time notifications when collaborators download, save, or share files with you. Never miss a beat.</p>
     </div>
   </div>
 </section>
 
-<!-- Third Header -->
-<section class="section">
-  <h2 class="hero-heading">Built by musicians.</h2>
+<!-- Search Section -->
+<section class="section feature-section scroll-reveal">
+  <div class="feature-content">
+    <div class="feature-demo search-demo">
+      <div class="search-box-demo">
+        <div class="search-input-row">
+          <svg class="search-icon-demo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="M21 21l-4.35-4.35"></path>
+          </svg>
+          <span class="search-placeholder">Search files...</span>
+        </div>
+        <div class="search-filters-row">
+          <div class="search-filter">
+            <span class="filter-label">BPM</span>
+            <span class="filter-value">120-140</span>
+          </div>
+          <div class="search-filter">
+            <span class="filter-label">Key</span>
+            <span class="filter-value">C major</span>
+          </div>
+          <div class="search-filter active">
+            <span class="filter-label">Type</span>
+            <span class="filter-value">Audio</span>
+          </div>
+        </div>
+      </div>
+      <div class="search-results-demo">
+        <div class="search-result-item">
+          <%= image_tag "icons/audio.svg", class: "result-icon" %>
+          <div class="result-info">
+            <span class="result-name">summer_vibes_128bpm_Cmaj.wav</span>
+            <span class="result-meta">128 BPM · C major · 4.2 MB</span>
+          </div>
+        </div>
+        <div class="search-result-item">
+          <%= image_tag "icons/audio.svg", class: "result-icon" %>
+          <div class="result-info">
+            <span class="result-name">chill_beat_124_Cmin.wav</span>
+            <span class="result-meta">124 BPM · C minor · 3.8 MB</span>
+          </div>
+        </div>
+        <div class="search-result-item">
+          <%= image_tag "icons/audio.svg", class: "result-icon" %>
+          <div class="result-info">
+            <span class="result-name">melodic_loop_132bpm.wav</span>
+            <span class="result-meta">132 BPM · 2.1 MB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="feature-text">
+      <h2 class="section-heading">Find anything. Instantly.</h2>
+      <p class="section-text">Search by BPM, musical key, or file type. Handa automatically detects tempo and key from your filenames so you can find the right sample in seconds.</p>
+    </div>
+  </div>
 </section>
 
-<!-- Video Section -->
-<section class="section section-last">
-  <video src="/videos/screenrecording.mov" autoplay loop muted playsinline class="demo-video"></video>
+<!-- Project Extraction Section -->
+<section class="section feature-section scroll-reveal">
+  <div class="feature-content reverse">
+    <div class="feature-demo extraction-demo">
+      <div class="extraction-before">
+        <div class="zip-icon-wrapper">
+          <%= image_tag "icons/zip.svg", class: "zip-icon-large" %>
+          <span class="zip-name">SERENADE.zip</span>
+        </div>
+        <div class="extraction-arrow">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </div>
+      <div class="extraction-after">
+        <div class="tree-item tree-root">
+          <%= image_tag "icons/ableton-folder.svg", class: "tree-icon" %>
+          <span>SERENADE Project</span>
+        </div>
+        <div class="tree-item tree-child">
+          <%= image_tag "icons/ableton-als.svg", class: "tree-icon" %>
+          <span>SERENADE.als</span>
+        </div>
+        <div class="tree-item tree-child">
+          <%= image_tag "icons/folder.svg", class: "tree-icon" %>
+          <span>Samples</span>
+        </div>
+        <div class="tree-item tree-grandchild">
+          <%= image_tag "icons/audio.svg", class: "tree-icon" %>
+          <span>kick_808.wav</span>
+        </div>
+        <div class="tree-item tree-grandchild">
+          <%= image_tag "icons/audio.svg", class: "tree-icon" %>
+          <span>snare_vinyl.wav</span>
+        </div>
+      </div>
+    </div>
+    <div class="feature-text">
+      <h2 class="section-heading">Upload once. Explore everything.</h2>
+      <p class="section-text">Drop a ZIP and Handa extracts it automatically. Browse into Ableton, Logic, and FL Studio projects - all files organized exactly as you left them.</p>
+    </div>
+  </div>
 </section>
+
+<!-- Save to Library Section -->
+<section class="section feature-section scroll-reveal">
+  <div class="feature-content">
+    <div class="feature-demo save-demo">
+      <div class="save-card-demo">
+        <div class="save-card-header">
+          <%= image_tag "icons/ableton-folder.svg", class: "save-card-icon" %>
+          <div class="save-card-info">
+            <span class="save-card-title">Collab Session v3</span>
+            <span class="save-card-meta">Shared by @alex_producer</span>
+          </div>
+        </div>
+        <div class="save-card-actions">
+          <button class="save-btn-demo save-btn-download">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download
+          </button>
+          <button class="save-btn-demo save-btn-library">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+            Save to Library
+          </button>
+        </div>
+        <div class="save-confirmation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>Saved! Now in your library.</span>
+        </div>
+      </div>
+    </div>
+    <div class="feature-text">
+      <h2 class="section-heading">One click. It's yours.</h2>
+      <p class="section-text">When someone shares a project with you, save it directly to your library. The entire project - files, folders, samples - copied to your account instantly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Storage Section -->
+<section class="section feature-section scroll-reveal">
+  <div class="feature-content reverse">
+    <div class="feature-demo storage-demo">
+      <div class="storage-card-demo">
+        <div class="storage-header-demo">
+          <span class="storage-title">Storage</span>
+          <span class="storage-amount">2.4 GB <span class="storage-limit">/ 10 GB</span></span>
+        </div>
+        <div class="storage-bar-demo">
+          <div class="storage-segment daw-segment" style="width: 45%"></div>
+          <div class="storage-segment audio-segment" style="width: 30%"></div>
+          <div class="storage-segment other-segment" style="width: 9%"></div>
+        </div>
+        <div class="storage-legend">
+          <div class="legend-item">
+            <span class="legend-dot daw-dot"></span>
+            <span class="legend-label">DAW Projects</span>
+            <span class="legend-value">1.1 GB</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot audio-dot"></span>
+            <span class="legend-label">Audio Files</span>
+            <span class="legend-value">720 MB</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot other-dot"></span>
+            <span class="legend-label">Other</span>
+            <span class="legend-value">215 MB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="feature-text">
+      <h2 class="section-heading">Know exactly where you stand.</h2>
+      <p class="section-text">Visual storage breakdown by category. See how much space your DAW projects, audio files, and other files are using at a glance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section cta-section">
+  <%= image_tag "handa-logo.png", class: "cta-logo" %>
+  <h2 class="cta-heading">File sharing, built for music.</h2>
+  <%= link_to "GET STARTED", new_user_registration_path, class: "cta-btn" %>
+</section>
+
+<!-- Scroll Reveal Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const reveals = document.querySelectorAll('.scroll-reveal');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -50px 0px'
+  });
+
+  reveals.forEach(el => observer.observe(el));
+});
+</script>
