@@ -3,6 +3,15 @@
 
 module FileIconHelper
 
+  # Returns Open Graph image for social sharing previews
+  # Single branded image used for all share links
+  # The asset title is displayed via og:title meta tag
+  #
+  # @return [String] Path to the OG image (relative to public/)
+  def og_image_for(_asset = nil)
+    "/og-share.png"
+  end
+
   # Returns icon for an Asset (used throughout the app)
   # Works for root-level assets in library AND child assets within extracted ZIPs
   #

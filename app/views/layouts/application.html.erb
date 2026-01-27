@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>handa</title>
+    <title><%= content_for?(:page_title) ? "#{yield(:page_title)} - handa" : "handa" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : "The missing infrastructure for seamless remote music collaboration" %>">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%# Open Graph meta tags for rich link previews %>
+    <meta property="og:site_name" content="handa">
+    <meta property="og:title" content="<%= content_for?(:og_title) ? yield(:og_title) : "handa" %>">
+    <% if content_for?(:og_image) %>
+      <meta property="og:image" content="<%= yield(:og_image) %>">
+    <% end %>
+
     <%= favicon_link_tag "handa-favicon.png" %>
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <%# Apple device icons and web app settings %>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="handa">
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
