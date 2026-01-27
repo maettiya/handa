@@ -1,6 +1,6 @@
 <%# Share with submenu - quick share with collaborators (scrollable) %>
 <div class="menu-item-with-submenu" data-controller="direct-share" data-direct-share-asset-id-value="<%= asset.id %>">
-  <button class="menu-item menu-item-parent" data-action="mouseenter->direct-share#loadRecipients">
+  <button class="menu-item menu-item-parent" data-action="mouseenter->direct-share#loadRecipients click->dropdown#toggleSubmenu click->direct-share#loadRecipients">
     <span>Share with</span>
     <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
       <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none"/>

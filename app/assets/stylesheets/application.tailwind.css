@@ -815,6 +815,25 @@ body {
   display: block;
 }
 
+/* Mobile backdrop for dropdown menus */
+.menu-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.menu-backdrop.visible {
+  display: block;
+  opacity: 1;
+}
+
 .menu-item {
   display: block;
   width: 100%;
@@ -3397,6 +3416,16 @@ body {
     object-fit: contain;
   }
 
+  /* Card menu always visible on mobile (no hover) */
+  .card-menu {
+    opacity: 1;
+  }
+
+  .menu-trigger {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px;
+  }
+
   /* ----- AUDIO PLAYER (centered like desktop, just smaller) ----- */
   .audio-player {
     left: 50%;
@@ -3533,13 +3562,134 @@ body {
   /* ----- DROPDOWN MENUS ----- */
   .menu-dropdown {
     min-width: 140px;
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    border-radius: 16px 16px 0 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 1001;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+
+  /* Pull indicator for bottom sheet */
+  .menu-dropdown::after {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: #555;
+    border-radius: 2px;
+    margin: 8px auto 4px;
   }
 
   /* Touch-friendly tap targets */
   .menu-item,
   .menu-item-parent {
-    padding: 12px 14px;
-    min-height: 44px;
+    padding: 14px 20px;
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  .menu-divider {
+    margin: 8px 16px;
+  }
+
+  /* ----- SUBMENUS (stacked below parent on mobile) ----- */
+  .submenu {
+    position: static;
+    display: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  .menu-item-with-submenu:hover .submenu {
+    display: none; /* Disable hover on mobile */
+  }
+
+  .menu-item-with-submenu.submenu-open .submenu {
+    display: block; /* Use JS toggle instead */
+  }
+
+  .submenu::before {
+    display: none;
+  }
+
+  .submenu-inner {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: #252525;
+    margin: 0;
+    border-top: 1px solid #3a3a3a;
+    border-bottom: 1px solid #3a3a3a;
+  }
+
+  /* Share With submenu - full width on mobile */
+  .share-with-submenu {
+    min-width: 100%;
+    max-height: none;
+  }
+
+  .share-with-search {
+    padding: 12px 16px;
+  }
+
+  .share-with-search-input {
+    padding: 10px 14px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  .share-with-list {
+    max-height: 40vh;
+  }
+
+  .share-recipient {
+    padding: 12px 16px;
+  }
+
+  /* Access submenu improvements */
+  .access-submenu {
+    padding: 12px 16px;
+  }
+
+  .access-submenu-item {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .access-mini-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  /* Menu item with arrow indicator */
+  .menu-item-parent::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+
+  .menu-item-with-submenu.submenu-open .menu-item-parent::after {
+    transform: rotate(-135deg);
+  }
+
+  /* Hide the SVG arrow on mobile, use CSS arrow */
+  .menu-item-parent svg {
+    display: none;
   }
 
   /* ----- NOTIFICATIONS DROPDOWN ----- */
@@ -3549,6 +3699,16 @@ body {
     right: 16px;
     left: 16px;
     width: auto;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+  }
+
+  .notification-dropdown-list {
+    max-height: calc(100vh - 160px);
+  }
+
+  .notification-dropdown-item {
+    padding: 12px 16px;
   }
 
   /* ----- COLLABORATORS ----- */
