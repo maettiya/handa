@@ -312,6 +312,11 @@
         setTimeout(() => audioElement.click(), 300);
       }
     }
+
+    // Remove highlight param from URL so refresh doesn't re-trigger playback
+    const url = new URL(window.location);
+    url.searchParams.delete('highlight');
+    history.replaceState({}, '', url);
   })();
 </script>
 <% end %>
