@@ -190,6 +190,16 @@ body {
   cursor: pointer;
 }
 
+a.notification-clickable {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+a.notification-clickable:hover {
+  background: #4a4a4a;
+}
+
 .notification-avatar {
   width: 40px;
   height: 40px;
