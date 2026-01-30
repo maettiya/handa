@@ -31,6 +31,8 @@ module FileIconHelper
       end
     when "logic"
       return "icons/logic.svg"
+    when "garageband"
+      return "icons/garageband.svg"
     when "fl_studio"
       return "icons/flstudio.svg"
     when "lossless_audio"
@@ -47,6 +49,8 @@ module FileIconHelper
 
       if ext == "logicx" || title_ext == "logicx"
         return "icons/logic.svg"
+      elsif ext == "band" || title_ext == "band"
+        return "icons/garageband.svg"
       else
         return "icons/folder.svg"
       end
@@ -61,6 +65,8 @@ module FileIconHelper
       "icons/ableton-als.svg"
     when "logicx"
       "icons/logic.svg"
+    when "band"
+      "icons/garageband.svg"
     when "flp"
       "icons/flstudio.svg"
 

@@ -144,6 +144,8 @@ class Asset < ApplicationRecord
       'ableton'
     when 'logicx'
       'logic'
+    when 'band'
+      'garageband'
     when 'flp'
       'fl_studio'
     when 'ptx'
