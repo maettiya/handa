@@ -307,6 +307,7 @@ Quick Shares (parent_id: NULL, ephemeral: true)
 ### Asset Types
 - `ableton` - Ableton Live project (.als detected)
 - `logic` - Logic Pro project (.logicx detected)
+- `garageband` - GarageBand project (.band detected)
 - `fl_studio` - FL Studio project (.flp detected)
 - `lossless_audio` - WAV, AIF, FLAC
 - `compressed_audio` - MP3, M4A, AAC
@@ -468,7 +469,16 @@ Uses Active Storage's `direct_upload: true` option. No server-side file handling
 
 ## Upcoming Features To-Do
 
-### 1. Real-time Collaboration
+### 1. Enhanced Notifications
+
+**Goal**: Rich activity tracking and clickable notifications.
+
+- **"User listened to X"** - Notify when someone plays your shared audio
+- **"User listened to X for 13 seconds"** - Include listen duration
+- **"User opened X"** - Know when someone accessed your share link (even before listen/download)
+- **Clickable notifications** - Click "Someone listened to SERENADE [79bpm]" to jump to that file
+
+### 2. Real-time Collaboration
 
 **Goal**: Allow multiple users to collaborate on the same project in real-time.
 
@@ -476,7 +486,7 @@ Uses Active Storage's `direct_upload: true` option. No server-side file handling
 - **Save to Library**: Creates independent copy (blob references, but separate Asset records)
 - **Collaborate**: Shared access to the SAME Asset record (both users see same version)
 
-### 2. Native macOS App
+### 3. Native macOS App
 
 **Goal**: Invisible sync engine that watches a "Handa Projects" folder.
 
@@ -485,7 +495,7 @@ Uses Active Storage's `direct_upload: true` option. No server-side file handling
 - Uploads to Handa cloud instantly
 - Delta sync (only upload changed bytes)
 
-### 3. Version History
+### 4. Version History
 
 **Goal**: Track versions of files over time, allow rollback.
 
