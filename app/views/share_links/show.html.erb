@@ -98,7 +98,9 @@
               <%# Audio file - clickable to play %>
               <div class="share-file-card share-file-audio"
                    data-audio-url="<%= url_for(file.file) %>"
-                   data-audio-title="<%= file.original_filename || file.title %>">
+                   data-audio-title="<%= file.original_filename || file.title %>"
+                   data-asset-id="<%= file.id %>"
+                   data-share-link-token="<%= @share_link.token %>">
                 <div class="share-file-icon project-icon-playable">
                   <%= image_tag asset_icon_for(file), class: "icon-image" %>
                   <div class="project-icon-play-overlay">
@@ -153,7 +155,9 @@
         <%# Audio file - icon with play overlay %>
         <div class="share-icon share-icon-playable"
              data-audio-url="<%= url_for(@asset.file) %>"
-             data-audio-title="<%= @asset.title %>">
+             data-audio-title="<%= @asset.title %>"
+             data-asset-id="<%= @asset.id %>"
+             data-share-link-token="<%= @share_link.token %>">
           <%= image_tag asset_icon_for(@asset), class: "icon-image" %>
           <div class="share-icon-play-overlay">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
