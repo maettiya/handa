@@ -190,9 +190,16 @@ body {
   cursor: pointer;
 }
 
-a.notification-clickable {
+a.notification-dropdown-item {
   text-decoration: none;
   color: inherit;
+}
+
+a.notification-dropdown-item:not(.notification-clickable) {
+  cursor: default;
+}
+
+a.notification-clickable {
   cursor: pointer;
 }
 
@@ -3102,6 +3109,19 @@ a.notification-clickable:hover {
   opacity: 0.5;
 }
 
+/* Notification highlight - pulsing glow when navigating from notification */
+.project-card-wrapper.notification-highlight {
+  animation: notification-pulse 1.5s ease-in-out 2;
+}
+
+@keyframes notification-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(249, 115, 22, 0.4);
+  }
+}
 
 /* Breadcrumb drop target */
 .breadcrumb-link.drop-target {
