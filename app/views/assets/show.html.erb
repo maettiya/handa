@@ -233,7 +233,7 @@
   </div>
 </div>
 
-<%# Highlight file from notification click %>
+<%# Auto-play audio from notification click %>
 <% if params[:highlight].present? %>
 <script>
   // Run immediately since Turbo has already loaded the page
@@ -241,14 +241,15 @@
     const fileId = '<%= params[:highlight] %>';
     const card = document.querySelector(`[data-file-id="${fileId}"]`);
     if (card) {
-      // Add highlight class
-      card.classList.add('notification-highlight');
-
       // Scroll into view
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      // Remove highlight after 3 seconds
-      setTimeout(() => card.classList.remove('notification-highlight'), 3000);
+      // Find the audio element and click it to trigger playback
+      const audioElement = card.querySelector('[data-audio-url]');
+      if (audioElement) {
+        // Small delay to let scroll complete
+        setTimeout(() => audioElement.click(), 300);
+      }
     }
   })();
 </script>
