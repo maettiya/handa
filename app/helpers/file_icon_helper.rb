@@ -31,6 +31,8 @@ module FileIconHelper
       end
     when "logic"
       return "icons/logic.svg"
+    when "fl_studio"
+      return "icons/flstudio.svg"
     when "lossless_audio"
       return "icons/audio.svg"
     when "compressed_audio"
@@ -51,6 +53,8 @@ module FileIconHelper
       "icons/ableton-als.svg"
     when "logicx"
       "icons/logic.svg"
+    when "flp"
+      "icons/flstudio.svg"
 
     # Lossless Audio Formats
     when "wav", "aif", "aiff", "flac"
