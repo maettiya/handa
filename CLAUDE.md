@@ -469,14 +469,17 @@ Uses Active Storage's `direct_upload: true` option. No server-side file handling
 
 ## Upcoming Features To-Do
 
-### 1. Enhanced Notifications
+### 1. Enhanced Notifications (Partial)
 
-**Goal**: Rich activity tracking and clickable notifications.
+**Implemented:**
+- **"User opened X"** - Notifies when someone views your share link (session-deduplicated)
+- **"User listened to X"** - Notifies every play for analytics (no dedup - track engagement!)
+- **"User downloaded X"** - Notifies on download (session-deduplicated)
 
-- **"User listened to X"** - Notify when someone plays your shared audio
-- **"User listened to X for 13 seconds"** - Include listen duration
-- **"User opened X"** - Know when someone accessed your share link (even before listen/download)
-- **Clickable notifications** - Click "Someone listened to SERENADE [79bpm]" to jump to that file
+**Still To-Do:**
+- **Listen duration** - "User listened to X for 13 seconds"
+- **Clickable notifications** - Click notification to jump to that file
+- **Real-time bell updates** - Badge updates without page refresh (requires ActionCable/Redis)
 
 ### 2. Real-time Collaboration
 
