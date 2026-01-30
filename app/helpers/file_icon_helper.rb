@@ -39,9 +39,17 @@ module FileIconHelper
       return "icons/mp3.svg"
     end
 
-    # Regular directories/folders get the folder icon
+    # For directories, check if it's a DAW package (like .logicx which is a folder on macOS)
+    # Check both the extension and the title (for extracted ZIPs where title is "Project.logicx")
     if asset.is_directory?
-      return "icons/folder.svg"
+      ext = asset.extension
+      title_ext = File.extname(asset.title.to_s).delete(".").downcase
+
+      if ext == "logicx" || title_ext == "logicx"
+        return "icons/logic.svg"
+      else
+        return "icons/folder.svg"
+      end
     end
 
     # For files, check the extension
