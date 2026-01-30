@@ -1,4 +1,5 @@
 class ShareLinksController < ApplicationController
+  skip_before_action :authenticate_user!, only: [:show, :download, :download_file, :verify_password, :listen]
   before_action :authenticate_user!, only: [:create, :destroy, :save_to_library]
   before_action :set_share_link, only: [:show, :download, :verify_password]
   before_action :set_asset, only: [:create]
@@ -117,6 +118,27 @@ class ShareLinksController < ApplicationController
     SaveToLibraryJob.perform_later(original_asset.id, current_user.id, original_asset.user.id, placeholder.id)
 
     redirect_to library_index_path, notice: "Saving to your library..."
+  end
+
+  # POST /s/:token/listen
+  # Record that someone listened to an audio file from a share link
+  def listen
+    @share_link = ShareLink.find_by(token: params[:token])
+    return head :not_found unless @share_link
+    return head :gone if @share_link.expired?
+
+    # Find the asset being listened to
+    asset = if params[:asset_id].present?
+      # Specific file within the shared folder
+      find_asset_within_share(@share_link.asset, params[:asset_id])
+    else
+      @share_link.asset
+    end
+
+    return head :not_found unless asset
+
+    notify_listen(@share_link, current_user, asset)
+    head :ok
   end
 
   # GET /s/:token/download
@@ -302,6 +324,40 @@ class ShareLinksController < ApplicationController
       notification_type: 'share_link_download',
       notifiable: downloaded_asset
     )
+  end
+
+  # Notify asset owner when someone listens to their audio
+  # @param share_link - the share link being used
+  # @param listener - the user listening (or nil for anonymous)
+  # @param listened_asset - the specific audio file being played
+  # NOTE: No session dedup - each play creates a notification for analytics
+  def notify_listen(share_link, listener, listened_asset)
+    owner = share_link.asset.user
+
+    # Don't notify if owner is listening to their own file
+    return if listener == owner
+
+    Notification.create!(
+      user: owner,
+      actor: listener, # nil for anonymous listeners
+      notification_type: 'share_link_listened',
+      notifiable: listened_asset
+    )
+  end
+
+  # Find an asset within the shared asset's tree (security: only allows access to descendants)
+  def find_asset_within_share(root_asset, asset_id)
+    asset = Asset.find_by(id: asset_id)
+    return nil unless asset
+
+    # Walk up the tree to verify this asset belongs to the shared asset
+    current = asset
+    while current
+      return asset if current.id == root_asset.id
+      current = current.parent
+    end
+
+    nil # Asset is not within the shared asset
   end
 
   # Creates ZIP using temp file (low memory usage for Heroku)

@@ -95,11 +95,13 @@ export default class extends Controller {
 
     const url = audioElement.dataset.audioUrl
     const title = audioElement.dataset.audioTitle || "Unknown Track"
+    const assetId = audioElement.dataset.assetId
+    const shareLinkToken = audioElement.dataset.shareLinkToken
 
-    this.loadAndPlay(url, title)
+    this.loadAndPlay(url, title, assetId, shareLinkToken)
   }
 
-  loadAndPlay(url, title) {
+  loadAndPlay(url, title, assetId = null, shareLinkToken = null) {
     // Show the player
     this.element.classList.add("visible")
 
@@ -132,9 +134,34 @@ export default class extends Controller {
     this.currentTimeTarget.textContent = "0:00"
     this.durationTarget.textContent = "0:00"
 
+    // Store share link info for listen notification
+    this.currentAssetId = assetId
+    this.currentShareLinkToken = shareLinkToken
+
     this.wavesurfer.load(url)
     this.wavesurfer.once("ready", () => {
       this.wavesurfer.play()
+      // Notify server that someone is listening (only for share links)
+      this.notifyListen()
+    })
+  }
+
+  // Send listen notification to server (for share link plays)
+  notifyListen() {
+    if (!this.currentShareLinkToken) return
+
+    const url = `/s/${this.currentShareLinkToken}/listen`
+    const body = this.currentAssetId ? { asset_id: this.currentAssetId } : {}
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+      },
+      body: JSON.stringify(body)
+    }).catch(() => {
+      // Silently fail - don't interrupt playback
     })
   }
 

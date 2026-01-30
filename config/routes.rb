@@ -54,6 +54,9 @@ Rails.application.routes.draw do
   # Save shared asset to library
   post 's/:token/save', to: 'share_links#save_to_library', as: :share_link_save
 
+  # Record audio listen event
+  post 's/:token/listen', to: 'share_links#listen', as: :share_link_listen
+
   # Library - main dashboard showing all user's files
   get 'library/index'
   post 'library/move_asset', to: 'library#move_asset', as: :library_move_asset

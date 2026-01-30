@@ -132,6 +132,8 @@
                               added you as a collaborator
                             <% when 'share_link_viewed' %>
                               opened <strong><%= notification.notifiable&.title || 'your share link' %></strong>
+                            <% when 'share_link_listened' %>
+                              listened to <strong><%= notification.notifiable&.title || 'your audio' %></strong>
                             <% when 'share_link_download' %>
                               <% download_title = notification.notifiable.is_a?(Download) ? notification.notifiable.asset&.title : notification.notifiable&.title %>
                               downloaded <strong><%= download_title || 'a file' %></strong>
