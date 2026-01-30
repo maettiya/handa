@@ -1,0 +1,20 @@
+<h2>New Handa Signup</h2>
+
+<p><strong><%= @user.username %></strong> just created a Handa account!</p>
+
+<table style="margin: 20px 0;">
+  <tr>
+    <td style="padding-right: 20px;"><strong>Username:</strong></td>
+    <td><%= @user.username %></td>
+  </tr>
+  <tr>
+    <td style="padding-right: 20px;"><strong>Email:</strong></td>
+    <td><%= @user.email %></td>
+  </tr>
+  <tr>
+    <td style="padding-right: 20px;"><strong>Signed up:</strong></td>
+    <td><%= @user.created_at.strftime("%B %d, %Y at %I:%M %p UTC") %></td>
+  </tr>
+</table>
+
+<p style="color: #666;">Total users: <strong><%= @user_count %></strong></p>

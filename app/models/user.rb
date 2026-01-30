@@ -14,6 +14,9 @@ class User < ApplicationRecord
 
   validates :username, presence: true, uniqueness: true
 
+  # Notify admin of new signups
+  after_create :notify_admin_of_signup
+
   # Library assets (non-ephemeral, root-level)
   def library_assets
     assets.library.order(created_at: :desc)
@@ -110,6 +113,11 @@ class User < ApplicationRecord
   end
 
   private
+
+  # Send email to admin when a new user signs up
+  def notify_admin_of_signup
+    AdminMailer.new_signup(self).deliver_later
+  end
 
   # Categorize a single file by its extension
   def categorize_by_extension(filename, size, breakdown)

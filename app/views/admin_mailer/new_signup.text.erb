@@ -1,0 +1,10 @@
+New Handa Signup
+================
+
+<%= @user.username %> just created a Handa account!
+
+Username: <%= @user.username %>
+Email: <%= @user.email %>
+Signed up: <%= @user.created_at.strftime("%B %d, %Y at %I:%M %p UTC") %>
+
+Total users: <%= @user_count %>
