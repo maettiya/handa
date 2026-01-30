@@ -29,6 +29,10 @@ class ShareLinksController < ApplicationController
     @asset = @share_link.asset
     @require_password = @share_link.password_required? && !session_authenticated?
 
+    # Notify the asset owner that someone viewed their share link
+    # (only after password verification if required)
+    notify_view(@share_link, current_user) unless @require_password
+
     # Load children for preview (if not password protected or already authenticated)
     unless @require_password
       # Check if we should auto-skip a single root folder
@@ -248,6 +252,28 @@ class ShareLinksController < ApplicationController
     end
 
     nil # Folder is not within the shared asset
+  end
+
+  # Notify asset owner when someone views their share link
+  def notify_view(share_link, viewer)
+    owner = share_link.asset.user
+
+    # Don't notify if owner is viewing their own link
+    return if viewer == owner
+
+    # Prevent duplicate notifications within same session (prevents F5 spam)
+    # Different users/browsers have different sessions, so they'll each trigger a notification
+    # Same user returning days later will have a new session, so they'll trigger again
+    session_key = "notified_view_#{share_link.id}"
+    return if session[session_key]
+    session[session_key] = true
+
+    Notification.create!(
+      user: owner,
+      actor: viewer, # nil for anonymous viewers
+      notification_type: 'share_link_viewed',
+      notifiable: share_link.asset
+    )
   end
 
   # Notify asset owner of a download (for single file direct downloads)
