@@ -138,8 +138,11 @@ class DownloadsController < ApplicationController
 
     return head :not_found unless asset
 
-    # Record download for share links
-    share_link&.record_download!
+    # Record download and notify owner for share links
+    if share_link
+      share_link.record_download!
+      notify_download(share_link, current_user, asset)
+    end
 
     # Single file with no children - redirect directly to file
     if !asset.is_directory? && asset.children.empty? && asset.file.attached?
@@ -250,5 +253,29 @@ class DownloadsController < ApplicationController
         files << [child.file, "#{path_prefix}/#{filename}"]
       end
     end
+  end
+
+  # Notify asset owner of a download
+  # @param share_link - the share link being used
+  # @param downloader - the user downloading (or nil for anonymous)
+  # @param downloaded_asset - the specific asset being downloaded
+  def notify_download(share_link, downloader, downloaded_asset)
+    owner = share_link.asset.user
+
+    # Don't notify if owner is downloading their own file
+    return if downloader == owner
+
+    # Prevent duplicate notifications per asset per session
+    # (allows notifications for different files in same session)
+    session_key = "notified_download_#{downloaded_asset.id}"
+    return if session[session_key]
+    session[session_key] = true
+
+    Notification.create!(
+      user: owner,
+      actor: downloader, # nil for anonymous downloads
+      notification_type: 'share_link_download',
+      notifiable: downloaded_asset
+    )
   end
 end

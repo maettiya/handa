@@ -137,6 +137,7 @@ class ShareLinksController < ApplicationController
 
     if @asset.is_directory? || @asset.children.any?
       # Folder with children - use background download
+      notify_download(@share_link, current_user, @asset)
       download = Download.create!(
         user: current_user,
         asset: @asset,
@@ -148,7 +149,7 @@ class ShareLinksController < ApplicationController
       render json: { download_id: download.id }
     elsif @asset.file.attached?
       # Single file - direct download
-      notify_download(@share_link, current_user)
+      notify_download(@share_link, current_user, @asset)
       redirect_to rails_blob_path(@asset.file, disposition: "attachment")
     else
       redirect_to share_link_path(@share_link.token), alert: "File not available"
@@ -180,6 +181,7 @@ class ShareLinksController < ApplicationController
 
     if @file.is_directory? || @file.children.any?
       # Folder - use background download
+      notify_download(@share_link, current_user, @file)
       download = Download.create!(
         user: current_user,
         asset: @file,
@@ -191,6 +193,7 @@ class ShareLinksController < ApplicationController
       render json: { download_id: download.id }
     elsif @file.file.attached?
       # Single file - direct download
+      notify_download(@share_link, current_user, @file)
       redirect_to rails_blob_path(@file.file, disposition: "attachment")
     else
       redirect_to share_link_path(@share_link.token), alert: "File not available"
@@ -276,15 +279,20 @@ class ShareLinksController < ApplicationController
     )
   end
 
-  # Notify asset owner of a download (for single file direct downloads)
-  def notify_download(share_link, downloader)
+  # Notify asset owner of a download
+  # @param share_link - the share link being used
+  # @param downloader - the user downloading (or nil for anonymous)
+  # @param downloaded_asset - the specific asset being downloaded (defaults to share_link.asset)
+  def notify_download(share_link, downloader, downloaded_asset = nil)
+    downloaded_asset ||= share_link.asset
     owner = share_link.asset.user
 
     # Don't notify if owner is downloading their own file
     return if downloader == owner
 
-    # Prevent duplicate notifications - check if we already notified in this session
-    session_key = "notified_download_#{share_link.id}"
+    # Prevent duplicate notifications per asset per session
+    # (allows notifications for different files in same session)
+    session_key = "notified_download_#{downloaded_asset.id}"
     return if session[session_key]
     session[session_key] = true
 
@@ -292,7 +300,7 @@ class ShareLinksController < ApplicationController
       user: owner,
       actor: downloader, # nil for anonymous downloads
       notification_type: 'share_link_download',
-      notifiable: share_link.asset
+      notifiable: downloaded_asset
     )
   end
 
