@@ -293,3 +293,25 @@
 </div>
 
 </div> <!-- Close share controller wrapper -->
+
+<%# Auto-play audio from notification click %>
+<% if params[:highlight].present? %>
+<script>
+  // Run immediately since Turbo has already loaded the page
+  (function() {
+    const fileId = '<%= params[:highlight] %>';
+    const card = document.querySelector(`[data-file-id="${fileId}"]`);
+    if (card) {
+      // Scroll into view
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Find the audio element and click it to trigger playback
+      const audioElement = card.querySelector('[data-audio-url]');
+      if (audioElement) {
+        // Small delay to let scroll complete
+        setTimeout(() => audioElement.click(), 300);
+      }
+    }
+  })();
+</script>
+<% end %>

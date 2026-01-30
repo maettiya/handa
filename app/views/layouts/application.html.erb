@@ -121,8 +121,14 @@
                       <% if notification_asset && current_user.assets.exists?(notification_asset.id) %>
                         <% root = notification_asset.root_asset %>
                         <% if root == notification_asset %>
-                          <%# Asset is itself the root - link directly %>
-                          <% notification_link = asset_path(notification_asset) %>
+                          <%# Asset is itself the root %>
+                          <% if notification_asset.children.any? %>
+                            <%# It's a folder/project - link to browse its contents %>
+                            <% notification_link = asset_path(notification_asset) %>
+                          <% else %>
+                            <%# It's a standalone file - link to library and auto-play %>
+                            <% notification_link = library_index_path(highlight: notification_asset.id) %>
+                          <% end %>
                         <% else %>
                           <%# Asset is a child - link to root with play param for audio %>
                           <% notification_link = asset_path(root, highlight: notification_asset.id) %>
