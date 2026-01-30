@@ -117,7 +117,8 @@
                       <%# Determine the link target for clickable notifications %>
                       <% notification_asset = notification.notifiable.is_a?(Asset) ? notification.notifiable : notification.notifiable&.asset %>
                       <%# Link to root asset (the folder) with highlight/play param for the specific file %>
-                      <% if notification_asset %>
+                      <%# Only create link if the asset still exists and belongs to current user %>
+                      <% if notification_asset && current_user.assets.exists?(notification_asset.id) %>
                         <% root = notification_asset.root_asset %>
                         <% if root == notification_asset %>
                           <%# Asset is itself the root - link directly %>

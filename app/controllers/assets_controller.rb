@@ -6,7 +6,13 @@ class AssetsController < ApplicationController
 
   def show
     # Find the asset - scoped to current_user for security
-    @asset = current_user.assets.find(params[:id])
+    @asset = current_user.assets.find_by(id: params[:id])
+
+    # Handle missing or deleted assets gracefully (e.g., from stale notification links)
+    unless @asset
+      redirect_to library_index_path, alert: "This file no longer exists"
+      return
+    end
 
     # Check if we should auto-skip a single root folder
     # (e.g., "SERENADE Project.zip" containing only "SERENADE Project/" folder)
@@ -20,7 +26,11 @@ class AssetsController < ApplicationController
 
     if params[:folder_id].present?
       # Browsing inside a subfolder - folder can be any descendant, not just direct child
-      @current_folder = current_user.assets.find(params[:folder_id])
+      @current_folder = current_user.assets.find_by(id: params[:folder_id])
+      unless @current_folder
+        redirect_to asset_path(@asset), alert: "This folder no longer exists"
+        return
+      end
       @files = @current_folder.children.visible.order(:original_filename)
     else
       # Root level - show top-level files
